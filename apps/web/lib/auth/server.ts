@@ -11,7 +11,7 @@ const baseUrl =
 export const auth = initAuth({
   baseUrl,
   productionUrl: `https://${process.env.VERCEL_URL ?? "localhost:3000"}`,
-  secret: process.env.AUTH_SECRET || process.env.NEXT_PUBLIC_AUTH_SECRET,
+  secret: process.env.BETTER_AUTH_SECRET,
   extraPlugins: [nextCookies()],
   emailAndPassword: {
     enabled: true,
