@@ -1,4 +1,3 @@
-import "server-only";
 import { cache } from "react";
 import { headers } from "next/headers";
 import { nextCookies } from "better-auth/next-js";
@@ -12,7 +11,7 @@ const baseUrl =
 export const auth = initAuth({
   baseUrl,
   productionUrl: `https://${process.env.VERCEL_URL ?? "localhost:3000"}`,
-  secret: process.env.AUTH_SECRET,
+  secret: process.env.AUTH_SECRET || process.env.NEXT_PUBLIC_AUTH_SECRET,
   extraPlugins: [nextCookies()],
   emailAndPassword: {
     enabled: true,
