@@ -5,8 +5,6 @@ import { motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "../logo";
-import { useCurrentUser } from "@/hooks/use-current-user";
-import { UserNav } from "../layout/user-nav";
 import { useRouter } from "next/navigation";
 
 const navItems = [
@@ -18,9 +16,6 @@ const navItems = [
 
 export function LandingNavbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [routeLoading, setrouteLoading] = useState(false);
-  const router = useRouter();
-  const { user } = useCurrentUser();
 
   return (
     <motion.header
@@ -45,7 +40,7 @@ export function LandingNavbar() {
           ))}
         </div> */}
 
-        <div className="hidden items-center gap-4 md:flex">
+        {/* <div className="hidden items-center gap-4 md:flex">
           {!user && (
             <Button
               variant="ghost"
@@ -73,7 +68,7 @@ export function LandingNavbar() {
               avatarClassName="size-7 text-xs"
             />
           )}
-        </div>
+        </div> */}
 
         {/* Mobile Menu Button */}
         <button
@@ -105,9 +100,9 @@ export function LandingNavbar() {
               </Link>
             ))} */}
             <div className="flex flex-col gap-2 pt-4">
-              <Button variant="outline" size="sm">
+              {/* <Button variant="outline" size="sm">
                 Sign In
-              </Button>
+              </Button> */}
               <Button
                 size="sm"
                 variant={"brand"}
