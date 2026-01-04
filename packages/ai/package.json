@@ -1,0 +1,149 @@
+{
+  "name": "@gaia/ai",
+  "version": "0.0.0",
+  "description": "ai implementation for gaia-rag",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./src/index.ts",
+        "default": "./src/index.ts"
+      },
+      "require": "./dist/index.js",
+      "default": "./dist/index.mjs"
+    },
+    "./models": {
+      "import": {
+        "types": "./src/models.ts",
+        "default": "./src/models.ts"
+      },
+      "require": "./dist/models.js",
+      "default": "./dist/models.mjs"
+    },
+    "./mcp": {
+      "import": {
+        "types": "./src/mcp/index.ts",
+        "default": "./src/mcp/index.ts"
+      },
+      "require": "./dist/mcp/index.js",
+      "default": "./dist/mcp/index.mjs"
+    },
+    "./vectorstores": {
+      "import": {
+        "types": "./src/vectorstores/index.ts",
+        "default": "./src/vectorstores/index.ts"
+      },
+      "require": "./dist/vectorstores/index.js",
+      "default": "./dist/vectorstores/index.mjs"
+    },
+    "./types": {
+      "import": {
+        "types": "./src/types.ts",
+        "default": "./src/types.ts"
+      },
+      "require": "./dist/types.js",
+      "default": "./dist/types.mjs"
+    },
+    "./tools": {
+      "import": {
+        "types": "./src/tools/index.ts",
+        "default": "./src/tools/index.ts"
+      },
+      "require": "./dist/tools/index.js",
+      "default": "./dist/tools/index.mjs"
+    },
+    "./utils": {
+      "import": {
+        "types": "./src/utils.ts",
+        "default": "./src/utils.ts"
+      },
+      "require": "./dist/utils.js",
+      "default": "./dist/utils.mjs"
+    },
+    "./local": {
+      "import": {
+        "types": "./src/local-models/index.ts",
+        "default": "./src/local-models/index.ts"
+      },
+      "require": "./dist/local-models/index.js",
+      "default": "./dist/local-models/index.mjs"
+    },
+    "./fulltext": {
+      "import": {
+        "types": "./src/vectorstores/fulltext/index.ts",
+        "default": "./src/vectorstores/fulltext/index.ts"
+      },
+      "require": "./dist/vectorstores/fulltext/index.js",
+      "default": "./dist/vectorstores/fulltext/index.mjs"
+    },
+    "./const": {
+      "import": {
+        "types": "./src/const.ts",
+        "default": "./src/const.ts"
+      },
+      "require": "./dist/const.js",
+      "default": "./dist/const.mjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo node_modules"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/pg": "^8.16.0",
+    "ts-to-zod": "^5.1.0",
+    "typescript": "^5.6.0"
+  },
+  "keywords": [
+    "db",
+    "typescript"
+  ],
+  "dependencies": {
+    "@ai-sdk/gateway": "^2.0.17",
+    "@ai-sdk/mcp": "^0.0.11",
+    "@ai-sdk/openai": "2.0.24",
+    "@ai-sdk/openai-compatible": "^1.0.28",
+    "@lancedb/lancedb": "^0.23.0",
+    "@langchain/community": "^1.1.1",
+    "@langchain/core": "^1.1.7",
+    "@langchain/openai": "^1.2.0",
+    "@langchain/pinecone": "^1.0.1",
+    "@langchain/qdrant": "^1.0.1",
+    "@langchain/weaviate": "^1.0.1",
+    "@modelcontextprotocol/sdk": "^1.24.3",
+    "@orama/orama": "^3.1.18",
+    "@pinecone-database/pinecone": "5",
+    "@qdrant/js-client-rest": "^1.16.2",
+    "@supabase/supabase-js": "^2.89.0",
+    "@zilliz/milvus2-sdk-node": "^2.6.7",
+    "ai": "^5.0.104",
+    "axios": "^1.13.2",
+    "cheerio": "^1.1.2",
+    "chromadb": "^3.1.6",
+    "dotenv": "^17.2.3",
+    "faiss-node": "^0.5.1",
+    "flexsearch": "0.7.43",
+    "milvus": "link:@langchain/classic/vectorstores/milvus",
+    "minisearch": "^7.2.0",
+    "pg": "^8.16.3",
+    "sqlite3": "5.1.7",
+    "uuid": "^13.0.0",
+    "weaviate-client": "^3.10.0",
+    "zod": "^4.1.12"
+  }
+}

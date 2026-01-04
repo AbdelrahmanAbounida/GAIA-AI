@@ -1,0 +1,72 @@
+{
+  "name": "@gaia/api",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "require": "./src/index.ts"
+    },
+    "./types": {
+      "types": "./src/types.ts",
+      "import": "./src/types.ts",
+      "require": "./src/types.ts"
+    },
+    "./ratelimit": {
+      "types": "./src/ratelimits.ts",
+      "import": "./src/ratelimits.ts",
+      "require": "./src/ratelimits.ts"
+    },
+    "./utils": {
+      "types": "./src/utils.ts",
+      "import": "./src/utils.ts",
+      "require": "./src/utils.ts"
+    },
+    "./scalar": {
+      "types": "./src/scalar.ts",
+      "import": "./src/scalar.ts",
+      "require": "./src/scalar.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo node_modules"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.6.0"
+  },
+  "keywords": [
+    "db",
+    "typescript"
+  ],
+  "dependencies": {
+    "@gaia/ai": "workspace:^",
+    "@gaia/db": "workspace:^",
+    "@orpc/client": "^1.12.2",
+    "@orpc/openapi": "^1.12.2",
+    "@orpc/server": "^1.12.2",
+    "@orpc/zod": "^1.12.2",
+    "axios": "^1.13.2",
+    "nanoid": "^5.1.6",
+    "uuid": "^13.0.0",
+    "vm2": "^3.10.0",
+    "zod": "^4.1.12"
+  }
+}

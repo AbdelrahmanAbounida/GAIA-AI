@@ -1,0 +1,58 @@
+{
+  "name": "@gaia/db",
+  "version": "0.0.0",
+  "description": "database",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./src/index.ts",
+        "default": "./src/index.ts"
+      },
+      "require": "./dist/index.js",
+      "default": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo node_modules",
+    "generate": "drizzle-kit generate",
+    "migrate": "tsx --env-file=../../.env src/migrate.ts",
+    "push": "drizzle-kit push",
+    "export": "drizzle-kit export",
+    "studio": "dotenv -e ../../.env drizzle-kit studio "
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^20.19.25",
+    "dotenv": "^17.2.3",
+    "drizzle-kit": "^0.31.7",
+    "drizzle-orm": "^0.44.7",
+    "tsx": "^4.20.6",
+    "typescript": "^5.6.0"
+  },
+  "keywords": [
+    "db",
+    "typescript"
+  ],
+  "dependencies": {
+    "@libsql/client": "^0.15.15",
+    "better-sqlite3": "^12.5.0",
+    "drizzle-zod": "^0.8.3",
+    "libsql": "^0.5.22",
+    "zod": "^4.1.12"
+  }
+}

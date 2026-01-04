@@ -1,0 +1,10 @@
+{
+  "extends": "../../gen/ts-base.json",
+  "include": ["src"],
+  // "compilerOptions": {
+  //   "module": "ESNext",
+  //   "outDir": "dist",
+  //   "lib": ["es2022"]
+  // },
+  "exclude": ["dist", "build", "node_modules"]
+}

@@ -1,0 +1,12 @@
+{
+  "extends": "../../gen/ts-base.json",
+  "include": [
+    "src",
+    "../../apps/web/lib/chunker2.ts",
+    "../../apps/web/archive/indexing-services.ts",
+    "../../apps/web/archive/vectorstore.ts",
+    "../../apps/web/archive/chunker.ts",
+    "../../apps/web/archive/types.ts"
+  ],
+  "exclude": ["dist", "build", "node_modules"]
+}

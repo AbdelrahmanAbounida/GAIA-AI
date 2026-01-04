@@ -1,0 +1,18 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount SQLite database directory to persist data
+      - sqlite_data:/app/data
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:/app/data/db.sqlite
+    restart: unless-stopped
+
+volumes:
+  sqlite_data:
+    driver: local

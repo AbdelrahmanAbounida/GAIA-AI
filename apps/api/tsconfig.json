@@ -1,0 +1,5 @@
+{
+  "extends": "../../gen/ts-base.json",
+  "include": ["src", "../web/archive/rag.ts"],
+  "exclude": ["dist", "build", "node_modules"]
+}

@@ -1,0 +1,29 @@
+{
+  "name": "gaia",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "check-types": "turbo run check-types",
+    "gen": "turbo gen package --config gen/gen.ts"
+  },
+  "devDependencies": {
+    "@swc/cli": "^0.7.9",
+    "@swc/core": "^1.15.3",
+    "@swc/wasm": "^1.15.3",
+    "env": "^0.0.2",
+    "prettier": "^3.6.2",
+    "tsup": "^8.5.1",
+    "turbo": "^2.6.1",
+    "typescript": "5.9.2"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@turbo/gen": "^2.6.1"
+  }
+}
