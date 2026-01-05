@@ -2,8 +2,6 @@
   "compilerOptions": {
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -30,18 +28,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts",
-    "../api/src/lib/tool-validator.ts",
-    "../api/src/lib/tool-executor.ts",
-    "../api/src/lib/package-manager.ts",
-    "../landing/components/cta-section.tsx",
-    "../landing/components/features-section2.tsx",
-    "../landing/components/footer.tsx",
-    "../landing/components/hero-section.tsx",
-    "../landing/components/navbar.tsx",
-    "../landing/components/providers-section.tsx",
-    "../landing/components/services-section.tsx",
-    "../landing/components/use-cases-section.tsx"
+    "**/*.mts"
   ],
   "exclude": ["node_modules"]
 }
