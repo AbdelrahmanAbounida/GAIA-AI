@@ -12,7 +12,8 @@ export function ProviderIcon({
   provider: string;
   className?: string;
 }) {
-  const { theme } = useTheme();
+  // const { theme } = useTheme();
+  const theme = "dark";
 
   const iconSrc = useMemo(() => {
     const cleanProvider = provider

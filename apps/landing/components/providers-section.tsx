@@ -25,7 +25,7 @@ export function ProvidersSection() {
     const shuffled = [...allProviders].sort(() => Math.random() - 0.5);
 
     // Take random subset (optional - adjust count as needed)
-    const selected = shuffled.slice(0, Math.min(12, shuffled.length));
+    const selected = shuffled; // .slice(0, Math.min(12, shuffled.length));
 
     setProviders(selected);
   }, []);

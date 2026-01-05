@@ -145,5 +145,7 @@ export const Icons = {
   // Full-text Search
   flexsearch: FlexSearchIcon,
   minisearch: MiniSearchIcon,
+  orama: OramaSearchIcon,
+  oramasearch: OramaSearchIcon,
   oramaSearch: OramaSearchIcon,
 } as const;
