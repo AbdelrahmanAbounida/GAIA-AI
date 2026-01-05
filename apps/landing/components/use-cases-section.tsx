@@ -54,24 +54,24 @@ const useCases = [
 
 export function UseCasesSection() {
   const [activeCase, setActiveCase] = useState(useCases[0]);
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true);
   const videoRef = useRef<any>(null);
 
-  useEffect(() => {
-    const checkTheme = () => {
-      setIsDark(document.documentElement.classList.contains("dark"));
-    };
+  // useEffect(() => {
+  //   const checkTheme = () => {
+  //     setIsDark(document.documentElement.classList.contains("dark"));
+  //   };
 
-    checkTheme();
+  //   checkTheme();
 
-    const observer = new MutationObserver(checkTheme);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
+  //   const observer = new MutationObserver(checkTheme);
+  //   observer.observe(document.documentElement, {
+  //     attributes: true,
+  //     attributeFilter: ["class"],
+  //   });
 
-    return () => observer.disconnect();
-  }, []);
+  //   return () => observer.disconnect();
+  // }, []);
 
   useEffect(() => {
     // Autoplay video when switching tabs
@@ -96,9 +96,9 @@ export function UseCasesSection() {
         >
           <p className="text-gaia-600 dark:text-gaia-400 mb-4">Use cases</p>
           <h2 className="text-2xl font-semibold text-gaia-900 dark:text-gaia-100 sm:text-3xl">
-            Built for{" "}
-            <span className="text-green-700 dark:text-green-500">
-              every team
+            Built For{" "}
+            <span className="text-green-700 dark:text-green-700">
+              Every Team
             </span>
           </h2>
         </motion.div>

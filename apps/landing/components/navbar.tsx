@@ -5,9 +5,12 @@ import { motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "./logo";
+import { useRouter } from "next/navigation";
 
 export function LandingNavbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [routeLoading, setrouteLoading] = useState(false);
+  const router = useRouter();
 
   return (
     <motion.header
@@ -32,8 +35,8 @@ export function LandingNavbar() {
           ))}
         </div> */}
 
-        {/* <div className="hidden items-center gap-4 md:flex">
-          {!user && (
+        <div className="hidden items-center gap-4 md:flex">
+          {/* {!user && (
             <Button
               variant="ghost"
               size="tiny"
@@ -41,26 +44,26 @@ export function LandingNavbar() {
             >
               Sign In
             </Button>
-          )}
+          )} */}
           <Button
             variant={"brand"}
             size="tiny"
             className="bg-primary h-7 text-xs text-primary-foreground hover:bg-primary/90"
             onClick={() => {
               setrouteLoading(true);
-              router.push("/projects");
+              router.push("/"); // TODO:: push to documentation link
             }}
           >
             Get Started
           </Button>
-          {user && (
+          {/* {user && (
             <UserNav
               showLong={false}
               className="size-4"
               avatarClassName="size-7 text-xs"
             />
-          )}
-        </div> */}
+          )} */}
+        </div>
 
         {/* Mobile Menu Button */}
         <button
