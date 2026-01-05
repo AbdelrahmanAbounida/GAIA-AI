@@ -51,7 +51,7 @@ export function LandingNavbar() {
             className="bg-primary h-7 text-xs text-primary-foreground hover:bg-primary/90"
             onClick={() => {
               setrouteLoading(true);
-              router.push("/"); // TODO:: push to documentation link
+              router.push("https://github.com/AbdelrahmanAbounida/gaia-docs"); // TODO::: docs url
             }}
           >
             Get Started

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "sonner";
+import { CheckIcon, InfoIcon, XIcon } from "lucide-react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,6 +30,25 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} dark antialiased`}
       >
+        <Toaster
+          duration={5000}
+          position="top-right"
+          icons={{
+            success: (
+              <CheckIcon className="fill-green-600 text-white w-5 h-5 mt-1.5 border-white bg-green-800 rounded-2xl p-1" />
+            ),
+            error: (
+              <XIcon className="fill-red-500 text-white w-5 h-5 mt-1.5 border-white bg-red-800 rounded-2xl p-1" />
+            ),
+            info: (
+              <InfoIcon className="text-blue-600  w-5 h-5 mt-1.5   rounded-2xl" />
+            ),
+          }}
+          toastOptions={{
+            className:
+              " border-zinc-700/55! flex! items-start! p-3! pl-4! justify-start!  dark:bg-gaia-800! text-gaia-600! min-h-[65px]!",
+          }}
+        />
         {children}
       </body>
     </html>

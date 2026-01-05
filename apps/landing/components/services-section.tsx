@@ -98,7 +98,12 @@ export function ServicesSection() {
               </p>
 
               {/* View Template link */}
-              <div className="flex items-center gap-1 text-sm text-muted-foreground  transition-colors duration-300">
+              <div
+                onClick={() => {
+                  window.open("https://docs.gaiadocs.com", "_blank");
+                }}
+                className="flex items-center gap-1 text-sm text-muted-foreground  transition-colors duration-300"
+              >
                 <span>View Documentation</span>
                 <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </div>

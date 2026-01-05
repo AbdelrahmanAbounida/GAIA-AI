@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { showInfoToast } from "./toast";
 
 export function HeroSection() {
   const [routeLoading, setrouteLoading] = useState(false);
@@ -26,18 +27,25 @@ export function HeroSection() {
           className="flex flex-col items-center text-center"
         >
           {/* Badge */}
-          <motion.div
+          <motion.a
+            href="https://github.com/AbdelrahmanAbounida/GAIA-AI"
+            target="_blank"
+            rel="noopener noreferrer"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.1 }}
-            className="mb-6 flex items-center gap-2 rounded-full border border-gaia-300 dark:border-primary/30 bg-gaia-100 dark:bg-zinc-100/10 px-4 py-1.5"
+            className="mb-6 flex cursor-pointer items-center gap-2 rounded-full border 
+             border-gaia-300 dark:border-gaia-600/30 
+             bg-gaia-100 dark:bg-gaia-800/30 
+             px-4 py-1.5 
+             transition-colors hover:bg-gaia-200 dark:hover:bg-gaia-700/20"
           >
             {/* <Sparkles className="h-4 w-4 text-green-600" /> */}
             <GithubIcon className="h-4 w-4 dark:text-white" />
             <span className="text-xs dark:text-white">
               Open Source RAG Framework
             </span>
-          </motion.div>
+          </motion.a>
 
           {/* Main Heading */}
           <motion.h1
@@ -72,7 +80,7 @@ export function HeroSection() {
             <Button
               onClick={() => {
                 setrouteLoading(true);
-                router.push("/projects");
+                router.push("https://github.com/AbdelrahmanAbounida/gaia-docs");
               }}
               disabled={routeLoading}
               variant={"brand"}
@@ -85,7 +93,11 @@ export function HeroSection() {
             <Button
               onClick={() => {
                 // TODO: Add documentation link
-                window.open("https://docs.gaiadocs.com/", "_blank");
+                showInfoToast({
+                  title: "Soon",
+                  description: "Documentation coming soon",
+                });
+                // window.open("https://docs.gaiadocs.com/", "_blank"); // gaia-docs.aboneda.com
               }}
               size="sm"
               variant="outline"

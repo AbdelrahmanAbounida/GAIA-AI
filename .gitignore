@@ -6,7 +6,7 @@ node_modules
 .pnp.js
 
 archive 
-**/apps/docs/archive
+**/apps/docs/
 
 # Local env files
 .env
