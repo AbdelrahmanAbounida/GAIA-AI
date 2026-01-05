@@ -3,13 +3,7 @@ import { headers } from "next/headers";
 import { nextCookies } from "better-auth/next-js";
 import { initAuth } from "./auth";
 
-const baseUrl =
-  process.env.NODE_ENV === "production"
-    ? `https://${process.env.VERCEL_URL}`
-    : "http://localhost:3000";
-
 export const auth = initAuth({
-  baseUrl,
   productionUrl: `https://${process.env.VERCEL_URL ?? "localhost:3000"}`,
   secret: process.env.BETTER_AUTH_SECRET,
   extraPlugins: [nextCookies()],

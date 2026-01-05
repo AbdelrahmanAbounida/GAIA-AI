@@ -1,9 +1,9 @@
-import dotenv from "dotenv";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import Database from "better-sqlite3";
 import path from "path";
 import fs from "fs";
+// import dotenv from "dotenv";
 
 // Find monorepo root
 function findMonorepoRoot(startDir: string): string {
@@ -26,9 +26,9 @@ function findMonorepoRoot(startDir: string): string {
 const monorepoRoot = findMonorepoRoot(process.cwd());
 
 // Load .env from monorepo root
-dotenv.config({
-  path: path.resolve(monorepoRoot, ".env"),
-});
+// dotenv.config({
+//   path: path.resolve(monorepoRoot, ".env"),
+// });
 
 async function runMigrate() {
   const databaseUrl = process.env.DATABASE_URL;

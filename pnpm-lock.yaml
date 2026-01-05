@@ -511,6 +511,9 @@ importers:
         specifier: ^4.1.12
         version: 4.1.13
     devDependencies:
+      '@types/cheerio':
+        specifier: ^1.0.0
+        version: 1.0.0
       '@types/node':
         specifier: ^20.14.0
         version: 20.19.25
@@ -532,6 +535,9 @@ importers:
       better-sqlite3:
         specifier: ^12.5.0
         version: 12.5.0
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
       drizzle-zod:
         specifier: ^0.8.3
         version: 0.8.3(drizzle-orm@0.44.7(@libsql/client@0.15.15)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@12.5.0)(kysely@0.28.8)(pg@8.16.3)(sqlite3@5.1.7))(zod@4.1.13)
@@ -548,18 +554,12 @@ importers:
       '@types/node':
         specifier: ^20.19.25
         version: 20.19.25
-      dotenv:
-        specifier: ^17.2.3
-        version: 17.2.3
       drizzle-kit:
         specifier: ^0.31.7
         version: 0.31.7
       drizzle-orm:
         specifier: ^0.44.7
         version: 0.44.7(@libsql/client@0.15.15)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@12.5.0)(kysely@0.28.8)(pg@8.16.3)(sqlite3@5.1.7)
-      tsx:
-        specifier: ^4.20.6
-        version: 4.20.6
       typescript:
         specifier: ^5.6.0
         version: 5.9.2
@@ -3612,6 +3612,10 @@ packages:
 
   '@types/better-sqlite3@7.6.13':
     resolution: {integrity: sha512-NMv9ASNARoKksWtsq/SHakpYAYnhBrQgGD8zkLYk/jaK8jUGn08CfEdTRgYhMypUQAfzSP8W6gNLe0q19/t4VA==}
+
+  '@types/cheerio@1.0.0':
+    resolution: {integrity: sha512-zAaImHWoh5RY2CLgU2mvg3bl2k3F65B0N5yphuII3ythFLPmJhL7sj1RDu6gSxcgqHlETbr/lhA2OBY+WF1fXQ==}
+    deprecated: This is a stub types definition. cheerio provides its own type definitions, so you do not need this installed.
 
   '@types/command-line-args@5.2.3':
     resolution: {integrity: sha512-uv0aG6R0Y8WHZLTamZwtfsDLVRnOa+n+n5rEvFWL5Na5gZ8V2Teab/duDPFzIIIhs9qizDpcavCusCLJZu62Kw==}
@@ -11700,6 +11704,10 @@ snapshots:
     dependencies:
       '@types/node': 20.19.26
 
+  '@types/cheerio@1.0.0':
+    dependencies:
+      cheerio: 1.1.2
+
   '@types/command-line-args@5.2.3': {}
 
   '@types/command-line-usage@5.0.4': {}
@@ -17780,6 +17788,7 @@ snapshots:
       get-tsconfig: 4.13.0
     optionalDependencies:
       fsevents: 2.3.3
+    optional: true
 
   tunnel-agent@0.6.0:
     dependencies:

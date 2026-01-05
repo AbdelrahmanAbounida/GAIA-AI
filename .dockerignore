@@ -15,3 +15,5 @@ build
 coverage
 data/vector_stores
 **/archive
+apps/docs
+apps/landing

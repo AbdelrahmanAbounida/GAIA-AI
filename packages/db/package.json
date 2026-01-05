@@ -31,6 +31,7 @@
     "clean": "rm -rf dist .turbo node_modules",
     "generate": "drizzle-kit generate",
     "migrate": "tsx --env-file=../../.env src/migrate.ts",
+    "migrate:docker": "tsx src/migrate.ts",
     "push": "drizzle-kit push",
     "export": "drizzle-kit export",
     "studio": "dotenv -e ../../.env drizzle-kit studio "
@@ -41,7 +42,6 @@
     "dotenv": "^17.2.3",
     "drizzle-kit": "^0.31.7",
     "drizzle-orm": "^0.44.7",
-    "tsx": "^4.20.6",
     "typescript": "^5.6.0"
   },
   "keywords": [
@@ -49,6 +49,7 @@
     "typescript"
   ],
   "dependencies": {
+    "dotenv": "^17.2.3",
     "@libsql/client": "^0.15.15",
     "better-sqlite3": "^12.5.0",
     "drizzle-zod": "^0.8.3",

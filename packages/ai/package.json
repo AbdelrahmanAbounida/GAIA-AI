@@ -104,6 +104,7 @@
     "clean": "rm -rf dist .turbo node_modules"
   },
   "devDependencies": {
+    "@types/cheerio": "^1.0.0",
     "@types/node": "^20.14.0",
     "@types/pg": "^8.16.0",
     "ts-to-zod": "^5.1.0",
