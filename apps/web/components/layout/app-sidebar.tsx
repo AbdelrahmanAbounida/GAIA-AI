@@ -98,7 +98,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <Logo
                   // isIcon={state == "collapsed"}
                   isIcon
-                  className=" w-9! h-7 ml-1  "
+                  className=" w-7! h-7  "
                 />
                 <ProjectsSwitcher className="h-7! py-2 absolute top-0 left-15 min-w-[110px]" />
               </SidebarHeader>
@@ -116,14 +116,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 asChild
                 isActive={isActive("/chat") && !currentChatId}
                 className=""
-                onClick={() => {
-                  window.location.href = `/${BASE_URL}/chat`;
-                }}
+                // onClick={() => {
+                //   window.location.href = `/${BASE_URL}/chat`;
+                // }}
               >
-                <div>
+                <Link href={`/${BASE_URL}/chat`}>
                   <MessageCircleIcon className="mr-1 ml-0 size-4!" />
                   <span className=" text-md">New Chat</span>
-                </div>
+                </Link>
               </SidebarMenuButton>
 
               <SidebarMenuButton

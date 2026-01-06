@@ -8,7 +8,6 @@ import type { SocialProviders } from "better-auth/social-providers";
 export function initAuth<
   TExtraPlugins extends BetterAuthPlugin[] = [],
 >(options: {
-  // baseUrl: string;
   productionUrl: string;
   secret: string | undefined;
   extraPlugins?: TExtraPlugins;
@@ -16,6 +15,24 @@ export function initAuth<
   emailVerification?: BetterAuthOptions["emailVerification"];
   emailAndPassword?: BetterAuthOptions["emailAndPassword"];
 }): any {
+  const trustedOrigins = [
+    options.productionUrl,
+    // Development origins
+    "http://localhost:5679",
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:5679",
+    "http://127.0.0.1:3000",
+    "http://0.0.0.0:3000",
+  ];
+
+  const baseURL =
+    process.env.NODE_ENV === "production"
+      ? process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : "http://0.0.0.0:3000" // Docker internal
+      : "http://localhost:3000";
+
   const config = {
     database: drizzleAdapter(db, {
       provider: "sqlite",
@@ -23,6 +40,8 @@ export function initAuth<
     }),
     secret: options.secret,
     emailVerification: options.emailVerification,
+    baseURL,
+    trustedOrigins,
     user: {
       additionalFields: {},
     },
@@ -31,7 +50,6 @@ export function initAuth<
       oAuthProxy({
         productionURL: options.productionUrl,
       }),
-
       ...(options.extraPlugins ?? []),
     ],
     socialProviders: options.socialProviders,

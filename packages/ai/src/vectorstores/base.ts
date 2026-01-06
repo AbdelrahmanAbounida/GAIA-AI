@@ -17,7 +17,8 @@ import type {
   SearchType,
 } from "./fulltext/types";
 import type { FullTextSearchResult as FTSResult } from "./fulltext/types";
-
+import * as path from "path";
+import * as fs from "fs/promises";
 /**
  * Abstract base class for vector store implementations
  */
@@ -86,12 +87,8 @@ export abstract class BaseVectorStore implements IVectorStore {
   protected async initializeFullTextSearch(): Promise<void> {
     // Skip if no FTS provider specified
     if (!this.ftsProvider) {
-      console.log(">>>>>>>>>>>>");
       return;
     }
-    console.log({
-      ftsProviderftsProviderftsProviderftsProvider: this.ftsProvider,
-    });
 
     // Skip if provider has native FTS and it's configured
     if (this.ftsProvider === "native" && this.supportsNativeFullTextSearch()) {
@@ -99,22 +96,41 @@ export abstract class BaseVectorStore implements IVectorStore {
       return;
     }
 
-    // Initialize external FTS provider
     try {
+      const pathParts = this.persistPath.split(path.sep);
+      const projectId =
+        this.config.projectId || pathParts[pathParts.length - 1];
+      const baseDataDir = pathParts.slice(0, -2).join(path.sep);
+
+      const ftsPersistDirectory = path.join(
+        baseDataDir,
+        this.ftsProvider,
+        projectId
+      );
+
+      console.log(`📁 FTS provider: ${this.ftsProvider}`);
+      console.log(`📁 FTS persist directory: ${ftsPersistDirectory}`);
+
       const ftsConfig: FullTextSearchConfig = {
-        persistDirectory: this.persistPath,
+        persistDirectory: ftsPersistDirectory,
         provider: this.ftsProvider,
         indexName: this.tableName || "default",
-        ...this.config.ftsConfig!,
+        ...(this.config.ftsConfig || {}),
       };
+
+      await fs.mkdir(ftsPersistDirectory, { recursive: true, mode: 0o755 });
+      console.log(
+        `✓ Ensured FTS persist directory exists: ${ftsPersistDirectory}`
+      );
 
       this.ftsInstance = await this.createFullTextSearchInstance(ftsConfig);
       await this.ftsInstance.initialize();
 
-      console.log(`✓ Initialized ${this.ftsProvider} full-text search`);
+      console.log(
+        `✓ Initialized ${this.ftsProvider} full-text search at ${ftsPersistDirectory}`
+      );
     } catch (error) {
       console.warn(`⚠️ Failed to initialize FTS: ${error}`);
-      // Don't fail the entire initialization if FTS fails
       this.ftsInstance = null;
     }
   }

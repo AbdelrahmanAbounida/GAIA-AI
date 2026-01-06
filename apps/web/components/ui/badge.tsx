@@ -10,7 +10,7 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
+          "border-transparent bg-green-600 dark:bg-brand-800 text-white! rounded-md text-xs text-primary-foreground [a&]:hover:bg-primary/90",
         brand: cn(
           "relative justify-center cursor-pointer inline-flex items-center space-x-2 text-center font-regular ease-out duration-200 rounded-md outline-none transition-all outline-0 focus-visible:outline-4 focus-visible:outline-offset-1 border text-foreground focus-visible:outline-brand-600!",
           " h-4.5 px-4 border-brand-light4! hover:border-brand-light2! border hover:bg-brand-light7!  text-white! data-[state=open]:outline-brand-600!",

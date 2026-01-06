@@ -406,38 +406,3 @@ export async function POST(request: Request) {
     );
   }
 }
-
-// ============= STREAMING VERSION (OPTIONAL) =============
-export async function STREAM(request: Request) {
-  try {
-    const { messages, model } = await request.json();
-    const agent = await routeToAgent(messages, model);
-
-    // Use stream() for streaming responses
-    const stream = agent.stream({ messages });
-
-    // Transform stream to include AI elements
-    const transformedStream = new ReadableStream({
-      async start(controller) {
-        for await (const chunk of stream.textStream) {
-          controller.enqueue(new TextEncoder().encode(chunk));
-        }
-        controller.close();
-      },
-    });
-
-    return new Response(transformedStream, {
-      headers: {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
-      },
-    });
-  } catch (error) {
-    console.error("Stream API Error:", error);
-    return Response.json(
-      { error: "Failed to stream response" },
-      { status: 500 }
-    );
-  }
-}

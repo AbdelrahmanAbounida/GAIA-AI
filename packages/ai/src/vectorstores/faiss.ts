@@ -34,7 +34,7 @@ export class FaissVectorStore extends BaseVectorStore {
     await fs.mkdir(this.persistPath, { recursive: true });
 
     const dummyDoc = new Document({
-      pageContent: "Initialization document",
+      pageContent: "",
       metadata: { type: "init" },
     });
 

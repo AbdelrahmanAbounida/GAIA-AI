@@ -20,7 +20,7 @@
   --card-foreground: oklch(0.2046 0 0);
   --popover: oklch(0.9911 0 0);
   --popover-foreground: oklch(0.4386 0 0);
-  --primary: oklch(0.8348 0.1302 160.908);
+  --primary: oklch(62.016% 0.15489 153.687);
   --primary-foreground: oklch(0.2626 0.0147 166.4589);
   --secondary: oklch(0.994 0 0);
   --secondary-foreground: oklch(0.2046 0 0);
@@ -82,6 +82,8 @@
   --color-gaia-DEFAULT: #50cf8e;
   --color-gaia-100: #faf9f5;
   --color-gaia-200: #f4f3ec;
+  --color-gaia-250: #f0eee7;
+  --color-gaia-250: #f0eee7;
   --color-gaia-300: #e7e5e4;
   --color-gaia-400: #d6d3d1;
   --color-gaia-500: #a8a29e;
@@ -162,6 +164,7 @@
   --color-gaia-DEFAULT: #5a5750;
   --color-gaia-100: #faf9f5;
   --color-gaia-200: #f5f4ed;
+  --color-gaia-250: #f0eee7;
   --color-gaia-300: #e8e6dc;
   --color-gaia-400: #c4c0b4;
   --color-gaia-500: #8a8679;
@@ -242,6 +245,7 @@
   --color-gaia-DEFAULT: var(--color-gaia-DEFAULT);
   --color-gaia-100: var(--color-gaia-100);
   --color-gaia-200: var(--color-gaia-200);
+  --color-gaia-250: var(--color-gaia-250);
   --color-gaia-300: var(--color-gaia-300);
   --color-gaia-400: var(--color-gaia-400);
   --color-gaia-500: var(--color-gaia-500);
@@ -289,11 +293,22 @@
 ::-webkit-scrollbar-thumb:hover {
   background: oklch(0.4 0.005 260);
 }
+/* Light mode autofill */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px #272727 inset !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--color-gaia-200) inset !important;
+  -webkit-text-fill-color: black !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Dark mode autofill */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--color-gaia-950) inset !important;
   -webkit-text-fill-color: white !important;
   transition: background-color 5000s ease-in-out 0s;
 }

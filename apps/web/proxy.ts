@@ -8,8 +8,8 @@ export async function proxy(request: NextRequest) {
 
   // First Auth Layer
   const { user } = await getServerAuth();
-  if (!user && !(currentpath.startsWith("/login") || currentpath === "/")) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  if (!user && !(currentpath.startsWith("/auth") || currentpath === "/")) {
+    return NextResponse.redirect(new URL("/auth", request.url));
   }
 
   return NextResponse.next();

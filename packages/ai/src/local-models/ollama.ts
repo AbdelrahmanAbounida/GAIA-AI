@@ -477,3 +477,49 @@ export async function checkOllamaConnection(
     return false;
   }
 }
+
+/**
+ * Show model capabilities and details
+ */
+export async function showOllamaModel({
+  modelName,
+  baseUrl,
+  verbose = false,
+}: {
+  modelName: string;
+  baseUrl: string;
+  verbose?: boolean;
+}): Promise<{
+  capabilities: string[];
+  details?: {
+    parent_model?: string;
+    format?: string;
+    family?: string;
+    families?: string[];
+    parameter_size?: string;
+    quantization_level?: string;
+  };
+  parameters?: string;
+  license?: string;
+  template?: string;
+  model_info?: Record<string, any>;
+}> {
+  try {
+    const response = await axios.post(`${baseUrl}/api/show`, {
+      model: modelName,
+      verbose,
+    });
+
+    return {
+      capabilities: response.data.capabilities || [],
+      details: response.data.details,
+      parameters: response.data.parameters,
+      license: response.data.license,
+      template: response.data.template,
+      model_info: response.data.model_info,
+    };
+  } catch (error) {
+    console.error("Error showing Ollama model:", error);
+    throw new Error("Failed to get model information");
+  }
+}

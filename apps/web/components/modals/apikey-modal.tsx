@@ -77,7 +77,7 @@ export function CreateKeyModal({
                 {
                   "API Key created successfully! Please save this key somewhere safe, and make sure it is only accessible by you."
                 }
-                <span className="font-medium text-white">
+                <span className="font-semibold  dark:text-white">
                   {"You won't be able to view this key again. "}
                 </span>
                 once you close this dialog for security reasons.
@@ -129,7 +129,7 @@ export function CreateKeyModal({
                 onClick={handleClose}
                 className="px-9"
                 variant={"brand"}
-                size={"md"}
+                size={"sm"}
               >
                 Done
               </Button>

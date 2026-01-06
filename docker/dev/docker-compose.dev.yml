@@ -1,0 +1,50 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5679:3000"
+    volumes:
+      # Mount source code selectively
+      - ./apps/web/src:/app/apps/web/src
+      - ./apps/web/app:/app/apps/web/app
+      - ./apps/web/public:/app/apps/web/public
+      - ./packages/db/src:/app/packages/db/src
+      - ./packages/db/drizzle:/app/packages/db/drizzle
+      - ./packages/ai/src:/app/packages/ai/src
+      - ./apps/api/src:/app/apps/api/src
+
+      # Mount config files
+      - ./apps/web/next.config.ts:/app/apps/web/next.config.ts
+      - ./apps/web/tailwind.config.ts:/app/apps/web/tailwind.config.ts
+      - ./apps/web/tsconfig.json:/app/apps/web/tsconfig.json
+      - ./apps/web/postcss.config.mjs:/app/apps/web/postcss.config.mjs
+
+      # Explicitly exclude node_modules and build artifacts
+      - /app/node_modules
+      - /app/apps/web/node_modules
+      - /app/apps/api/node_modules
+      - /app/packages/db/node_modules
+      - /app/packages/ai/node_modules
+      - /app/apps/web/.next
+      - /app/packages/db/dist
+
+      # Persist data
+      - sqlite_data:/app/data
+
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=file:/app/data/database.db
+      - BETTER_AUTH_SECRET=mSI6cfdAeD1876y5VDqMEgczNXv7QI5A
+      - VECTOR_STORE_PATH=/app/apps/web/data
+      - BETTER_AUTH_URL=http://localhost:5679
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+    working_dir: /app
+    command: pnpm --filter=@gaia/ui dev
+    restart: unless-stopped
+
+volumes:
+  sqlite_data:
+    driver: local

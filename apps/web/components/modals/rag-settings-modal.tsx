@@ -122,7 +122,7 @@ function ModelSelector({
       </PopoverTrigger>
       <PopoverContent
         onWheel={(e) => e.stopPropagation()}
-        className="p-0 overflow-auto"
+        className="p-0 overflow-auto z-9999"
       >
         <Command className="p-0">
           <CommandInput placeholder="Search models..." />
@@ -267,13 +267,13 @@ function EmbeddingTab({
         </AlertDescription>
       </Alert>
 
-      <div className="space-y-2">
+      <div className="space-y-2 ">
         <Label>Vectorstore</Label>
         <Select value={vectorStore} onValueChange={onVectorstoreChange}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="">
             {availableVectorstores.map((vec) => (
               <SelectItem key={vec.id} value={vec.id}>
                 <div className="flex items-center gap-2">
@@ -473,14 +473,14 @@ function RetrievalTab({
   return (
     <div className="space-y-4 mt-7 ">
       <div className="space-y-2">
-        <Label>Default Retrieval LLM</Label>
+        {/* <Label>Default Retrieval LLM</Label>
         <ModelSelector
           value={llmModel}
           models={availableLLMs}
           placeholder="Select retrieval model..."
           onSelect={onLLMModelChange}
           disabled={isLoading}
-        />
+        /> */}
       </div>
 
       <div className="space-y-2">
@@ -788,11 +788,11 @@ export function RAGSettingsModal({
       ) : (
         <RAGSettingsView />
       )}
-      <DialogFooter className="mt-6 absolute bottom-4 right-6">
+      <DialogFooter className="mt-6 absolute bottom-4 right-1">
         <Button
-          size="tiny"
+          size="sm"
           variant="outline"
-          className={cn("h-7", !showCancelButton && "hidden")}
+          className={cn("dark:h-7", !showCancelButton && "hidden")}
           onClick={handleCancel}
           disabled={updateSettingsMutation.isPending || isLoadingSettings}
         >
@@ -800,7 +800,7 @@ export function RAGSettingsModal({
         </Button>
         <Button
           variant="brand"
-          size="tiny"
+          size="sm"
           onClick={handleSave}
           className="mr-4"
           disabled={updateSettingsMutation.isPending || isLoadingSettings}
@@ -812,7 +812,7 @@ export function RAGSettingsModal({
   );
 
   if (contentOnly) {
-    return <div className={cn("w-full", className)}>{content}</div>;
+    return <div className={cn("w-full z-9999", className)}>{content}</div>;
   }
 
   return (
@@ -827,7 +827,7 @@ export function RAGSettingsModal({
           RAG Settings
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-full max-w-3xl h-[400px] max-h-[80vh]">
+      <DialogContent className="w-full max-w-3xl h-[400px] max-h-[80vh] ">
         <DialogTitle className="sr-only">RAG Settings</DialogTitle>
         {content}
       </DialogContent>

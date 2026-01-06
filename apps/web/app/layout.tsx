@@ -1,10 +1,9 @@
 import "@/lib/orpc/server";
 import type React from "react";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Roboto } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "sonner";
 import { AllProviders } from "@/providers";
+import NextTopLoader from "nextjs-toploader";
 
 export const metadata: Metadata = {
   title: "GAIA - The RAG Framework",
@@ -23,6 +22,7 @@ export default function RootLayout({
         className="font-sans antialiased  h-screen"
         suppressHydrationWarning
       >
+        <NextTopLoader color="#3EA56D" />
         <AllProviders>{children}</AllProviders>
       </body>
     </html>

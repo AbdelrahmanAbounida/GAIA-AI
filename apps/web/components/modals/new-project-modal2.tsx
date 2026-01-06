@@ -380,14 +380,15 @@ export function CreateProjectModal2({
 
         {step === "basic" && (
           <div className="space-y-6 py-4">
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                You'll configure AI providers and models in the next step.
-                Default settings will be used if not specified.
-              </AlertDescription>
-            </Alert>
-
+            {!hasAICredentials && !hasEmbeddingCredentials && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  You'll configure AI providers and models in the next step.
+                  Default settings will be used if not specified.
+                </AlertDescription>
+              </Alert>
+            )}
             <div className="space-y-2">
               <Label htmlFor="name">
                 Project Name <span className="text-red-500">*</span>
@@ -398,6 +399,7 @@ export function CreateProjectModal2({
                 onChange={(e) => setName(e.target.value)}
                 placeholder="My GAIA Project"
                 autoFocus
+                className="focus:bg-white"
                 disabled={isLoading}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && name.trim()) {
@@ -448,8 +450,8 @@ export function CreateProjectModal2({
                   trigger={
                     <Button
                       variant="outline"
-                      size="sm"
-                      className="h-7 text-xs border dark:border-gaia-700/70 p-2"
+                      size="tiny"
+                      // className="h-7 text-xs border dark:border-gaia-700/70 p-2"
                     >
                       <Plus className="size-3" />
                       Add Provider
@@ -556,8 +558,8 @@ export function CreateProjectModal2({
                   trigger={
                     <Button
                       variant="outline"
-                      size="sm"
-                      className="h-7 text-xs border dark:border-gaia-700/70 p-2"
+                      size="tiny"
+                      // className="h-7 text-xs border dark:border-gaia-700/70 p-2"
                     >
                       <Plus className="size-3" />
                       Add Provider
@@ -667,8 +669,8 @@ export function CreateProjectModal2({
                   trigger={
                     <Button
                       variant="outline"
-                      size="sm"
-                      className="h-7 text-xs border dark:border-gaia-700/70 p-2"
+                      size="tiny"
+                      // className="h-7 text-xs border dark:border-gaia-700/70 p-2"
                     >
                       <Plus className="size-3" />
                       Add Provider

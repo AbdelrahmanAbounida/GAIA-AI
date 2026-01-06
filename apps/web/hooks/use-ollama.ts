@@ -16,10 +16,33 @@ interface InstalledModel {
   details?: any;
 }
 
+function getDefaultOllamaBaseUrl(): string {
+  const isDocker =
+    process.env.NEXT_PUBLIC_DOCKER_ENV === "true" ||
+    process.env.NEXT_PUBLIC_IS_DOCKER === "true" ||
+    process.env.NEXT_PUBLIC_DOCKER === "true";
+
+  return isDocker
+    ? "http://host.docker.internal:11434"
+    : "http://localhost:11434";
+}
+
 export function useOllama() {
   const { credentials } = useCredentials();
   const ollamaCred = credentials.find((cred) => cred.provider === "ollama");
-  const baseUrl = ollamaCred?.baseUrl || "http://localhost:11434";
+
+  // Prioritize Docker URL if in Docker environment and saved URL is localhost
+  const isDocker =
+    process.env.NEXT_PUBLIC_DOCKER_ENV === "true" ||
+    process.env.NEXT_PUBLIC_IS_DOCKER === "true" ||
+    process.env.NEXT_PUBLIC_DOCKER === "true";
+
+  let baseUrl = ollamaCred?.baseUrl || getDefaultOllamaBaseUrl();
+
+  // Override localhost with Docker URL if in Docker
+  if (isDocker && baseUrl.includes("localhost")) {
+    baseUrl = "http://host.docker.internal:11434";
+  }
 
   const {
     isOllamaRunning,
@@ -36,6 +59,7 @@ export function useOllama() {
     deleteModel,
     searchModels,
     getModelDetails,
+    showModel,
   } = useOllamaModels(baseUrl);
 
   const { pullModel, cancelPull, activePulls, isPulling, getPullProgress } =
@@ -53,6 +77,7 @@ export function useOllama() {
     refetchModels,
     deleteModel,
     searchModels,
+    showModel, // LEGACY
     getModelDetails,
     pullModel,
     cancelPull,
@@ -66,8 +91,19 @@ export function useOllamaModels(baseUrl?: string) {
   const queryClient = useQueryClient();
   const { credentials } = useCredentials();
   const ollamaCred = credentials.find((cred) => cred.provider === "ollama");
-  const finalBaseUrl =
-    baseUrl || ollamaCred?.baseUrl || "http://localhost:11434";
+
+  const isDocker =
+    process.env.NEXT_PUBLIC_DOCKER_ENV === "true" ||
+    process.env.NEXT_PUBLIC_IS_DOCKER === "true" ||
+    process.env.NEXT_PUBLIC_DOCKER === "true";
+
+  let finalBaseUrl =
+    baseUrl || ollamaCred?.baseUrl || getDefaultOllamaBaseUrl();
+
+  // Override localhost with Docker URL if in Docker
+  if (isDocker && finalBaseUrl.includes("localhost")) {
+    finalBaseUrl = "http://host.docker.internal:11434";
+  }
 
   const {
     data: modelsData,
@@ -123,6 +159,10 @@ export function useOllamaModels(baseUrl?: string) {
     ...orpcQueryClient.authed.ollama.getModelDetails.mutationOptions(),
   });
 
+  const showModelMutation = useMutation({
+    ...orpcQueryClient.authed.ollama.showModel.mutationOptions(),
+  });
+
   return {
     installedModels,
     isLoading,
@@ -131,14 +171,26 @@ export function useOllamaModels(baseUrl?: string) {
     deleteModel: deleteModelMutation,
     searchModels: searchModelsMutation,
     getModelDetails: searchModelDetailsMutation,
+    showModel: showModelMutation,
   };
 }
 
 export function useOllamaConnection(baseUrl?: string) {
   const { credentials } = useCredentials();
   const ollamaCred = credentials.find((cred) => cred.provider === "ollama");
-  const finalBaseUrl =
-    baseUrl || ollamaCred?.baseUrl || "http://localhost:11434";
+
+  const isDocker =
+    process.env.NEXT_PUBLIC_DOCKER_ENV === "true" ||
+    process.env.NEXT_PUBLIC_IS_DOCKER === "true" ||
+    process.env.NEXT_PUBLIC_DOCKER === "true";
+
+  let finalBaseUrl =
+    baseUrl || ollamaCred?.baseUrl || getDefaultOllamaBaseUrl();
+
+  // Override localhost with Docker URL if in Docker
+  if (isDocker && finalBaseUrl.includes("localhost")) {
+    finalBaseUrl = "http://host.docker.internal:11434";
+  }
 
   const {
     data: connectionStatus,
@@ -187,8 +239,20 @@ export const useOllamaPull = (baseUrl?: string): UseOllamaPullReturn => {
   const { deleteModel } = useOllamaModels(baseUrl);
   const { credentials } = useCredentials();
   const ollamaCred = credentials.find((cred) => cred.provider === "ollama");
-  const OLLAMA_BASE_URL =
-    baseUrl || ollamaCred?.baseUrl || "http://localhost:11434";
+
+  const isDocker =
+    process.env.NEXT_PUBLIC_DOCKER_ENV === "true" ||
+    process.env.NEXT_PUBLIC_IS_DOCKER === "true" ||
+    process.env.NEXT_PUBLIC_DOCKER === "true";
+
+  let OLLAMA_BASE_URL =
+    baseUrl || ollamaCred?.baseUrl || getDefaultOllamaBaseUrl();
+
+  // Override localhost with Docker URL if in Docker
+  if (isDocker && OLLAMA_BASE_URL.includes("localhost")) {
+    OLLAMA_BASE_URL = "http://host.docker.internal:11434";
+  }
+
   const abortControllersRef = useRef<Map<string, AbortController>>(new Map());
 
   useEffect(() => {
@@ -301,7 +365,6 @@ export const useOllamaPull = (baseUrl?: string): UseOllamaPullReturn => {
         existingPull.status !== "complete" &&
         existingPull.status !== "error"
       ) {
-        console.log(`Model ${modelName} is already being pulled`);
         return;
       }
 

@@ -1,20 +1,72 @@
-Dockerfile
-.dockerignore
-node_modules
-npm-debug.log
-README.md
-.git
-.gitignore
-.env*.local
-*.db
-*.db-journal
-.DS_Store
 .turbo
 dist
 build
+out
 coverage
-data/vector_stores
-**/archive
+
+# Dependencies
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Environment files
+.env
+.env*.local
+.env.production
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+README.md
+*.md
 apps/docs
 apps/landing
-**/assets
+
+# Development
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Data directories
+data/
+archive/
+
+# Assets (if not needed in production)
+**/assets/**/*.svg
+**/assets/**/*.png
+
+# Test files
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+**/__tests__
+**/test
+**/tests
+
+# Misc
+.prettierrc
+.eslintrc
+.editorconfig

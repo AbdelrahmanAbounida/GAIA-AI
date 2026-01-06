@@ -74,8 +74,19 @@ function DialogContent({
           "dark:bg-gaia-950 bg-gaia-100",
           className
         )}
+        onInteractOutside={(e) => {
+          const target = e.target as HTMLElement;
+          if (
+            target.closest("[data-sonner-toast]") ||
+            target.closest("[data-sonner-toaster]")
+          ) {
+            e.preventDefault();
+            return;
+          }
+        }}
         {...props}
       >
+        <DialogTitle className="sr-only">Dialog Title</DialogTitle>
         {children}
         {showCloseButton && (
           <DialogPrimitive.Close

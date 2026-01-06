@@ -35,6 +35,27 @@ export const useAllProviders = () => {
 };
 
 /**
+ * Helper to get default Ollama base URL
+ */
+function getDefaultOllamaBaseUrl(): string {
+  const isDocker =
+    process.env.NEXT_PUBLIC_DOCKER_ENV === "true" ||
+    process.env.NEXT_PUBLIC_IS_DOCKER === "true" ||
+    process.env.NEXT_PUBLIC_DOCKER === "true";
+
+  return isDocker
+    ? "http://host.docker.internal:11434"
+    : "http://localhost:11434";
+}
+
+/**
+ * Helper to check if a model name is an embedding model
+ */
+function isEmbeddingModel(modelName: string): boolean {
+  return modelName.toLowerCase().includes("embed");
+}
+
+/**
  * get user's available models based on valid credentials
  */
 export const useAvailableModels = () => {
@@ -51,21 +72,79 @@ export const useAvailableModels = () => {
   );
   const credentials = credentialsData?.credentials;
 
-  const LOCAL_PROVIDERS = new Set(["ollama", "openai-compatible"]);
+  // Get Ollama credential
+  const ollamaCred = credentials?.find((cred) => cred.provider === "ollama");
 
-  // Transform local credential to model schema
-  const transformLocalCredentialToModel = (credential: Credential) => ({
-    id: credential.provider,
-    name: credential.name || credential.provider,
+  const isDocker =
+    process.env.NEXT_PUBLIC_DOCKER_ENV === "true" ||
+    process.env.NEXT_PUBLIC_IS_DOCKER === "true" ||
+    process.env.NEXT_PUBLIC_DOCKER === "true";
+
+  let ollamaBaseUrl = ollamaCred?.baseUrl || getDefaultOllamaBaseUrl();
+
+  // Override localhost with Docker URL if in Docker
+  if (isDocker && ollamaBaseUrl.includes("localhost")) {
+    ollamaBaseUrl = "http://host.docker.internal:11434";
+  }
+
+  // Fetch Ollama models if Ollama credential exists and is valid
+  const { data: ollamaModelsData, isPending: ollamaModelsLoading } = useQuery({
+    ...orpcQueryClient.authed.ollama.listModels.queryOptions({
+      input: { baseUrl: ollamaBaseUrl },
+    }),
+    // enabled: !!ollamaCred?.isValid,
+    // retry: false,
+  });
+
+  // Transform Ollama installed model to model schema
+  const transformOllamaModelToSchema = (
+    ollamaModel: any,
+    credential: Credential
+  ) => ({
+    id: "ollama",
+    name: ollamaModel.name,
     specification: {
-      provider: credential.provider,
+      provider: "ollama",
+      baseUrl: credential.baseUrl,
+      apiKey: credential.apiKey,
+      credentialId: credential.id,
+      modelName: ollamaModel.name,
+    },
+    description: `Ollama model: ${ollamaModel.name}`,
+    pricing: null,
+    modelType: isEmbeddingModel(ollamaModel.name)
+      ? ("embedding" as const)
+      : ("language" as const),
+  });
+
+  // Transform OpenAI-compatible credential to model schema for LLMs
+  const transformOpenAICompatibleToLLM = (credential: Credential) => ({
+    id: "openai-compatible",
+    name: credential.name || "OpenAI Compatible (Chat)",
+    specification: {
+      provider: "openai-compatible",
       baseUrl: credential.baseUrl,
       apiKey: credential.apiKey,
       credentialId: credential.id,
     },
-    description: `Local ${credential.provider} connection`,
+    description: `Local OpenAI-compatible chat model`,
     pricing: null,
     modelType: "language" as const,
+  });
+
+  // Transform OpenAI-compatible credential to model schema for Embeddings
+  const transformOpenAICompatibleToEmbedding = (credential: Credential) => ({
+    id: "openai-compatible",
+    name: credential.name || "OpenAI Compatible (Embedding)",
+    specification: {
+      provider: "openai-compatible",
+      baseUrl: credential.baseUrl,
+      apiKey: credential.apiKey,
+      credentialId: credential.id,
+    },
+    description: `Local OpenAI-compatible embedding model`,
+    pricing: null,
+    modelType: "embedding" as const,
   });
 
   const availableModels = useMemo(() => {
@@ -73,14 +152,16 @@ export const useAvailableModels = () => {
       return { llms: [], embeddings: [], image: [] };
     }
 
-    // if vercel return all models
+    // if vercel return all models (but filter out embedding models from LLMs)
     if (
       credentials?.filter((cred) => cred.isValid && cred.provider === "vercel")
         .length > 0
     ) {
       return {
         llms:
-          aiModels.models?.llms?.map((m) => ({ ...m, fromVercel: true })) ?? [],
+          aiModels.models?.llms
+            ?.filter((m) => !isEmbeddingModel(m.name))
+            ?.map((m) => ({ ...m, fromVercel: true })) ?? [],
         embeddings:
           aiModels.models?.embeddings?.map((m) => ({
             ...m,
@@ -96,28 +177,60 @@ export const useAvailableModels = () => {
       .filter((cred) => cred.isValid && cred.credentialType === "ai_model")
       .map((cred) => cred.provider);
 
-    // Get standard LLMs from aiModels
+    // Get standard LLMs from aiModels (filter out embedding models)
     const standardLlms =
-      aiModels.models?.llms?.filter((model) =>
-        validAIProviders.includes(model.id)
+      aiModels.models?.llms?.filter(
+        (model) =>
+          validAIProviders.includes(model.id) && !isEmbeddingModel(model.name)
       ) ?? [];
 
-    // Add local provider models (ollama, openai-compatible)
-    const localLlms = credentials
-      .filter(
-        (cred) =>
-          cred.isValid &&
-          cred.credentialType === "ai_model" &&
-          LOCAL_PROVIDERS.has(cred.provider)
-      )
-      .map(transformLocalCredentialToModel);
+    // Add Ollama LLM models (filter out embedding models)
+    const ollamaLlms =
+      ollamaCred?.isValid && ollamaModelsData?.models
+        ? ollamaModelsData.models
+            .filter((model) => !isEmbeddingModel(model.name))
+            .map((model) => transformOllamaModelToSchema(model, ollamaCred))
+        : [];
 
-    const llms = [...standardLlms, ...localLlms];
+    // Get OpenAI-compatible credentials
+    const openaiCompatibleCreds = credentials.filter(
+      (cred) =>
+        cred.isValid &&
+        cred.credentialType === "ai_model" &&
+        cred.provider === "openai-compatible"
+    );
 
-    const embeddings =
+    // Add OpenAI-compatible LLMs
+    const openaiCompatibleLlms = openaiCompatibleCreds.map(
+      transformOpenAICompatibleToLLM
+    );
+
+    const llms = [...standardLlms, ...ollamaLlms, ...openaiCompatibleLlms];
+
+    // Get standard embeddings from aiModels
+    const standardEmbeddings =
       aiModels.models?.embeddings?.filter((model) =>
         validAIProviders.includes(model.id)
       ) ?? [];
+
+    // Add Ollama embedding models (models that contain "embed" in name)
+    const ollamaEmbeddings =
+      ollamaCred?.isValid && ollamaModelsData?.models
+        ? ollamaModelsData.models
+            .filter((model) => isEmbeddingModel(model.name))
+            .map((model) => transformOllamaModelToSchema(model, ollamaCred))
+        : [];
+
+    // Add OpenAI-compatible embeddings
+    const openaiCompatibleEmbeddings = openaiCompatibleCreds.map(
+      transformOpenAICompatibleToEmbedding
+    );
+
+    const embeddings = [
+      ...standardEmbeddings,
+      ...ollamaEmbeddings,
+      ...openaiCompatibleEmbeddings,
+    ];
 
     const image =
       aiModels.models?.image?.filter((model) =>
@@ -125,7 +238,7 @@ export const useAvailableModels = () => {
       ) ?? [];
 
     return { llms, embeddings, image };
-  }, [aiModels, credentials]);
+  }, [aiModels, credentials, ollamaModelsData, ollamaCred]);
 
   // Filter vector stores by valid credentials
   const availableVectorstores = useMemo(() => {
@@ -175,7 +288,8 @@ export const useAvailableModels = () => {
     );
   }, [credentials]);
 
-  const isPending = aiModelsLoading || credentialsLoading;
+  const isPending =
+    aiModelsLoading || credentialsLoading || ollamaModelsLoading;
 
   return {
     isPending,

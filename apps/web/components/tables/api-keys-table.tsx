@@ -89,14 +89,14 @@ export function ApiKeyTable({ keys, onDelete }: ApiKeyTableProps) {
 
   return (
     <>
-      <div className="rounded-md border">
-        <Table className="">
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
+      <div className="rounded-xl! ">
+        <Table className="rounded-xl!">
+          <TableHeader className="bg-gaia-250 dark:bg-gaia-800 rounded-3xl!">
+            <TableRow className="border-none">
+              <TableHead className=" rounded-l-xl">Name</TableHead>
               <TableHead>Created On</TableHead>
-              <TableHead>API Key</TableHead>
-              <TableHead className="w-[70px]">Actions</TableHead>
+              <TableHead className="">API Key</TableHead>
+              <TableHead className="w-[70px] rounded-r-xl!">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="">
@@ -129,10 +129,10 @@ export function ApiKeyTable({ keys, onDelete }: ApiKeyTableProps) {
                           <span className="sr-only">Open menu</span>
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent align="start">
                         <DropdownMenuItem
                           onClick={() => setDeleteId(key.id)}
-                          className="text-destructive focus:text-destructive"
+                          className="text-destructive hover:bg-transparent focus:text-destructive"
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
                           Delete

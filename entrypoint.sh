@@ -1,48 +1,23 @@
 #!/bin/sh
 set -e
 
-echo "🔍 Starting database setup..."
-echo "DATABASE_URL: $DATABASE_URL"
+echo "🚀 Starting application..."
 
-# Resolve the actual database path
-DB_PATH=$(echo "$DATABASE_URL" | sed 's|file:||')
-echo "Resolved database path: $DB_PATH"
-
-# Ensure the directory exists
-mkdir -p "$(dirname "$DB_PATH")"
-
-echo "📂 Database directory contents:"
-ls -la "$(dirname "$DB_PATH")" || true
-
-echo "📦 Checking migration files..."
-if [ -d "/app/packages/db/drizzle" ]; then
-    echo "✅ Found migrations:"
-    ls -la /app/packages/db/drizzle/*.sql 2>/dev/null || echo "No .sql files yet"
+# Check if database exists
+if [ ! -f /app/data/database.db ]; then
+    echo "📦 Database not found, running migrations..."
+    
+    # Run migrations using tsx (installed globally)
+    cd /app/packages/db
+    tsx -r dotenv/config drizzle/migrate.ts
+    
+    echo "✅ Migrations complete"
 else
-    echo "❌ No drizzle folder found!"
-    exit 1
+    echo "✅ Database already exists"
 fi
 
-echo "🔧 Running migrations from packages/db..."
-cd /app/packages/db
-
-# Run the migration
-if pnpm run migrate:docker; then
-    echo "✅ Migrations completed successfully!"
-else
-    echo "❌ Migration failed!"
-    exit 1
-fi
-
-# Verify database was created
-if [ -f "$DB_PATH" ]; then
-    echo "✅ Database file created at: $DB_PATH"
-    ls -lh "$DB_PATH"
-else
-    echo "❌ Database file not found after migration!"
-    exit 1
-fi
-
-echo "🚀 Starting Next.js application..."
+echo "🌐 Starting Next.js server..."
 cd /app
-exec node apps/web/server.js
+
+# Start the Next.js standalone server
+node apps/web/server.js

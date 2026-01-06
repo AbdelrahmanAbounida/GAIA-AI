@@ -1585,7 +1585,7 @@ export const ALL_VECTOR_STORES: VectorStoreProvider[] = [
       {
         id: "host",
         name: "Host",
-        isRequired: false,
+        isRequired: true,
         default: "localhost",
         placeholder: "localhost or api.trychroma.com",
         description: "Chroma server host (default: localhost for local)",
@@ -1615,7 +1615,7 @@ export const ALL_VECTOR_STORES: VectorStoreProvider[] = [
       {
         id: "tenant",
         name: "Tenant",
-        isRequired: false,
+        isRequired: true,
         cloudOnly: true,
         placeholder: "default-tenant",
         description: "Required for Chroma Cloud",
@@ -1623,7 +1623,7 @@ export const ALL_VECTOR_STORES: VectorStoreProvider[] = [
       {
         id: "database",
         name: "Database",
-        isRequired: false,
+        isRequired: true,
         cloudOnly: true,
         placeholder: "default_database",
         description: "Required for Chroma Cloud",
@@ -1636,7 +1636,7 @@ export const ALL_VECTOR_STORES: VectorStoreProvider[] = [
         description: "Name of the collection to use/create",
       },
     ],
-    needsCredentials: false,
+    needsCredentials: true,
   },
   {
     id: "milvus",

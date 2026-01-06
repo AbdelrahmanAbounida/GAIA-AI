@@ -1,4 +1,4 @@
-import { orpc } from "@/lib/orpc/client";
+import { orpcServer as orpc } from "@/lib/orpc/server";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {

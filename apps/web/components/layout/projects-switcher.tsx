@@ -14,31 +14,37 @@ import { useAppStore } from "@/store/use-app-store";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { CreateProjectModal2 } from "../modals/new-project-modal2";
+import { useMounted } from "@/hooks/use-mounted";
 
 export const ProjectsSwitcher = ({ className }: { className?: string }) => {
-  const { projects } = useProjects();
-  const { activeProjectId, setActiveProject } = useAppStore();
-  const activeProject = projects.find((p) => p.id === activeProjectId);
+  const mounted = useMounted();
   const router = useRouter();
 
+  const { projects } = useProjects();
+  const { activeProjectId, setActiveProject } = useAppStore();
+
+  if (!mounted) {
+    return null;
+  }
+
+  const activeProject = projects.find((p) => p.id === activeProjectId);
+
   return (
-    <div className={cn(" ")}>
+    <div className={cn(className)}>
       <DropdownMenu>
-        <DropdownMenuTrigger
-          asChild
-          className={cn(
-            "focus:outline-none!   focus:ring-0! ",
-            "border-gaia-300 dark:border-gaia-700 dark:text-white/70 hover:bg-gaia-200",
-            className
-          )}
-        >
-          <Button variant="outline" size={"tiny"} className="text-sm px-5 h-7 ">
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="outline"
+            size="tiny"
+            className="text-sm px-5 h-7 border-gaia-300 dark:border-gaia-700 dark:text-white/70 hover:bg-gaia-200 focus:outline-none focus:ring-0"
+          >
             <span className="truncate text-xs">
-              {activeProject?.name || "Select Project"}
+              {activeProject?.name ?? "Select Project"}
             </span>
             <ChevronsUpDownIcon className="h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
+
         <DropdownMenuContent className="w-56 ml-3.5" align="start">
           {projects.length === 0 ? (
             <DropdownMenuItem disabled>
@@ -61,14 +67,11 @@ export const ProjectsSwitcher = ({ className }: { className?: string }) => {
               </DropdownMenuItem>
             ))
           )}
-          <DropdownMenuSeparator className=" " />
-          {/* */}
+
+          <DropdownMenuSeparator />
+
           <CreateProjectModal2>
-            <DropdownMenuItem
-              onSelect={(e) => {
-                e.preventDefault();
-              }}
-            >
+            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
               <PlusIcon className="h-4 w-4" />
               <span className="ml-2">New Project</span>
             </DropdownMenuItem>

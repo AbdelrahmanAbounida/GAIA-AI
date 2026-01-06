@@ -97,9 +97,9 @@ export function CredentialModal({
         </DialogTrigger>
       )}
       <DialogContent
-        onInteractOutside={(e) => {
-          e.preventDefault();
-        }}
+        // onInteractOutside={(e) => {
+        //   e.preventDefault();
+        // }}
         className="overflow-hidden p-0 w-[90%]! max-w-7xl! max-h-[90vh] h-[800px]"
       >
         <DialogTitle className="sr-only">Credential Settings</DialogTitle>

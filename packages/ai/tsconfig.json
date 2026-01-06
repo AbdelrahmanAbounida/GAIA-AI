@@ -1,12 +1,26 @@
 {
-  "extends": "../../gen/ts-base.json",
-  "include": [
-    "src",
-    "../../apps/web/lib/chunker2.ts",
-    "../../apps/web/archive/indexing-services.ts",
-    "../../apps/web/archive/vectorstore.ts",
-    "../../apps/web/archive/chunker.ts",
-    "../../apps/web/archive/types.ts"
-  ],
-  "exclude": ["dist", "build", "node_modules"]
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2020"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "downlevelIteration": true,
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }

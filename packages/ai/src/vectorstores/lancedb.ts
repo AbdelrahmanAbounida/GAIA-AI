@@ -105,7 +105,7 @@ export class LanceDBVectorStore extends BaseVectorStore {
       this.nativeTable = await db.createTable(this.tableName!, [
         {
           vector: Array(this.embeddingSize).fill(0),
-          text: "Initialization document",
+          text: "",
           id: "init",
           documentId: "",
           source: "",

@@ -23,7 +23,7 @@ import {
 import { useOllama } from "@/hooks/use-ollama";
 import { useCredentials } from "@/hooks/use-credentials";
 import { Progress } from "@/components/ui/progress";
-import { showErrorToast } from "@/components/ui/toast";
+import { showErrorToast, showWarningToast } from "@/components/ui/toast";
 import { useLocalModelStore } from "@/store/use-local-models";
 import { formatBytes } from "@/lib/format";
 import { ConfirmModal } from "../../confirm-modal";
@@ -112,7 +112,7 @@ export const OllamaView = ({ view }: { view: "ai_models" | "embeddings" }) => {
 
   const checkDuplicateModel = (modelName: string): boolean => {
     if (credentialModels.includes(modelName)) {
-      showErrorToast({
+      showWarningToast({
         title: "Model already exists",
         description: `The model "${modelName}" is already in your credential.`,
         position: "bottom-right",
@@ -279,11 +279,32 @@ export const OllamaView = ({ view }: { view: "ai_models" | "embeddings" }) => {
         verbose: false,
       });
 
-      if (!isModelExist?.model) {
+      if (!isModelExist?.success) {
         showErrorToast({
           title: "Model not found",
           description:
             "The model you entered does not exist in the Ollama library.",
+          position: "bottom-left",
+          duration: 4000,
+        });
+        return;
+      }
+      const modelCpabilities = isModelExist.model?.tags;
+
+      if (view == "embeddings" && !modelCpabilities?.includes("embedding")) {
+        showErrorToast({
+          title: "Embeddings not supported",
+          description: "The model you entered does not support embeddings.",
+          position: "bottom-left",
+          duration: 4000,
+        });
+        return;
+      }
+      if (view == "ai_models" && !modelCpabilities?.includes("tools")) {
+        showErrorToast({
+          title: "Tools not supported",
+          description:
+            "The model you entered does not support tools. which is required for ai models.",
           position: "bottom-left",
           duration: 4000,
         });

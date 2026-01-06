@@ -3,67 +3,45 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
-FROM base AS deps
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
-
-# Copy package files
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY apps ./apps
-COPY packages ./packages
-
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-
-# Build packages/db (compile TypeScript)
-RUN cd packages/db && pnpm run build
-
-# Build the Next.js app
-RUN pnpm run build
-
-RUN echo "=== Checking build output ===" && \
-    find /app -name ".next" -type d && \
-    ls -la /app/.next 2>/dev/null || echo "No .next in /app root" && \
-    ls -la /app/apps/*/.next 2>/dev/null || echo "No .next in apps"
-
-# Production image
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV="production"
+ENV NODE_ENV=production
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+ENV NEXT_PUBLIC_DOCKER_ENV="true"
+ENV DOCKER_ENV="true"
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Install tsx globally for running migrations
-RUN pnpm add -g tsx
+# Install tsx globally for migrations
+RUN pnpm add -g tsx dotenv
 
-COPY --from=builder /app/apps/web/public ./public
+# Copy pre-built Next.js standalone output (built locally)
+COPY apps/web/.next/standalone ./
+COPY apps/web/.next/static ./apps/web/.next/static
+COPY apps/web/public ./apps/web/public
 
-COPY --from=builder /app/apps/web/.next/standalone ./
+# Copy database package for migrations (built locally)
+COPY packages/db/src ./packages/db/src
+COPY packages/db/dist ./packages/db/dist
+COPY packages/db/drizzle ./packages/db/drizzle
+COPY packages/db/package.json ./packages/db/package.json
 
-COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
+# Copy workspace files
+COPY package.json ./package.json
+COPY pnpm-workspace.yaml ./pnpm-workspace.yaml
+COPY pnpm-lock.yaml ./pnpm-lock.yaml
 
-COPY --from=builder /app/apps/web/.next/standalone/node_modules ./node_modules
+# Install only production dependencies needed for migrations
+RUN pnpm install --prod --frozen-lockfile
 
-# Copy db package source files (needed for tsx to run migrate.ts)
-COPY --from=builder /app/packages/db/src ./packages/db/src
-COPY --from=builder /app/packages/db/dist ./packages/db/dist
-COPY --from=builder /app/packages/db/drizzle ./packages/db/drizzle
-COPY --from=builder /app/packages/db/package.json ./packages/db/package.json
-COPY --from=builder /app/packages/db/node_modules ./packages/db/node_modules
+RUN mkdir -p /app/data && \
+    mkdir -p /app/apps/web/data && \
+    chown -R nextjs:nodejs /app && \
+    chmod -R 755 /app/data /app/apps
 
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
-
-# Create directory for SQLite database
-RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data
-
-# Copy entrypoint script BEFORE switching user
+# Copy and setup entrypoint
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh && chown nextjs:nodejs /app/entrypoint.sh
 
@@ -73,6 +51,5 @@ EXPOSE 3000
 
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
-ENV DATABASE_URL="file:/app/data/database.db"
 
 CMD ["/app/entrypoint.sh"]

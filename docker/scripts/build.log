@@ -1,0 +1,127 @@
+--progress is a global compose flag, better use `docker compose --progress xx build ...
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [web internal] load build definition from Dockerfile
+#1 transferring dockerfile: 3.22kB done
+#1 DONE 0.0s
+
+#2 [web internal] load metadata for docker.io/library/node:20-alpine3.19
+#2 DONE 1.3s
+
+#3 [web internal] load .dockerignore
+#3 transferring context: 250B done
+#3 DONE 0.0s
+
+#4 [web base 1/2] FROM docker.io/library/node:20-alpine3.19@sha256:1cc9088b0fbcb2009a8fc2cb57916cd129cd5e32b3c75fb12bb24bac76917a96
+#4 resolve docker.io/library/node:20-alpine3.19@sha256:1cc9088b0fbcb2009a8fc2cb57916cd129cd5e32b3c75fb12bb24bac76917a96 0.0s done
+#4 DONE 0.1s
+
+#5 [web internal] load build context
+#5 transferring context: 866.82MB 5.0s
+#5 ...
+
+#4 [web base 1/2] FROM docker.io/library/node:20-alpine3.19@sha256:1cc9088b0fbcb2009a8fc2cb57916cd129cd5e32b3c75fb12bb24bac76917a96
+#4 sha256:d381a7daebb432502fd6016f77001db040d4437bc347b529e5637ea75562ab23 443B / 443B 0.3s done
+#4 sha256:28e4cdbeccf68ae9ce47ad2caa1737d54563706835227ad12859e4bf0b36e802 1.39MB / 1.39MB 0.7s done
+#4 sha256:55b646bedde00306f5e12c0e681ee985ef441e91b22278d16db3cd13d2975220 42.18MB / 42.18MB 5.1s done
+#4 sha256:6c9d4d66fb4987fcd48c673e8b29bb504a3cfb33f10b97cbcea126aa3b8b59fd 3.36MB / 3.36MB 2.1s done
+#4 extracting sha256:6c9d4d66fb4987fcd48c673e8b29bb504a3cfb33f10b97cbcea126aa3b8b59fd 0.1s done
+#4 extracting sha256:55b646bedde00306f5e12c0e681ee985ef441e91b22278d16db3cd13d2975220 0.8s done
+#4 extracting sha256:28e4cdbeccf68ae9ce47ad2caa1737d54563706835227ad12859e4bf0b36e802 0.1s done
+#4 extracting sha256:d381a7daebb432502fd6016f77001db040d4437bc347b529e5637ea75562ab23 0.0s done
+#4 DONE 6.1s
+
+#5 [web internal] load build context
+#5 ...
+
+#6 [web base 2/2] RUN corepack enable
+#6 DONE 0.6s
+
+#5 [web internal] load build context
+#5 transferring context: 1.03GB 6.4s done
+#5 DONE 6.7s
+
+#7 [web builder 1/8] WORKDIR /app
+#7 DONE 0.2s
+
+#8 [web deps 1/9] RUN apk add --no-cache libc6-compat
+#8 0.377 fetch https://dl-cdn.alpinelinux.org/alpine/v3.19/main/aarch64/APKINDEX.tar.gz
+#8 ...
+
+#9 [web runner  2/18] RUN addgroup --system --gid 1001 nodejs
+#9 DONE 0.3s
+
+#8 [web deps 1/9] RUN apk add --no-cache libc6-compat
+#8 0.643 fetch https://dl-cdn.alpinelinux.org/alpine/v3.19/community/aarch64/APKINDEX.tar.gz
+#8 ...
+
+#10 [web runner  3/18] RUN adduser --system --uid 1001 nextjs
+#10 DONE 0.3s
+
+#8 [web deps 1/9] RUN apk add --no-cache libc6-compat
+#8 0.899 (1/3) Installing musl-obstack (1.2.3-r2)
+#8 0.917 (2/3) Installing libucontext (1.2-r2)
+#8 0.934 (3/3) Installing gcompat (1.1.0-r4)
+#8 0.957 OK: 11 MiB in 20 packages
+#8 DONE 1.0s
+
+#11 [web deps 2/9] WORKDIR /app
+#11 DONE 0.0s
+
+#12 [web runner  4/18] RUN pnpm add -g tsx
+#12 ...
+
+#13 [web deps 3/9] COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+#13 DONE 0.1s
+
+#14 [web deps 4/9] RUN mkdir -p apps/web packages/db apps/api packages/ai
+#14 DONE 0.1s
+
+#15 [web deps 5/9] COPY apps/web/package.json ./apps/web/package.json
+#15 DONE 0.0s
+
+#16 [web deps 6/9] COPY packages/db/package.json ./packages/db/package.json
+#16 DONE 0.0s
+
+#17 [web deps 7/9] COPY apps/api/package.json ./apps/api/package.json
+#17 DONE 0.0s
+
+#12 [web runner  4/18] RUN pnpm add -g tsx
+#12 ...
+
+#18 [web deps 8/9] COPY packages/ai/package.json ./packages/ai/package.json
+#18 DONE 0.0s
+
+#12 [web runner  4/18] RUN pnpm add -g tsx
+#12 0.626 /usr/local/lib/node_modules/corepack/dist/lib/corepack.cjs:21535
+#12 0.626   if (key == null || signature == null) throw new Error(`Cannot find matching keyid: ${JSON.stringify({ signatures, keys })}`);
+#12 0.626                                               ^
+#12 0.626 
+#12 0.626 Error: Cannot find matching keyid: {"signatures":[{"sig":"MEYCIQCDS9aVWzPjM8BKOiel92BSrBIRjflBzrE8LW0HUn6YDQIhAOrIeaWmaZpd1ysr2W+X5780aX9ZIy872S+R9c74vW08","keyid":"SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"}],"keys":[{"expires":null,"keyid":"SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA","keytype":"ecdsa-sha2-nistp256","scheme":"ecdsa-sha2-nistp256","key":"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE1Olb3zMAFFxXKHiIkQO5cJ3Yhl5i6UPp+IhuteBJbuHcA5UogKo0EWtlWwW6KSaKoTNEYL7JlCQiVnkhBktUgg=="}]}
+#12 0.626     at verifySignature (/usr/local/lib/node_modules/corepack/dist/lib/corepack.cjs:21535:47)
+#12 0.626     at fetchLatestStableVersion (/usr/local/lib/node_modules/corepack/dist/lib/corepack.cjs:21553:5)
+#12 0.626     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+#12 0.626     at async fetchLatestStableVersion2 (/usr/local/lib/node_modules/corepack/dist/lib/corepack.cjs:21672:14)
+#12 0.626     at async Engine.getDefaultVersion (/usr/local/lib/node_modules/corepack/dist/lib/corepack.cjs:22292:23)
+#12 0.626     at async Engine.executePackageManagerRequest (/usr/local/lib/node_modules/corepack/dist/lib/corepack.cjs:22390:47)
+#12 0.626     at async Object.runMain (/usr/local/lib/node_modules/corepack/dist/lib/corepack.cjs:23096:5)
+#12 0.626 
+#12 0.626 Node.js v20.18.1
+#12 ERROR: process "/bin/sh -c pnpm add -g tsx" did not complete successfully: exit code: 1
+
+#19 [web deps 9/9] RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+#19 CANCELED
+------
+ > [web runner  4/18] RUN pnpm add -g tsx:
+0.626 Error: Cannot find matching keyid: {"signatures":[{"sig":"MEYCIQCDS9aVWzPjM8BKOiel92BSrBIRjflBzrE8LW0HUn6YDQIhAOrIeaWmaZpd1ysr2W+X5780aX9ZIy872S+R9c74vW08","keyid":"SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"}],"keys":[{"expires":null,"keyid":"SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA","keytype":"ecdsa-sha2-nistp256","scheme":"ecdsa-sha2-nistp256","key":"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE1Olb3zMAFFxXKHiIkQO5cJ3Yhl5i6UPp+IhuteBJbuHcA5UogKo0EWtlWwW6KSaKoTNEYL7JlCQiVnkhBktUgg=="}]}
+0.626     at verifySignature (/usr/local/lib/node_modules/corepack/dist/lib/corepack.cjs:21535:47)
+0.626     at fetchLatestStableVersion (/usr/local/lib/node_modules/corepack/dist/lib/corepack.cjs:21553:5)
+0.626     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+0.626     at async fetchLatestStableVersion2 (/usr/local/lib/node_modules/corepack/dist/lib/corepack.cjs:21672:14)
+0.626     at async Engine.getDefaultVersion (/usr/local/lib/node_modules/corepack/dist/lib/corepack.cjs:22292:23)
+0.626     at async Engine.executePackageManagerRequest (/usr/local/lib/node_modules/corepack/dist/lib/corepack.cjs:22390:47)
+0.626     at async Object.runMain (/usr/local/lib/node_modules/corepack/dist/lib/corepack.cjs:23096:5)
+0.626 
+0.626 Node.js v20.18.1
+------
+failed to solve: process "/bin/sh -c pnpm add -g tsx" did not complete successfully: exit code: 1

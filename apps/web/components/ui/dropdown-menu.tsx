@@ -90,10 +90,10 @@ const DropdownMenuItem = React.forwardRef<
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex cursor-pointer first:rounded-t-xl last:rounded-b-xl select-none items-center gap-2 rounded-md px-2 h-9 text-sm outline-none transition-colors dark:focus:bg-gaia-700/30 dark:focus:text-bg-gaia-700-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0",
+      "relative h-7 dark:text-xs flex cursor-pointer first:rounded-t-xl last:rounded-b-xl select-none items-center gap-2 rounded-md px-2  text-sm outline-none transition-colors dark:focus:bg-gaia-700/30 dark:focus:text-bg-gaia-700-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0",
       isActive && "bg-gaia-300 dark:bg-gaia-700/30",
       inset && "pl-8",
-      "h-7 text-xs hover:bg-gaia-200 dark:hover:bg-gaia-700/30",
+      " hover:bg-gaia-200 dark:hover:bg-gaia-700/30",
       className
     )}
     {...props}

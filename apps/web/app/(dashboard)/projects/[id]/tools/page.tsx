@@ -7,7 +7,7 @@ import { MCPCardView } from "@/components/mcp/mcp-card-view";
 import { ToolsCardView } from "@/components/tools/tools-card-view";
 import { NewToolDialog } from "@/components/tools/new-tool-dialog";
 import { NewMCPDialog } from "@/components/mcp/new-mcp-dialog";
-import { RAGModal } from "@/components/modals/rag-modal";
+import { RAGModal } from "@/components/modals/rag-modal/rag-modal";
 
 export default function ToolsPage() {
   // tabs state

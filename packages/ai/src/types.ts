@@ -18,6 +18,7 @@ type createImageArtifactTool = InferUITool<
 export type ChatTools = {
   createCodeArtifact: CreateCodeArtifactTool;
   createImageArtifact: createImageArtifactTool;
+  ragTool: any;
 };
 // Correct ChatMessage type without nesting
 export type ChatMessage = UIMessage<

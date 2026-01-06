@@ -14,7 +14,7 @@ import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { orpc, orpcQueryClient } from "@/lib/orpc/client";
 import { CredentialModal } from "@/components/modals/credential-modal/credential-modal";
-import { RAGModal } from "@/components/modals/rag-modal";
+import { RAGModal } from "@/components/modals/rag-modal/rag-modal";
 import { showErrorToast, showSuccessToast } from "@/components/ui/toast";
 import { useState } from "react";
 import {

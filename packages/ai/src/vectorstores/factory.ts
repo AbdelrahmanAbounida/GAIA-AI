@@ -1,5 +1,6 @@
 import { OpenAIEmbeddings } from "@langchain/openai";
 import * as path from "path";
+import * as fs from "fs/promises";
 import type {
   VectorStoreProviderId,
   VectorStoreConfig,
@@ -41,6 +42,69 @@ export interface CreateVectorStoreOptions {
 }
 
 /**
+ * Get the base data directory, supporting both Docker and local environments
+ */
+function getDataDirectory(): string {
+  // 1. Check for explicit VECTOR_STORE_PATH environment variable first
+  if (process.env.VECTOR_STORE_PATH) {
+    console.log(`📁 Using VECTOR_STORE_PATH: ${process.env.VECTOR_STORE_PATH}`);
+    return process.env.VECTOR_STORE_PATH;
+  }
+
+  // 2. In Docker/production, use /app/data
+  // Check multiple indicators of Docker/production environment
+  const isDocker =
+    process.env.NODE_ENV === "production" ||
+    process.env.DATABASE_URL?.includes("/app/data") ||
+    process.env.DATABASE_URL?.startsWith("file:/app/data") ||
+    // Additional check: if we're in /app directory structure (Docker)
+    process.cwd().startsWith("/app/");
+
+  if (isDocker) {
+    console.log("📁 Detected Docker/production environment, using /app/data");
+    return "/app/data";
+  }
+
+  // 3. Default to process.cwd()/data for local development
+  const localPath = path.join(process.cwd(), "data");
+  console.log(`📁 Using local development path: ${localPath}`);
+  return localPath;
+}
+
+/**
+ * Ensure directory exists with proper permissions
+ */
+async function ensureDirectory(dirPath: string): Promise<void> {
+  try {
+    await fs.mkdir(dirPath, { recursive: true, mode: 0o755 });
+    console.log(`✅ Directory created/verified: ${dirPath}`);
+  } catch (error: any) {
+    if (error.code !== "EEXIST") {
+      throw new Error(
+        `Failed to create directory ${dirPath}: ${error.message}\n` +
+          `This might be a permission issue. Ensure the user running the process has write access.\n` +
+          `Current user: ${process.getuid?.() || "unknown"}, path: ${dirPath}`
+      );
+    }
+  }
+
+  // Verify we can write to the directory
+  try {
+    const testFile = path.join(dirPath, ".write-test");
+    await fs.writeFile(testFile, "test");
+    await fs.unlink(testFile);
+    console.log(`✅ Write permission verified for: ${dirPath}`);
+  } catch (error: any) {
+    throw new Error(
+      `Directory ${dirPath} exists but is not writable: ${error.message}\n` +
+        `Check permissions: chmod -R 755 ${dirPath} or chown to the correct user.\n` +
+        `Current user: ${process.getuid?.() || "unknown"}, ` +
+        `Current working directory: ${process.cwd()}`
+    );
+  }
+}
+
+/**
  * Factory function to create and initialize a vector store
  */
 export async function createVectorStore({
@@ -54,6 +118,13 @@ export async function createVectorStore({
   fullTextSearchTool,
   ftsConfig,
 }: CreateVectorStoreOptions): Promise<BaseVectorStore> {
+  console.log("🔍 Environment check:", {
+    NODE_ENV: process.env.NODE_ENV,
+    DATABASE_URL: process.env.DATABASE_URL,
+    VECTOR_STORE_PATH: process.env.VECTOR_STORE_PATH,
+    cwd: process.cwd(),
+  });
+
   const embeddings = new OpenAIEmbeddings({
     apiKey: embeddingApiKey,
     configuration: {
@@ -62,13 +133,20 @@ export async function createVectorStore({
     model: embeddingModel,
   });
 
+  // ✅ Use centralized data directory function
+  const baseDataDir = getDataDirectory();
+
+  // ✅ Create flat structure: /app/data/vector_stores/{provider}/{project-id}
   const persistDirectory = path.join(
-    process.cwd(),
-    "data",
+    baseDataDir,
     "vector_stores",
     provider,
     projectId
   );
+
+  console.log(`📁 Vector store will be created at: ${persistDirectory}`);
+
+  await ensureDirectory(persistDirectory);
 
   // Determine FTS provider
   const effectiveFTSProvider = determineEffectiveFTSProvider(

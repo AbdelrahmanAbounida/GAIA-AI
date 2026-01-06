@@ -6,14 +6,18 @@ import { orpc } from "@/lib/orpc/client";
 import { ChatPageView } from "@/components/chat/chat-page";
 import { ChatNotfound } from "@/components/chat/chat-notfound";
 
-const ChatPage = async (props: { params: Promise<{ chatId: string }> }) => {
+const ChatPage = async (props: {
+  params: Promise<{ id: string; chatId: string }>;
+}) => {
   const params = await props.params;
   const chatId = params.chatId;
+
+  console.log({ id: params.id, chatId });
 
   // 0- TODO:: handle the auth operation
   const user = await getServerAuth();
   if (!user) {
-    return redirect("/login");
+    return redirect("/auth");
   }
 
   // - Load all requried states from cookies

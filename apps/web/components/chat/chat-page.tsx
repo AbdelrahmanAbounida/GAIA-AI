@@ -41,8 +41,10 @@ export const ChatPageView = ({
   const queryClient = useQueryClient();
   const [artifactBoundingBox, setArtifactBoundingBox] =
     useState<DOMRect | null>(null);
-
-  const { activeProjectId: projectId } = useAppStore();
+  // TODO:: recheck
+  const { id: paramProjectId } = useParams<{ id: string }>();
+  const { activeProjectId } = useAppStore();
+  const projectId = activeProjectId ?? paramProjectId!;
 
   const { credentials, isLoading: isPending } = useCredentials();
 

@@ -41,7 +41,7 @@ export default function APIKeyPage() {
 
   if (isPending) {
     return (
-      <main className="  p-6 md:p-10">
+      <main className="  p-6 md:p-10 ">
         <div className="mx-auto max-w-5xl">
           <div className="mb-8">
             <h1 className="text-3xl font-bold tracking-tight text-foreground">
@@ -59,7 +59,7 @@ export default function APIKeyPage() {
   }
 
   return (
-    <main className="min-h-screen  p-6 md:p-10">
+    <main className=" p-6 md:p-10">
       <div className="mx-auto max-w-5xl">
         <div className="mb-8">
           <h1 className="text-2xl font-medium tracking-tight text-foreground">
@@ -100,7 +100,7 @@ export default function APIKeyPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg dark:bg-gaia-800 border dark:border-gaia-700">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gaia-200 dark:bg-gaia-800 border dark:border-gaia-700">
                       <Key className="h-5 w-5 dark:text-primary" />
                     </div>
                     <div>

@@ -9,7 +9,6 @@ import {
   ModelSelectorItem,
   ModelSelectorList,
   ModelSelectorLogo,
-  ModelSelectorLogoGroup,
   ModelSelectorName,
   ModelSelectorTrigger,
 } from "@/components/ai-elements/model-selector";
@@ -66,7 +65,7 @@ export const LLMSelector = () => {
                 .filter((model) => model.id === provider)
                 .map((model) => (
                   <ModelSelectorItem
-                    key={model.id}
+                    key={`${model.id}-${model.name}`}
                     onSelect={() => {
                       setSelectedModel(model.id);
                       setOpen(false);

@@ -36,7 +36,6 @@ export default function CredentialsView() {
   // Calculate pagination
   const total = credentials.length;
   const pageCount = Math.ceil(total / itemsPerPage);
-  console.log({ pageCount });
 
   // Get paginated credentials
   const paginatedCredentials = useMemo(() => {

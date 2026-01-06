@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
-import { CheckIcon, InfoIcon, XIcon } from "lucide-react";
+import { CheckIcon, InfoIcon, TriangleAlert, XIcon } from "lucide-react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,10 +44,21 @@ export default function RootLayout({
             info: (
               <InfoIcon className="text-blue-600  w-5 h-5 mt-1.5   rounded-2xl" />
             ),
+            warning: (
+              <TriangleAlert className="text-orange-600!  w-5 h-5 mt-1.5   rounded-2xl" />
+            ),
           }}
           toastOptions={{
             className:
-              " border-zinc-700/55! flex! items-start! p-3! pl-4! justify-start!  dark:bg-gaia-800! text-gaia-600! min-h-[65px]!",
+              " flex! items-start! p-3! pl-4! justify-start!  dark:bg-gaia-800! text-gaia-600! min-h-[65px]!",
+            style: {
+              zIndex: 9999,
+              pointerEvents: "auto",
+            },
+          }}
+          style={{
+            zIndex: 9999,
+            pointerEvents: "auto", // Add this here too
           }}
         />
         {children}

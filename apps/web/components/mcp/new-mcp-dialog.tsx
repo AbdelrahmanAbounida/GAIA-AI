@@ -176,18 +176,23 @@ export const NewMCPDialog = ({ forceShow }: { forceShow?: boolean }) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {isLoadingServers ? (
-          <Button disabled variant={"outline"} size={"tiny"}>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading...
-          </Button>
-        ) : (
-          (servers?.length > 0 || forceShow) && (
-            <Button variant={"brand"} size={"tiny"}>
+        <Button
+          disabled={isLoadingServers}
+          variant={isLoadingServers ? "outline" : "brand"}
+          size="tiny"
+        >
+          {isLoadingServers ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Loading...
+            </>
+          ) : (
+            <>
               <Server className="size-3 dark:text-white" />
               Add Server
-            </Button>
-          )
-        )}
+            </>
+          )}
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

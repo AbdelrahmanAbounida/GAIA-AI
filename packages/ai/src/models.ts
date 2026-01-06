@@ -3,6 +3,9 @@ import dotenv from "dotenv";
 import z from "zod";
 import type { AIProvider as Provider, ProviderCapability } from "./types";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { createOpenAI } from "@ai-sdk/openai";
+import { convertToOpenAICompatibleChatMessages } from "@ai-sdk/openai-compatible/internal";
+
 dotenv.config();
 
 // TODO;: move to api like feedback too
@@ -10,6 +13,12 @@ export const aiGateway = createGateway({
   apiKey:
     process.env.AI_GATEWAY_API_KEY ||
     "vck_2Z7c547Js4eb8e4sj8b1AYRsJQyTamv1BgRNyPVBhBMBRdk2Aj0ipmyJ",
+});
+
+export const aiCompatible = createOpenAICompatible({
+  name: "openai",
+  apiKey: "vck_2Z7c547Js4eb8e4sj8b1AYRsJQyTamv1BgRNyPVBhBMBRdk2Aj0ipmyJ",
+  baseURL: "https://ai-gateway.vercel.sh/v1",
 });
 
 export const getAllProvidersWithModels = async (): Promise<Provider[]> => {

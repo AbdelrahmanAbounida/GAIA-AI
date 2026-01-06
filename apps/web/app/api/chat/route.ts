@@ -8,26 +8,231 @@ import {
   JsonToSseTransformStream,
   tool,
   Tool,
+  type ModelMessage,
 } from "ai";
 import { z } from "zod";
-import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import { orpc } from "@/lib/orpc/client";
+import { getOrpcServer } from "@/lib/orpc/server";
 import { getMCPManager } from "@gaia/ai/mcp";
+import { aiCompatible } from "@gaia/ai/models";
 import {
   buildDynamicTools,
   createCodeArtifact,
   createImageArtifact,
   createVideoArtifact,
 } from "@gaia/ai/tools";
+import { FileParser } from "@/lib/file-parser";
+import PDFParser from "pdf2json";
+import { promises as fs } from "fs";
+import * as os from "os";
+import * as path from "path";
 
 export const maxDuration = 30;
 
-// TODO:: remove
-const aiGateway = createOpenAICompatible({
-  name: "openai",
-  apiKey: "vck_2Z7c547Js4eb8e4sj8b1AYRsJQyTamv1BgRNyPVBhBMBRdk2Aj0ipmyJ",
-  baseURL: "https://ai-gateway.vercel.sh/v1",
-});
+const orpc = getOrpcServer();
+
+/**
+ * Check if messages contain file attachments
+ */
+function hasFileAttachments(messages: UIMessage[]): boolean {
+  return messages.some((message) =>
+    message.parts.some((part) => part.type === "file")
+  );
+}
+
+/**
+ * Extract text from PDF using pdf2json
+ */
+async function extractPDFText(
+  base64Data: string,
+  filename?: string
+): Promise<string> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Generate a unique temporary file path
+      const tempDir = os.tmpdir();
+      const tempFileName = `${generateUUID()}.pdf`;
+      const tempFilePath = path.join(tempDir, tempFileName);
+
+      // Convert base64 to Buffer
+      const fileBuffer = Buffer.from(base64Data, "base64");
+
+      // Save the buffer as a temporary file
+      await fs.writeFile(tempFilePath, fileBuffer);
+
+      // Create PDF parser instance
+      const pdfParser = new (PDFParser as any)(null, 1);
+
+      // Handle parsing errors
+      pdfParser.on("pdfParser_dataError", (errData: any) => {
+        console.error("PDF Parser Error:", errData.parserError);
+        // Clean up temp file
+        fs.unlink(tempFilePath).catch(console.error);
+        reject(new Error(`PDF parsing error: ${errData.parserError}`));
+      });
+
+      // Handle successful parsing
+      pdfParser.on("pdfParser_dataReady", async () => {
+        try {
+          const parsedText = (pdfParser as any).getRawTextContent();
+
+          // Clean up temp file
+          await fs.unlink(tempFilePath).catch(console.error);
+
+          resolve(parsedText || "[Empty PDF or no text content found]");
+        } catch (error) {
+          // Clean up temp file
+          await fs.unlink(tempFilePath).catch(console.error);
+          reject(error);
+        }
+      });
+
+      // Load the PDF
+      pdfParser.loadPDF(tempFilePath);
+    } catch (error) {
+      console.error("PDF extraction error:", error);
+      reject(
+        new Error(
+          `Failed to extract PDF text: ${error instanceof Error ? error.message : "Unknown error"}`
+        )
+      );
+    }
+  });
+}
+
+/**
+ * Convert file attachments to a format compatible with the model
+ * This uses FileParser to extract text content from PDFs and other documents
+ */
+async function processMessagesForCompatibility(
+  messages: UIMessage[]
+): Promise<ModelMessage[]> {
+  const processedMessages: ModelMessage[] = [];
+
+  for (const message of messages) {
+    const role = message.role as "user" | "assistant";
+    const content: any[] = [];
+    const newMessage: ModelMessage = {
+      role: role,
+      content: content,
+    };
+
+    for (const part of message.parts) {
+      if (part.type === "text") {
+        (newMessage.content as any[]).push({
+          type: "text",
+          text: part.text,
+        });
+      } else if (part.type === "file") {
+        const mimeType = part.mediaType || "";
+
+        // Handle images normally - they're supported
+        if (mimeType.startsWith("image/")) {
+          (newMessage.content as any[]).push({
+            type: "image",
+            image: part.url,
+            mimeType: mimeType,
+          });
+        }
+        // Handle PDF files
+        else if (mimeType?.includes("pdf")) {
+          console.log("Processing PDF file:", part.filename);
+          try {
+            const base64Data = part.url.split(",")[1];
+            const textData = await extractPDFText(base64Data, part.filename);
+
+            console.log(
+              "PDF text extracted successfully, length:",
+              textData.length
+            );
+
+            (newMessage.content as any[]).push({
+              type: "text",
+              text: `[PDF Document: ${part.filename || "document.pdf"}]\n\n${textData}`,
+            });
+          } catch (pdfError) {
+            console.error("PDF parsing error:", pdfError);
+            (newMessage.content as any[]).push({
+              type: "text",
+              text: `[Error extracting PDF content from "${part.filename || "document.pdf"}": ${pdfError instanceof Error ? pdfError.message : "Unknown error"}. Please try uploading the file again or providing the information in a different format.]`,
+            });
+          }
+        }
+        // Handle other document types with FileParser
+        else if (
+          mimeType.startsWith("text/") ||
+          mimeType === "application/json" ||
+          mimeType === "application/xml" ||
+          mimeType.includes("spreadsheet") ||
+          mimeType.includes("excel") ||
+          mimeType.includes("word") ||
+          mimeType.includes("document")
+        ) {
+          try {
+            // Convert data URL to File object for FileParser
+            if (typeof part.url === "string" && part.url.startsWith("data:")) {
+              const base64Data = part.url.split(",")[1];
+              const binaryData = Buffer.from(base64Data, "base64");
+
+              // Create a File object from the binary data
+              const blob = new Blob([binaryData], { type: mimeType });
+              const file = new File([blob], part.filename || "document", {
+                type: mimeType,
+              });
+
+              // Use FileParser to extract content
+              const processedFile = await FileParser.processFile(file);
+
+              (newMessage.content as any[]).push({
+                type: "text",
+                text: `[File: ${processedFile.name}]\n\n${processedFile.content}`,
+              });
+            } else {
+              // Fallback for non-data URLs
+              (newMessage.content as any[]).push({
+                type: "text",
+                text: `[File attached: ${part.filename || "document"} (${mimeType})]`,
+              });
+            }
+          } catch (error) {
+            console.error("Error processing file with FileParser:", error);
+            (newMessage.content as any[]).push({
+              type: "text",
+              text: `[File attached: ${part.filename || "document"} (${mimeType}) - Error extracting content: ${error instanceof Error ? error.message : "Unknown error"}]`,
+            });
+          }
+        }
+        // Handle other file types
+        else {
+          (newMessage.content as any[]).push({
+            type: "text",
+            text: `[File attached: ${part.filename || "file"} (${mimeType}, size: ${part.url?.length || 0} bytes)]`,
+          });
+        }
+      } else if (part.type === "source-url") {
+        // Handle image parts
+        (newMessage.content as any[]).push({
+          type: "image",
+          image: part.url,
+        });
+      } else {
+        // Handle any other part types
+        (newMessage.content as any[]).push(part);
+      }
+    }
+
+    // If content is empty, add a placeholder
+    if ((newMessage.content as any[]).length === 0) {
+      (newMessage.content as any[]).push({
+        type: "text",
+        text: "",
+      });
+    }
+
+    processedMessages.push(newMessage);
+  }
+
+  return processedMessages;
+}
 
 export async function POST(req: Request) {
   const mcpManager = getMCPManager();
@@ -158,7 +363,6 @@ export async function POST(req: Request) {
     };
 
     // Build system prompt with available resources and prompts
-    // TODO:: move to a seprate file
     let systemPrompt = `You are a helpful AI assistant. You MUST use tools to answer questions - do NOT make up information.
 
 CRITICAL RULES:
@@ -255,13 +459,19 @@ Example: If user asks "create a React component for a todo list", you would:
         }
       });
     }
+
+    const hasFiles = hasFileAttachments(messages);
+    const processedMessages = hasFiles
+      ? await processMessagesForCompatibility(messages)
+      : convertToModelMessages(messages);
+
     // Create the UI message stream
     const stream = createUIMessageStream({
       execute: async ({ writer }) => {
         // Create the streamText result
         const result = streamText({
-          model: aiGateway(model || "gpt-3.5-turbo"),
-          messages: convertToModelMessages(messages),
+          model: aiCompatible("gpt-4o"),
+          messages: processedMessages,
           tools: {
             ...allTools,
             createCodeArtifact: createCodeArtifact({ dataStream: writer }),
@@ -331,8 +541,6 @@ async function cleanupMCPConnections(
 ): Promise<void> {
   if (serverIds.length === 0) return;
 
-  console.log(`🧹 Cleaning up ${serverIds.length} MCP connections...`);
-
   const cleanupResults = await Promise.allSettled(
     serverIds.map((serverId) => mcpManager.disconnect(serverId))
   );
@@ -363,8 +571,6 @@ const ragTool = ({ projectId }: { projectId: string }) => {
     }),
     execute: async ({ query, topK }) => {
       try {
-        console.log("✅🔎✅🔎✅🔎✅🔎✅🔎✅🔎");
-        console.log(`🔎 Searching for "${query}"...`);
         const res = await orpc.authed.rag.searchDocuments({
           query,
           topK,
@@ -385,10 +591,8 @@ const ragTool = ({ projectId }: { projectId: string }) => {
           };
         }
 
-        console.log(`✓ Found ${res.documents.length} documents for "${query}"`);
-
         return {
-          answer: res.documents.map((d) => d.content).join("\n\n"),
+          documents: res.documents,
         };
       } catch (error) {
         console.error("✗ RAG search error:", error);
@@ -400,7 +604,7 @@ const ragTool = ({ projectId }: { projectId: string }) => {
   });
 };
 
-export const artifactsPrompt = `
+const artifactsPrompt = `
 Artifacts is a special user interface mode that helps users with writing, editing, and other content creation tasks. When artifact is open, it is on the right side of the screen, while the conversation is on the left side. When creating or updating documents, changes are reflected in real-time on the artifacts and visible to the user.
 
 DO NOT GENERATE THE DOCUMENT CONTENT YOURSELF after calling \`createCodeArtifact\`. The tool will take care of that. Just call the tool with the correct parameters. You must not repeat the document's content in your reply.
@@ -423,7 +627,7 @@ This is a guide for using artifacts tools: \`createCodeArtifact\` and \`updateDo
 
 **Avoid using \`createCodeArtifact\` when:**
 - The user just wants information or explanations
-- You’re answering a short question
+- You're answering a short question
 - The user asked to keep everything in the chat
 - When using createCodeArtifact dont recreate the code in other text
 
@@ -440,7 +644,6 @@ function getUserDescriptionFromMessages(messages: UIMessage[]): string {
   if (message?.role !== "user") {
     return "";
   }
-  console.log(JSON.stringify(message?.parts));
   for (const part of message.parts) {
     if (part.type === "text") {
       return part.text;

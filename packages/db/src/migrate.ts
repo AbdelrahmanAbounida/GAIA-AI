@@ -3,7 +3,11 @@ import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import Database from "better-sqlite3";
 import path from "path";
 import fs from "fs";
-// import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+
+// Get the directory of this file
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Find monorepo root
 function findMonorepoRoot(startDir: string): string {
@@ -23,12 +27,7 @@ function findMonorepoRoot(startDir: string): string {
   return startDir;
 }
 
-const monorepoRoot = findMonorepoRoot(process.cwd());
-
-// Load .env from monorepo root
-// dotenv.config({
-//   path: path.resolve(monorepoRoot, ".env"),
-// });
+const monorepoRoot = findMonorepoRoot(__dirname);
 
 async function runMigrate() {
   const databaseUrl = process.env.DATABASE_URL;
@@ -39,6 +38,7 @@ async function runMigrate() {
 
   console.log("🚀 Running migrations...");
   console.log("📁 Monorepo root:", monorepoRoot);
+  console.log("📁 __dirname:", __dirname);
 
   try {
     // Resolve DB path from monorepo root
@@ -48,6 +48,29 @@ async function runMigrate() {
     );
 
     console.log("📂 Database path:", dbPath);
+
+    // Resolve migrations folder relative to this file
+    const migrationsFolder = path.resolve(__dirname, "..", "drizzle");
+    console.log("📂 Migrations folder:", migrationsFolder);
+
+    // Check if migrations folder exists
+    if (!fs.existsSync(migrationsFolder)) {
+      throw new Error(`Migrations folder not found: ${migrationsFolder}`);
+    }
+
+    // Check if meta folder exists
+    const metaFolder = path.join(migrationsFolder, "meta");
+    if (!fs.existsSync(metaFolder)) {
+      throw new Error(`Meta folder not found: ${metaFolder}`);
+    }
+
+    // Check if _journal.json exists
+    const journalPath = path.join(metaFolder, "_journal.json");
+    if (!fs.existsSync(journalPath)) {
+      throw new Error(`Journal file not found: ${journalPath}`);
+    }
+
+    console.log("✅ Found migration files");
 
     // Ensure directory exists
     const dir = path.dirname(dbPath);
@@ -60,9 +83,9 @@ async function runMigrate() {
 
     const start = Date.now();
 
-    // Run migrations from the "drizzle" folder
+    // Run migrations
     migrate(migrationDb as any, {
-      migrationsFolder: path.resolve(process.cwd(), "drizzle"),
+      migrationsFolder,
     });
 
     const duration = Date.now() - start;

@@ -255,6 +255,7 @@ export function validateRequiredCredentials(
   credentials: ReturnType<typeof extractCredentials>
 ) {
   // TODO;: handle the validation
+  // TODO:: if model is from ollama no need for api key
   const missing: string[] = [];
 
   if (settings.embeddingProvider && !credentials.embedding?.apiKey) {

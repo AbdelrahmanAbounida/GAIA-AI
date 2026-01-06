@@ -20,7 +20,17 @@ interface CreateOllamaCredentialModalProps {
   credentialType: "ai_model" | "embedding";
 }
 
-// configure baseurl , and apikey
+function getDefaultOllamaBaseUrl(): string {
+  const isDocker =
+    process.env.NEXT_PUBLIC_DOCKER_ENV === "true" ||
+    process.env.NEXT_PUBLIC_IS_DOCKER === "true" ||
+    process.env.NEXT_PUBLIC_DOCKER === "true";
+
+  return isDocker
+    ? "http://host.docker.internal:11434"
+    : "http://localhost:11434";
+}
+
 export function CreateOllamaCredentialModal({
   credentialType,
 }: CreateOllamaCredentialModalProps) {
@@ -44,16 +54,28 @@ export function CreateOllamaCredentialModal({
   );
   const isUpdate = !!ollamaCred;
 
-  // Load existing credentials when modal opens
+  const isDocker =
+    process.env.NEXT_PUBLIC_DOCKER_ENV === "true" ||
+    process.env.NEXT_PUBLIC_IS_DOCKER === "true" ||
+    process.env.NEXT_PUBLIC_DOCKER === "true";
+
   useEffect(() => {
-    if (open && ollamaCred) {
-      setBaseUrl(ollamaCred.baseUrl || "");
-      setApiKey(ollamaCred.apiKey || "");
-    } else if (open && !ollamaCred) {
-      setBaseUrl("http://localhost:11434");
-      setApiKey("");
+    if (open) {
+      if (ollamaCred) {
+        // If running in Docker and saved URL is localhost, use docker URL instead
+        const savedUrl = ollamaCred.baseUrl || getDefaultOllamaBaseUrl();
+        if (isDocker && savedUrl.includes("localhost")) {
+          setBaseUrl("http://host.docker.internal:11434");
+        } else {
+          setBaseUrl(savedUrl);
+        }
+        setApiKey(ollamaCred.apiKey || "");
+      } else {
+        setBaseUrl(getDefaultOllamaBaseUrl());
+        setApiKey("");
+      }
     }
-  }, [open, ollamaCred]);
+  }, [open, ollamaCred, isDocker]);
 
   const handleClose = () => {
     setBaseUrl("");
@@ -75,29 +97,71 @@ export function CreateOllamaCredentialModal({
     setIsValidating(true);
 
     try {
-      // Test connection before saving with the new credentials
-      const connectionResult = await testConnection.mutateAsync({
-        baseUrl: baseUrl.trim(),
-        apiKey: apiKey.trim(),
-      });
+      let finalBaseUrl = baseUrl.trim();
 
-      if (!connectionResult?.connected) {
-        showErrorToast({
-          title: "Connection Failed",
-          description:
-            "Unable to connect to Ollama. Please check your base URL and try again.",
-          duration: 4000,
+      // In Docker, if localhost is used, try host.docker.internal first
+      if (isDocker && finalBaseUrl.includes("localhost")) {
+        const dockerUrl = finalBaseUrl.replace(
+          "localhost",
+          "host.docker.internal"
+        );
+
+        // Test Docker URL first
+        const dockerResult = await testConnection.mutateAsync({
+          baseUrl: dockerUrl,
+          apiKey: apiKey.trim() || undefined,
         });
-        setIsValidating(false);
-        return;
+
+        if (dockerResult?.connected) {
+          finalBaseUrl = dockerUrl;
+          showSuccessToast({
+            title: "Docker Connection Detected",
+            description: "Using host.docker.internal for Docker environment",
+            duration: 3000,
+          });
+        } else {
+          // Fall back to original localhost URL
+          const localhostResult = await testConnection.mutateAsync({
+            baseUrl: finalBaseUrl,
+            apiKey: apiKey.trim() || undefined,
+          });
+
+          if (!localhostResult?.connected) {
+            showErrorToast({
+              title: "Connection Failed",
+              description:
+                "Unable to connect to Ollama. Please check your base URL and try again.",
+              duration: 4000,
+            });
+            setIsValidating(false);
+            return;
+          }
+        }
+      } else {
+        // Normal connection test for non-Docker or non-localhost URLs
+        const connectionResult = await testConnection.mutateAsync({
+          baseUrl: finalBaseUrl,
+          apiKey: apiKey.trim() || undefined,
+        });
+
+        if (!connectionResult?.connected) {
+          showErrorToast({
+            title: "Connection Failed",
+            description:
+              "Unable to connect to Ollama. Please check your base URL and try again.",
+            duration: 4000,
+          });
+          setIsValidating(false);
+          return;
+        }
       }
 
-      // Create or update credential
+      // Create or update credential with the validated URL
       if (isUpdate) {
-        const res = await updateMutation.mutateAsync({
+        await updateMutation.mutateAsync({
           data: {
-            baseUrl: baseUrl.trim(),
-            apiKey: apiKey.trim(),
+            baseUrl: finalBaseUrl,
+            apiKey: apiKey.trim() || undefined,
             provider: "ollama",
             credentialType: credentialType,
           },
@@ -105,7 +169,7 @@ export function CreateOllamaCredentialModal({
         });
       } else {
         await createMutation.mutateAsync({
-          baseUrl: baseUrl.trim(),
+          baseUrl: finalBaseUrl,
           apiKey: apiKey.trim(),
           provider: "ollama",
           credentialType: credentialType,
@@ -135,6 +199,8 @@ export function CreateOllamaCredentialModal({
 
   const isSaving = createMutation.isPending || updateMutation.isPending;
   const isLoading = credentialsLoading || isValidating || isSaving;
+
+  const defaultBaseUrl = getDefaultOllamaBaseUrl();
 
   return (
     <Dialog
@@ -167,13 +233,15 @@ export function CreateOllamaCredentialModal({
             </Label>
             <Input
               id="base-url"
-              placeholder="http://localhost:11434"
+              placeholder={defaultBaseUrl}
               value={baseUrl}
               onChange={(e) => setBaseUrl(e.target.value)}
               disabled={isLoading}
             />
             <p className="text-xs text-muted-foreground">
               The URL where your Ollama instance is running
+              {defaultBaseUrl.includes("host.docker.internal") &&
+                " (Docker environment detected - using host.docker.internal)"}
             </p>
           </div>
 

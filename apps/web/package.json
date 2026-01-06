@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^1.0.28",
+    "@ai-sdk/provider-utils": "^4.0.6",
     "@ai-sdk/react": "^2.0.86",
     "@gaia/ai": "workspace:*",
     "@gaia/api": "workspace:*",
@@ -65,7 +66,10 @@
     "nanoid": "^5.1.6",
     "next": "16.0.0",
     "next-themes": "^0.4.6",
+    "nextjs-toploader": "^3.9.17",
+    "pdf2json": "^4.0.1",
     "pdfjs-dist": "^5.4.449",
+    "pg": "^8.16.3",
     "prism-react-renderer": "^2.4.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
@@ -94,6 +98,7 @@
     "@types/pdfjs-dist": "^2.10.378",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "baseline-browser-mapping": "^2.9.14",
     "eslint": "^9",
     "eslint-config-next": "16.0.0",
     "tailwindcss": "^4",

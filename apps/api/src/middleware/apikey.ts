@@ -20,15 +20,12 @@ export const requireApiKeyMiddleware = os
     if (!validKey) {
       throw new ORPCError("UNAUTHORIZED", { message: "Invalid apikey" });
     }
-    console.log({ validKey });
     // get apikey user
     const [apikeyUser] = await db
       .select()
       .from(user)
       .where(eq(user.id, validKey.userId))
       .limit(1);
-
-    console.log({ apikeyUser });
 
     if (!apikeyUser) {
       throw new ORPCError("UNAUTHORIZED", {

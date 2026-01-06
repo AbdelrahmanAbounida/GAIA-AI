@@ -18,19 +18,21 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { orpcQueryClient } from "@/lib/orpc/client";
 import { Project } from "@gaia/db";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProjectDetailsSheet } from "@/components/project-details";
-import { showErrorToast } from "@/components/ui/toast";
 import { CreateProjectModal2 } from "@/components/modals/new-project-modal2";
+import { useEffect } from "react";
+import { showErrorToast } from "@/components/ui/toast";
 
 export default function ProjectsPage() {
   const { setActiveProject, openProjectSheet } = useAppStore();
-
+  const searchParams = useSearchParams();
+  const errorMessage = searchParams.get("error");
   const queryClient = useQueryClient();
   const { data, isPending } = useQuery(
     orpcQueryClient.authed.project.list.queryOptions({
@@ -50,7 +52,6 @@ export default function ProjectsPage() {
     })
   );
   const projects: Project[] = data?.projects!;
-
   const router = useRouter();
 
   const deleteProject = ({ projectId }: { projectId: string }) => {
@@ -58,6 +59,16 @@ export default function ProjectsPage() {
       projectId,
     });
   };
+
+  useEffect(() => {
+    if (errorMessage) {
+      showErrorToast({
+        title: "Error",
+        description: errorMessage || "Something went wrong",
+        position: "top-right",
+      });
+    }
+  }, [errorMessage]);
 
   if (isPending) {
     return (
@@ -71,7 +82,7 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="space-y-6 w-full max-w-7xl mx-auto mt-7">
+    <div className="space-y-6 w-full max-w-7xl mx-auto mt-7 px-7">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-[20px] font-medium text-foreground">Projects</h2>
@@ -116,8 +127,8 @@ export default function ProjectsPage() {
             <Card
               key={project.id}
               className={cn(
-                "group shadow-none dark:shadow-lg cursor-pointer transition-colors  hover:bg-gaia-200  hover:border-border dark:hover:border-gaia-700 dark:hover:bg-gaia-800/90",
-                " dark:bg-[#202020] group relative"
+                "group shadow-none dark:shadow-lg cursor-pointer transition-colors  hover:bg-white/60  hover:border-border dark:border-gaia-700 dark:hover:border-gaia-700 dark:hover:bg-gaia-900",
+                "bg-white dark:bg-gaia-800 group relative"
               )}
               onClick={() => {
                 setActiveProject(project.id);

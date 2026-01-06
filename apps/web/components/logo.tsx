@@ -21,7 +21,7 @@ export const Logo = ({
   const router = useRouter();
 
   const content = (
-    <div className=" relative  pr-2 hover:bg-transparent!  bg-transparent! flex items-center justify-center text-center">
+    <div className=" relative  hover:bg-transparent!  bg-transparent! flex items-center justify-center text-center">
       <Image
         src={LogoImage}
         alt="gaia"

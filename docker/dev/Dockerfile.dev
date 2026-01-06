@@ -1,0 +1,122 @@
+FROM node:20-alpine AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+# Dependencies stage - heavily cached
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Copy root package files first
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+# Create directories and copy package.json files
+RUN mkdir -p apps/web packages/db apps/api packages/ai
+COPY apps/web/package.json ./apps/web/package.json
+COPY packages/db/package.json ./packages/db/package.json
+COPY apps/api/package.json ./apps/api/package.json
+COPY packages/ai/package.json ./packages/ai/package.json
+
+# Install dependencies 
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+
+# Builder stage
+FROM base AS builder
+WORKDIR /app
+
+# Copy installed dependencies
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
+COPY --from=deps /app/packages ./packages
+
+# Copy source code
+COPY . .
+
+# 🔍 ENHANCED DEBUG: Verify source files are present
+RUN echo "=== VERIFYING SOURCE FILES ===" && \
+    echo "📁 Web app structure:" && \
+    ls -la /app/apps/web/ && \
+    echo "\n📁 Web app directory:" && \
+    find /app/apps/web/app -type f | head -20 && \
+    echo "\n🔍 Checking page.tsx:" && \
+    cat /app/apps/web/app/page.tsx 2>/dev/null || echo "❌ page.tsx not found!" && \
+    echo "\n📦 Workspace packages:" && \
+    ls -la /app/packages/
+
+# Build only what's needed
+RUN cd packages/db && pnpm run build
+
+# 🔍 CRITICAL: Build with verbose output and fail on error
+RUN echo "=== STARTING WEB BUILD ===" && \
+    cd /app/apps/web && \
+    echo "Current directory: $(pwd)" && \
+    echo "Package.json exists: $(test -f package.json && echo 'YES' || echo 'NO')" && \
+    pnpm run build --verbose 2>&1 | tee /tmp/build.log && \
+    echo "=== BUILD COMPLETED ===" && \
+    cat /tmp/build.log
+
+# 🔍 VERIFY: Check if .next directory was actually created
+RUN echo "=== VERIFYING BUILD OUTPUT ===" && \
+    ls -la /app/apps/web/.next 2>/dev/null || (echo "❌ .next directory not found! Build failed!" && exit 1) && \
+    echo "\n📁 Standalone directory:" && \
+    ls -la /app/apps/web/.next/standalone 2>/dev/null || echo "⚠️  Standalone not found" && \
+    echo "\n📁 Static directory:" && \
+    ls -la /app/apps/web/.next/static 2>/dev/null || echo "⚠️  Static not found" && \
+    echo "\n📄 Server.js exists:" && \
+    test -f /app/apps/web/.next/standalone/apps/web/server.js && echo "✅ YES" || (echo "❌ NO - This is required!" && exit 1)
+
+# Production image
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV="production"
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Install tsx globally for running migrations
+RUN pnpm add -g tsx
+
+COPY --from=builder /app/apps/web/public ./public
+
+# Copy standalone output
+COPY --from=builder /app/apps/web/.next/standalone ./
+COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
+
+# Copy db package for migrations
+COPY --from=builder /app/packages/db/src ./packages/db/src
+COPY --from=builder /app/packages/db/dist ./packages/db/dist
+COPY --from=builder /app/packages/db/drizzle ./packages/db/drizzle
+COPY --from=builder /app/packages/db/package.json ./packages/db/package.json
+
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
+
+COPY --from=builder /app/node_modules ./node_modules 
+COPY --from=builder /app/packages/db/node_modules ./packages/db/node_modules
+
+# Create directories for SQLite database AND vector stores
+RUN mkdir -p /app/data && \
+    mkdir -p /app/apps/web/data/vector_stores/faiss && \
+    mkdir -p /app/apps/web/data/vector_stores/lancedb && \
+    mkdir -p /app/apps/web/data/vector_stores/chroma && \
+    mkdir -p /app/apps/web/data/vector_stores/flexsearch && \
+    mkdir -p /app/apps/web/data/vector_stores/minisearch && \
+    mkdir -p /app/apps/web/data/vector_stores/orama && \
+    chown -R nextjs:nodejs /app/data /app/apps && \
+    chmod -R 755 /app/data /app/apps
+
+# Copy entrypoint script
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh && chown nextjs:nodejs /app/entrypoint.sh
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+ENV DATABASE_URL="file:/app/data/database.db"
+
+CMD ["/app/entrypoint.sh"]

@@ -292,7 +292,7 @@ export function ProviderSetupForm({ provider, mode }: ProviderSetupFormProps) {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
+          <div className="h-12 w-12 rounded-xl bg-gaia-200 border border-gaia-300 dark:border-gaia-700 dark:bg-gaia-800 flex items-center justify-center">
             <ProviderIcon provider={provider.name} className="h-6 w-6" />
           </div>
           <div>
@@ -301,9 +301,9 @@ export function ProviderSetupForm({ provider, mode }: ProviderSetupFormProps) {
               {mode === "embedding" && (
                 <Badge variant="outline">Embedding</Badge>
               )}
-              {providerConfig.recommended && (
+              {/* {providerConfig.recommended && (
                 <Badge variant="default">Recommended</Badge>
-              )}
+              )} */}
             </h2>
             <p className="text-sm text-muted-foreground">
               Configure {provider.name} for{" "}
