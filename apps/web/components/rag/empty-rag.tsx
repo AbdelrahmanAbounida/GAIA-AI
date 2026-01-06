@@ -139,9 +139,9 @@ export function EmptyRAG({ projectId }: EmptyRAGProps) {
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button variant={"outline"} onClick={demoSearch}>
+          {/* <Button variant={"outline"} onClick={demoSearch}>
             Demo Search
-          </Button>
+          </Button> */}
         </EmptyContent>
       </Empty>
     );

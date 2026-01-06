@@ -544,16 +544,28 @@ export const connectMCP = os
         };
       }
 
-      // Check if already connected
-      if (manager.isConnected(server.id)) {
-        return {
-          success: true,
-          message: "Already connected",
-          capabilities: server.capabilities,
-        };
-      }
-
       const config = dbServerToConfig(server);
+
+      if (manager.isConnected(server.id)) {
+        try {
+          // Verify the connection is alive by getting capabilities
+          const capabilities = await manager.getServerCapabilities(config);
+          await db
+            .update(mcpServer)
+            .set({ status: "connected" })
+            .where(eq(mcpServer.id, input.id));
+
+          return {
+            success: true,
+            message: "Already connected",
+            capabilities,
+          };
+        } catch (error) {
+          // Connection is stale, disconnect and reconnect
+          console.log("⚠️ Existing connection is stale, reconnecting...");
+          await manager.disconnect(server.id);
+        }
+      }
 
       await db
         .update(mcpServer)
