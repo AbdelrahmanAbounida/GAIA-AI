@@ -38,7 +38,8 @@ const nextConfig: NextConfig = {
         "@huggingface/transformers",
       ],
 
-  output: isVercel ? "export" : "standalone",
+  // output: isVercel ? "export" : "standalone",
+  ...(isDockerBuild && { output: "standalone" }),
   outputFileTracingExcludes: {
     "*": [
       "node_modules/@lancedb/**",
