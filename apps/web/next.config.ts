@@ -13,6 +13,8 @@ const nextConfig: NextConfig = {
     "pg",
     "chromadb",
     "@chroma-core/default-embed",
+    "onnxruntime-node",
+    "@huggingface/transformers",
   ],
   output: "standalone",
 
@@ -28,8 +30,36 @@ const nextConfig: NextConfig = {
 
   webpack: (config, { isServer }) => {
     if (isServer) {
-      config.externals = [...(config.externals || []), "@orpc/client/fetch"];
+      config.externals = [
+        ...(config.externals || []),
+        "@orpc/client/fetch",
+        "onnxruntime-node",
+        "chromadb",
+        "@chroma-core/default-embed",
+        "@huggingface/transformers",
+      ];
+    } else {
+      // Prevent client-side bundling of server-only packages
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        "onnxruntime-node": false,
+        chromadb: false,
+        "@chroma-core/default-embed": false,
+        "@huggingface/transformers": false,
+      };
     }
+
+    // Ignore .node files
+    config.module = {
+      ...config.module,
+      rules: [
+        ...(config.module?.rules || []),
+        {
+          test: /\.node$/,
+          use: "node-loader",
+        },
+      ],
+    };
 
     // Only apply memory-saving optimizations when building for Docker
     if (isDockerBuild) {

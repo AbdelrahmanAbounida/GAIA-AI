@@ -25,5 +25,10 @@
   },
   "dependencies": {
     "@turbo/gen": "^2.6.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "esbuild": "^0.25.12"
+    }
   }
 }
