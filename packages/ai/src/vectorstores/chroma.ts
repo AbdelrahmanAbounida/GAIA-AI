@@ -1,5 +1,5 @@
-import { Chroma } from "@langchain/community/vectorstores/chroma";
-import { CloudClient, ChromaClient } from "chromadb";
+import type { Chroma } from "@langchain/community/vectorstores/chroma";
+import type { CloudClient, ChromaClient } from "chromadb";
 import { Document } from "@langchain/core/documents";
 import { BaseVectorStore, VectorStoreErrorHandler } from "./base";
 import type {
@@ -22,6 +22,15 @@ export interface ChromaConfig extends VectorStoreConfig {
 }
 
 /**
+ * Lazy load ChromaDB dependencies
+ */
+async function loadChromaDeps() {
+  const { Chroma } = await import("@langchain/community/vectorstores/chroma");
+  const { CloudClient, ChromaClient } = await import("chromadb");
+  return { Chroma, CloudClient, ChromaClient };
+}
+
+/**
  * Chroma vector store implementation
  * Supports both local and cloud deployments
  */
@@ -35,6 +44,7 @@ export class ChromaVectorStore extends BaseVectorStore {
   private database?: string;
   private isCloudMode: boolean;
   private chromaClient: ChromaClient | CloudClient | null = null;
+  private chromaDeps: Awaited<ReturnType<typeof loadChromaDeps>> | null = null;
 
   constructor(config: ChromaConfig) {
     super(config);
@@ -53,6 +63,16 @@ export class ChromaVectorStore extends BaseVectorStore {
   }
 
   /**
+   * Ensure ChromaDB dependencies are loaded
+   */
+  private async ensureChromaDeps() {
+    if (!this.chromaDeps) {
+      this.chromaDeps = await loadChromaDeps();
+    }
+    return this.chromaDeps;
+  }
+
+  /**
    * Validate API key and connection
    * For cloud: validates credentials
    * For local: validates server connectivity
@@ -61,6 +81,7 @@ export class ChromaVectorStore extends BaseVectorStore {
     config: Record<string, any>
   ): Promise<boolean | Error> {
     try {
+      const { CloudClient, ChromaClient } = await loadChromaDeps();
       const isCloud = !!(config.apiKey && config.tenant);
 
       if (isCloud) {
@@ -115,6 +136,9 @@ export class ChromaVectorStore extends BaseVectorStore {
     if (this.chromaClient) {
       return this.chromaClient;
     }
+
+    const { CloudClient, ChromaClient } = await this.ensureChromaDeps();
+
     if (this.isCloudMode) {
       this.chromaClient = new CloudClient({
         apiKey: this.apiKey!,
@@ -158,6 +182,8 @@ export class ChromaVectorStore extends BaseVectorStore {
    */
   protected async loadStore(): Promise<void> {
     try {
+      const { Chroma } = await this.ensureChromaDeps();
+
       if (this.isCloudMode) {
         this.store = new Chroma(this.config.embeddings, {
           chromaCloudAPIKey: this.apiKey,
@@ -321,20 +347,10 @@ export class ChromaVectorStore extends BaseVectorStore {
    */
   async getStats(): Promise<VectorStoreStats> {
     const baseStats = await super.getStats();
-    // let documentCount = 0;
-    // try {
-    //   const client = await this.getChromaClient();
-    //   const collections = await client.listCollections();
-    //   documentCount = collections.length;
-    // } catch (error) {
-    //   console.warn("Could not fetch document count:", error);
-    // }
 
     return {
       ...baseStats,
       provider: "chroma",
-      // mode: this.isCloudMode ? "cloud" : "local",
-      // documentCount,
     };
   }
 
