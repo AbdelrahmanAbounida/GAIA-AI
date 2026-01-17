@@ -23,6 +23,8 @@ const nextConfig: NextConfig = {
         "@chroma-core/default-embed",
         "onnxruntime-node",
         "@huggingface/transformers",
+        "@lancedb/lancedb",
+        "faiss-node",
       ]
     : [
         "better-sqlite3",
@@ -37,16 +39,18 @@ const nextConfig: NextConfig = {
         "@huggingface/transformers",
       ],
 
-  // output: isVercel ? "export" : "standalone",
   ...(isDockerBuild && { output: "standalone" }),
   outputFileTracingExcludes: {
-    "*": ["node_modules/faiss-node/**"], //
+    "*": [
+      "node_modules/faiss-node/**",
+      "node_modules/@lancedb/**",
+      "node_modules/.pnpm/*lancedb*/**",
+    ],
   },
   experimental: {
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
   },
 
-  // Production optimizations
   poweredByHeader: false,
   compress: true,
 
@@ -54,6 +58,7 @@ const nextConfig: NextConfig = {
 
   webpack: (config, { isServer }) => {
     if (isServer) {
+      // Keep existing externals
       config.externals = [
         ...(config.externals || []),
         "@orpc/client/fetch",
@@ -61,24 +66,15 @@ const nextConfig: NextConfig = {
         "chromadb",
         "@chroma-core/default-embed",
         "@huggingface/transformers",
-        // "@lancedb/lancedb",
         "faiss-node",
       ];
 
-      // Exclude heavy packages on Vercel to reduce bundle size
+      // ✅ CRITICAL: Add LanceDB to externals on Vercel
       if (isVercel) {
-        config.externals.push(
-          // "@lancedb/lancedb",
-          "faiss-node",
-          "@lancedb/lancedb-linux-x64-musl",
-          "@lancedb/lancedb-linux-x64-gnu",
-          "@lancedb/lancedb-darwin-x64",
-          "@lancedb/lancedb-darwin-arm64",
-          "@lancedb/lancedb-win32-x64-msvc"
-        );
+        config.externals.push("@lancedb/lancedb", "faiss-node");
       }
     } else {
-      // Prevent client-side bundling of server-only packages
+      // Prevent client-side bundling
       config.resolve.alias = {
         ...config.resolve.alias,
         "onnxruntime-node": false,
@@ -87,11 +83,21 @@ const nextConfig: NextConfig = {
         "@huggingface/transformers": false,
       };
 
-      // Also exclude heavy packages on client side for Vercel
       if (isVercel) {
-        // config.resolve.alias["@lancedb/lancedb"] = false;
+        config.resolve.alias["@lancedb/lancedb"] = false;
         config.resolve.alias["faiss-node"] = false;
       }
+    }
+
+    // ✅ Add ignore plugin for LanceDB native bindings
+    config.plugins = config.plugins || [];
+
+    if (isVercel) {
+      config.plugins.push(
+        new (require("webpack").IgnorePlugin)({
+          resourceRegExp: /@lancedb\/lancedb-(linux|darwin|win32)/,
+        })
+      );
     }
 
     // Ignore .node files
@@ -106,9 +112,8 @@ const nextConfig: NextConfig = {
       ],
     };
 
-    // Vercel-specific optimizations
+    // ✅ Enhanced Vercel-specific optimizations
     if (isVercel) {
-      // Reduce bundle size by excluding unnecessary files
       config.resolve.alias = {
         ...config.resolve.alias,
         "@lancedb/lancedb-linux-x64-musl": false,
@@ -118,7 +123,16 @@ const nextConfig: NextConfig = {
         "@lancedb/lancedb-win32-x64-msvc": false,
       };
 
-      // Optimize for serverless
+      // Add fallback for missing modules
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        "@lancedb/lancedb-linux-x64-gnu": false,
+        "@lancedb/lancedb-linux-x64-musl": false,
+        "@lancedb/lancedb-darwin-x64": false,
+        "@lancedb/lancedb-darwin-arm64": false,
+        "@lancedb/lancedb-win32-x64-msvc": false,
+      };
+
       config.optimization = {
         ...config.optimization,
         moduleIds: "deterministic",
@@ -133,7 +147,7 @@ const nextConfig: NextConfig = {
       };
     }
 
-    // Only apply memory-saving optimizations when building for Docker
+    // Docker optimizations
     if (isDockerBuild) {
       config.cache = false;
       config.parallelism = 1;
