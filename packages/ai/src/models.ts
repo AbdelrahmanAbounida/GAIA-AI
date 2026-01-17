@@ -6,7 +6,7 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 
 dotenv.config();
 
-// TODO;: move to api like feedback too
+// TODO:: move to api like feedback too
 export const aiGateway = createGateway({
   apiKey:
     process.env.AI_GATEWAY_API_KEY ||

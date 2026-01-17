@@ -9,8 +9,6 @@ import type {
   VectorStoreStats,
 } from "./types";
 
-// TODO;: check chroma fulltextsearch with regex
-
 /**
  * Extended config for Chroma-specific options
  */

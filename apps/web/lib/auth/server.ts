@@ -3,8 +3,16 @@ import { headers } from "next/headers";
 import { nextCookies } from "better-auth/next-js";
 import { initAuth } from "./auth";
 
+function getProductionUrl(): string {
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  // Fallback for local development
+  return "http://localhost:3000";
+}
+
 export const auth = initAuth({
-  productionUrl: `https://${process.env.VERCEL_URL ?? "localhost:3000"}`,
+  productionUrl: getProductionUrl(),
   secret: process.env.BETTER_AUTH_SECRET,
   extraPlugins: [nextCookies()],
   emailAndPassword: {

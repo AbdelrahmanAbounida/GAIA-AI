@@ -66,7 +66,6 @@ export interface PGVectorConfig extends VectorStoreConfig {
   };
 }
 
-// TODO;: recheck
 /**
  * Extended search options for PGVector
  */

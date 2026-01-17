@@ -100,7 +100,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   isIcon
                   className=" w-7! h-7  "
                 />
-                <ProjectsSwitcher className="h-7! py-2 absolute top-0 left-15 min-w-[110px]" />
+                <ProjectsSwitcher className="h-7! py-2 absolute top-0 left-15 min-w-27.5" />
               </SidebarHeader>
             </SidebarMenuButton>
           </SidebarMenuItem>

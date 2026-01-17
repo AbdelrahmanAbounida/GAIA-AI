@@ -26,11 +26,10 @@ export function initAuth<
     "http://0.0.0.0:3000",
   ];
 
-  const baseURL =
-    process.env.NODE_ENV === "production"
-      ? process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : "http://0.0.0.0:3000" // Docker internal
+  const baseURL = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : process.env.NODE_ENV === "production"
+      ? "http://0.0.0.0:3000" // Docker fallback
       : "http://localhost:3000";
 
   const config = {

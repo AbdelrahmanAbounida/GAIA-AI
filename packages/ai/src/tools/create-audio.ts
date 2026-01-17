@@ -7,6 +7,7 @@ import z from "zod";
 import type { ChatMessageWithNoTool } from "./types";
 import { createOpenAI } from "@ai-sdk/openai";
 
+// TODO:: audio
 const openai = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
