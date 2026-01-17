@@ -18,7 +18,7 @@ const nextConfig: NextConfig = {
     "@orpc/server",
     "@orpc/client",
     "pg",
-    ...(isVercel ? [] : ["chromadb", "@chroma-core/default-embed"]), // Only include on non-Vercel
+    ...(isVercel ? [] : ["chromadb", "@chroma-core/default-embed"]),
     "onnxruntime-node",
     "@huggingface/transformers",
     "@lancedb/lancedb",
@@ -60,7 +60,6 @@ const nextConfig: NextConfig = {
 
   webpack: (config, { isServer }) => {
     if (isServer) {
-      // Mark these as external (don't bundle them)
       config.externals = [
         ...(config.externals || []),
         "@orpc/client/fetch",
@@ -68,12 +67,10 @@ const nextConfig: NextConfig = {
         "@huggingface/transformers",
         "faiss-node",
         "@lancedb/lancedb",
-        // Always externalize chromadb on server
         "chromadb",
         "@chroma-core/default-embed",
       ];
     } else {
-      // For client-side, mark as false (don't include at all)
       config.resolve.alias = {
         ...config.resolve.alias,
         "onnxruntime-node": false,
@@ -85,8 +82,13 @@ const nextConfig: NextConfig = {
       };
     }
 
-    // On Vercel, also alias chromadb to false on server
     if (isVercel && isServer) {
+      config.externals.push(
+        "chromadb",
+        "@chroma-core/default-embed",
+        "@lancedb/lancedb",
+        "faiss-node"
+      );
       config.resolve.alias = {
         ...config.resolve.alias,
         chromadb: false,
@@ -100,7 +102,6 @@ const nextConfig: NextConfig = {
       };
     }
 
-    // Docker optimizations
     if (isDockerBuild) {
       config.cache = false;
       config.parallelism = 1;

@@ -155,7 +155,7 @@ function getEffectiveProvider(
   requestedProvider: VectorStoreProviderId
 ): VectorStoreProviderId {
   const isVercel = process.env.VERCEL === "1" || process.env.VERCEL_ENV;
-  // TODO:: create fixed list of providers on vercel
+
   if (isVercel) {
     const unsupportedProviders: VectorStoreProviderId[] = [
       "lancedb",
@@ -294,8 +294,10 @@ export async function createVectorStoreInstance(
 export async function getAvailableProviders(): Promise<
   VectorStoreProviderId[]
 > {
+  const isVercel = process.env.VERCEL === "1" || process.env.VERCEL_ENV;
+
+  // Base providers that work everywhere
   const allProviders: VectorStoreProviderId[] = [
-    "chroma",
     "pinecone",
     "qdrant",
     "weaviate",
@@ -304,10 +306,10 @@ export async function getAvailableProviders(): Promise<
     "supabase",
   ];
 
-  const isVercel = process.env.VERCEL === "1" || process.env.VERCEL_ENV;
-
   // Only include native-binding providers if not on Vercel
   if (!isVercel) {
+    allProviders.push("chroma");
+
     try {
       await import("./faiss");
       allProviders.push("faiss");
