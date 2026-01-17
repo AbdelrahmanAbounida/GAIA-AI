@@ -14,13 +14,19 @@ async function loadVectorStoreClass(provider: VectorStoreProviderId) {
       const { FaissVectorStore } = await import("./faiss");
       return FaissVectorStore;
     case "lancedb":
+      if (process.env.VERCEL === "1" || process.env.VERCEL_ENV) {
+        console.warn("LanceDB not available on Vercel, using pinecone");
+        const { PineconeVectorStore } = await import("./pinecone");
+        return PineconeVectorStore;
+      }
+
       try {
         const { LanceDBVectorStore } = await import("./lancedb");
         return LanceDBVectorStore;
       } catch (error) {
-        console.warn("LanceDB not available, falling back to ChromaDB");
-        const { ChromaVectorStore } = await import("./chroma");
-        return ChromaVectorStore;
+        console.warn("LanceDB not available, falling back to pinecone", error);
+        const { PineconeVectorStore } = await import("./pinecone");
+        return PineconeVectorStore;
       }
     case "pinecone":
       const { PineconeVectorStore } = await import("./pinecone");
