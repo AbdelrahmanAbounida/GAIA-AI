@@ -16,7 +16,6 @@ const nextConfig: NextConfig = {
   serverExternalPackages: isVercel
     ? [
         "better-sqlite3",
-        "@libsql/client",
         "@orpc/server",
         "@orpc/client",
         "pg",
