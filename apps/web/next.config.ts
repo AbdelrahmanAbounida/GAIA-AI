@@ -58,7 +58,7 @@ const nextConfig: NextConfig = {
 
       if (isVercel) {
         // config.externals.push("@lancedb/lancedb", "faiss-node");
-        config.externals.push({ vectordb: "vectordb" });
+        config.externals.push("@lancedb/lancedb");
       }
     } else {
       // Prevent client-side bundling
@@ -76,7 +76,6 @@ const nextConfig: NextConfig = {
       }
     }
 
-    // ✅ Add ignore plugin for LanceDB native bindings
     config.plugins = config.plugins || [];
 
     if (isVercel) {
