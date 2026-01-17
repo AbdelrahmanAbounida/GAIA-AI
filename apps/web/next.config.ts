@@ -41,12 +41,15 @@ const nextConfig: NextConfig = {
       ],
 
   output: "standalone",
-
+  outputFileTracingExcludes: {
+    "*": [
+      "node_modules/@lancedb/**",
+      "node_modules/faiss-node/**",
+      "node_modules/@libsql/**",
+    ],
+  },
   experimental: {
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
-    serverComponentsExternalPackages: isVercel
-      ? ["better-sqlite3"]
-      : ["better-sqlite3", "faiss-node", "@lancedb/lancedb"],
   },
 
   // Production optimizations
@@ -64,6 +67,8 @@ const nextConfig: NextConfig = {
         "chromadb",
         "@chroma-core/default-embed",
         "@huggingface/transformers",
+        "@lancedb/lancedb",
+        "faiss-node",
       ];
 
       // Exclude heavy packages on Vercel to reduce bundle size
