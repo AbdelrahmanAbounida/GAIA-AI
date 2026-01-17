@@ -40,11 +40,7 @@ const nextConfig: NextConfig = {
   // output: isVercel ? "export" : "standalone",
   ...(isDockerBuild && { output: "standalone" }),
   outputFileTracingExcludes: {
-    "*": [
-      "node_modules/@lancedb/**",
-      "node_modules/faiss-node/**",
-      "node_modules/@libsql/**",
-    ],
+    "*": ["node_modules/@lancedb/**", "node_modules/faiss-node/**"],
   },
   experimental: {
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
