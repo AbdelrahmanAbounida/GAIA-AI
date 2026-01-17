@@ -204,7 +204,7 @@ export const VectorStoreSchema = z.object({
 //       isSecret: z.boolean().optional(),
 //     })
 //   ),
-//   needsCredentials: z.boolean().default(true), // TODO:: load from types instead
+//   needsCredentials: z.boolean().default(true),
 //   fullTextSearchConfig: z
 //     .object({
 //       requiresSetup: z.boolean().optional(),

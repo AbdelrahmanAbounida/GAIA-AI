@@ -582,7 +582,6 @@ export const PROVIDER_CONFIGS: ProviderConfig[] = [
       },
     ],
   },
-  // TODO:: recheck if needed
 
   // {
   //   id: "ollama",

@@ -17,7 +17,6 @@ export type Artifact = {
   metadata?: Record<string, any>;
 };
 
-// TODO:: readjust here and in chat
 export type CustomUIDataTypes = {
   appendMessage: string;
   addToolApprovalResponse: string;

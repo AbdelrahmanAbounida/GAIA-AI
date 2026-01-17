@@ -384,8 +384,6 @@ export const JSONView = () => {
 };
 
 export const AddEmbeddingEmptyContent = () => {
-  // TODO:: check if the user credential providers has no embedding show provider with embedding and
-  // message to tell the user to add embedding before adding data
   return (
     <Empty className="w-full h-full">
       <EmptyHeader className="w-full! max-w-4xl">

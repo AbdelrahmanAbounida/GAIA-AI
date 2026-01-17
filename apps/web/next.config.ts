@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
     "@orpc/server",
     "@orpc/client",
     "pg",
+    "chromadb",
+    "@chroma-core/default-embed",
   ],
   output: "standalone",
 

@@ -232,7 +232,7 @@ export const OllamaView = ({ view }: { view: "ai_models" | "embeddings" }) => {
         const result = await searchModels.mutateAsync({
           query: ollamaSearch,
           order: "popular",
-          categories: view == "embeddings" ? ["embedding"] : ["tools"], // TODO:: we might need to allow user filter this too in ui
+          categories: view == "embeddings" ? ["embedding"] : ["tools"],
         });
         if (result?.success && result.models) {
           // const filtered =

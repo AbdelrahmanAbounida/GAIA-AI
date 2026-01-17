@@ -148,7 +148,6 @@ export interface FullTextSearchTool {
   bestFor: string;
   maxDocuments?: number; // Performance guideline
 }
-// TODO:: extend it for different providers options to make it global
 
 export interface SearchResult {
   content: string;

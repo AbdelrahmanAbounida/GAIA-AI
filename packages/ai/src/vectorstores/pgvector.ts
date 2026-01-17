@@ -547,7 +547,6 @@ export class PGVectorVectorStore extends BaseVectorStore {
         `SELECT COUNT(*) as count FROM ${this.tableName}`
       );
 
-      // TODO:: recheck
       return {
         ...baseStats,
         // documentCount: parseInt(result.rows[0].count),

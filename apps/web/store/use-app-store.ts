@@ -3,8 +3,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-// Todo: clean
-
 interface AppState {
   activeProjectId: string | null;
   setActiveProject: (id: string | null) => void;

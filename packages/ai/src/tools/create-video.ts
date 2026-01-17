@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import type { ChatMessageWithNoTool } from "./types";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 
-// TODO:: RECHECK
+// TODO:: VIDEO Tool > also check image and audio
 const aiModel = createOpenAICompatible({
   apiKey: process.env.OPENAI_API_KEY,
   baseURL: "https://api.openai.com/v1",

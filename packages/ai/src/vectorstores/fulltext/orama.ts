@@ -86,7 +86,7 @@ export class OramaFullTextSearch extends BaseFullTextSearch {
       this.db = create({
         schema: this.schema,
         language: this.config.language || "english",
-        // components: (this.config as OramaConfig).components, // TODO:: recheck
+        // components: (this.config as OramaConfig).components,
       });
 
       // Ensure persist directory exists

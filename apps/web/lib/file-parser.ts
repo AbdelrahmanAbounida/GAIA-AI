@@ -93,8 +93,6 @@ export class FileParser {
         default:
           content = await this.extractText(file);
           break;
-
-        // TODO::: hadnle links
       }
 
       return {
