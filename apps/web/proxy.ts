@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getServerAuth, getServerSession } from "./lib/auth/actions";
+import { getServerAuth } from "./lib/auth/actions";
 
 export async function proxy(request: NextRequest) {
   //   return NextResponse.redirect(new URL("/home", request.url));
