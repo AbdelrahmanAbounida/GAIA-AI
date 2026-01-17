@@ -29,7 +29,9 @@ import * as path from "path";
 export const maxDuration = 30;
 
 const orpc = getOrpcServer();
-
+export const config = {
+  runtime: "edge",
+};
 /**
  * Check if messages contain file attachments
  */
