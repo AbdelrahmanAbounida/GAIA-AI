@@ -1,6 +1,14 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
+  "globalEnv": [
+    "TURSO_CONNECTION_URL",
+    "TURSO_AUTH_TOKEN",
+    "BETTER_AUTH_SECRET",
+    "AUTH_SECRET",
+    "VERCEL",
+    "VERCEL_ENV"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
