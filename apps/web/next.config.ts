@@ -40,7 +40,7 @@ const nextConfig: NextConfig = {
   // output: isVercel ? "export" : "standalone",
   ...(isDockerBuild && { output: "standalone" }),
   outputFileTracingExcludes: {
-    "*": ["node_modules/@lancedb/**", "node_modules/faiss-node/**"],
+    "*": ["node_modules/faiss-node/**"], // "node_modules/@lancedb/**",
   },
   experimental: {
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
@@ -61,21 +61,20 @@ const nextConfig: NextConfig = {
         "chromadb",
         "@chroma-core/default-embed",
         "@huggingface/transformers",
-        "@lancedb/lancedb",
+        // "@lancedb/lancedb",
         "faiss-node",
       ];
 
       // Exclude heavy packages on Vercel to reduce bundle size
       if (isVercel) {
         config.externals.push(
-          "@lancedb/lancedb",
-          "faiss-node",
-          // Exclude specific LanceDB native binaries
-          "@lancedb/lancedb-linux-x64-musl",
-          "@lancedb/lancedb-linux-x64-gnu",
-          "@lancedb/lancedb-darwin-x64",
-          "@lancedb/lancedb-darwin-arm64",
-          "@lancedb/lancedb-win32-x64-msvc"
+          // "@lancedb/lancedb",
+          "faiss-node"
+          // "@lancedb/lancedb-linux-x64-musl",
+          // "@lancedb/lancedb-linux-x64-gnu",
+          // "@lancedb/lancedb-darwin-x64",
+          // "@lancedb/lancedb-darwin-arm64",
+          // "@lancedb/lancedb-win32-x64-msvc"
         );
       }
     } else {
@@ -90,7 +89,7 @@ const nextConfig: NextConfig = {
 
       // Also exclude heavy packages on client side for Vercel
       if (isVercel) {
-        config.resolve.alias["@lancedb/lancedb"] = false;
+        // config.resolve.alias["@lancedb/lancedb"] = false;
         config.resolve.alias["faiss-node"] = false;
       }
     }
@@ -113,11 +112,11 @@ const nextConfig: NextConfig = {
       config.resolve.alias = {
         ...config.resolve.alias,
         // Exclude native bindings that aren't needed on Vercel
-        "@lancedb/lancedb-linux-x64-musl": false,
-        "@lancedb/lancedb-linux-x64-gnu": false,
-        "@lancedb/lancedb-darwin-x64": false,
-        "@lancedb/lancedb-darwin-arm64": false,
-        "@lancedb/lancedb-win32-x64-msvc": false,
+        // "@lancedb/lancedb-linux-x64-musl": false,
+        // "@lancedb/lancedb-linux-x64-gnu": false,
+        // "@lancedb/lancedb-darwin-x64": false,
+        // "@lancedb/lancedb-darwin-arm64": false,
+        // "@lancedb/lancedb-win32-x64-msvc": false,
       };
 
       // Optimize for serverless
