@@ -18,8 +18,7 @@ const nextConfig: NextConfig = {
     "@orpc/server",
     "@orpc/client",
     "pg",
-    "chromadb",
-    "@chroma-core/default-embed",
+    ...(isVercel ? [] : ["chromadb", "@chroma-core/default-embed"]), // Only include on non-Vercel
     "onnxruntime-node",
     "@huggingface/transformers",
     "@lancedb/lancedb",
@@ -28,21 +27,25 @@ const nextConfig: NextConfig = {
 
   ...(isDockerBuild && { output: "standalone" }),
 
-  // 1. Fix Size Limit: Explicitly exclude the Alpine (musl) and other OS binaries
   outputFileTracingExcludes: {
     "*": [
-      // Exclude Alpine Linux (the huge 129MB file you don't need)
+      // Exclude Alpine Linux
       "**/@lancedb+lancedb-linux-x64-musl*/**",
       "**/@lancedb/lancedb-linux-x64-musl/**",
 
-      // Exclude Mac/Windows just to be safe
+      // Exclude Mac/Windows
       "**/@lancedb+lancedb-darwin*/**",
       "**/@lancedb/lancedb-darwin*/**",
       "**/@lancedb+lancedb-win32*/**",
       "**/@lancedb/lancedb-win32*/**",
 
-      // Exclude Faiss if not strictly needed or if too large
+      // Exclude Faiss
       "node_modules/faiss-node/**",
+
+      // Exclude ChromaDB on Vercel
+      ...(isVercel
+        ? ["node_modules/chromadb/**", "node_modules/@chroma-core/**"]
+        : []),
     ],
   },
   outputFileTracingRoot: path.join(__dirname, "../../"),
@@ -57,17 +60,20 @@ const nextConfig: NextConfig = {
 
   webpack: (config, { isServer }) => {
     if (isServer) {
+      // Mark these as external (don't bundle them)
       config.externals = [
         ...(config.externals || []),
         "@orpc/client/fetch",
         "onnxruntime-node",
-        "chromadb",
-        "@chroma-core/default-embed",
         "@huggingface/transformers",
         "faiss-node",
         "@lancedb/lancedb",
+        // Always externalize chromadb on server
+        "chromadb",
+        "@chroma-core/default-embed",
       ];
     } else {
+      // For client-side, mark as false (don't include at all)
       config.resolve.alias = {
         ...config.resolve.alias,
         "onnxruntime-node": false,
@@ -79,14 +85,18 @@ const nextConfig: NextConfig = {
       };
     }
 
-    // Keep the Vercel-specific alias exclusions to prevent webpack bundling
-    if (isVercel) {
+    // On Vercel, also alias chromadb to false on server
+    if (isVercel && isServer) {
       config.resolve.alias = {
         ...config.resolve.alias,
+        chromadb: false,
+        "@chroma-core/default-embed": false,
+        "@lancedb/lancedb": false,
         "@lancedb/lancedb-linux-x64-musl": false,
         "@lancedb/lancedb-darwin-x64": false,
         "@lancedb/lancedb-darwin-arm64": false,
         "@lancedb/lancedb-win32-x64-msvc": false,
+        "faiss-node": false,
       };
     }
 

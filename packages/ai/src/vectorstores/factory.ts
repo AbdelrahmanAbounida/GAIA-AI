@@ -9,46 +9,60 @@ import type {
 import type { BaseVectorStore } from "./base";
 
 async function loadVectorStoreClass(provider: VectorStoreProviderId) {
+  const isVercel = process.env.VERCEL === "1" || process.env.VERCEL_ENV;
+
   switch (provider) {
     case "faiss":
+      if (isVercel) {
+        throw new Error(
+          "Faiss is not available on Vercel. Use Pinecone, Qdrant, or Supabase instead."
+        );
+      }
       const { FaissVectorStore } = await import("./faiss");
       return FaissVectorStore;
-    case "lancedb":
-      if (process.env.VERCEL === "1" || process.env.VERCEL_ENV) {
-        console.warn("LanceDB not available on Vercel, using pinecone");
-        const { PineconeVectorStore } = await import("./pinecone");
-        return PineconeVectorStore;
-      }
 
-      try {
-        const { LanceDBVectorStore } = await import("./lancedb");
-        return LanceDBVectorStore;
-      } catch (error) {
-        console.warn("LanceDB not available, falling back to pinecone", error);
-        const { PineconeVectorStore } = await import("./pinecone");
-        return PineconeVectorStore;
+    case "lancedb":
+      if (isVercel) {
+        throw new Error(
+          "LanceDB is not available on Vercel. Use Pinecone, Qdrant, or Supabase instead."
+        );
       }
+      const { LanceDBVectorStore } = await import("./lancedb");
+      return LanceDBVectorStore;
+
+    case "chroma":
+      if (isVercel) {
+        throw new Error(
+          "ChromaDB is not available on Vercel. Use Pinecone, Qdrant, or Supabase instead."
+        );
+      }
+      const { ChromaVectorStore } = await import("./chroma");
+      return ChromaVectorStore;
+
     case "pinecone":
       const { PineconeVectorStore } = await import("./pinecone");
       return PineconeVectorStore;
+
     case "qdrant":
       const { QdrantVectorStore } = await import("./qdrant");
       return QdrantVectorStore;
+
     case "weaviate":
       const { WeaviateVectorStore } = await import("./weaviate");
       return WeaviateVectorStore;
-    case "chroma":
-      const { ChromaVectorStore } = await import("./chroma");
-      return ChromaVectorStore;
+
     case "milvus":
       const { MilvusVectorStore } = await import("./milvus");
       return MilvusVectorStore;
+
     case "pgvector":
       const { PGVectorVectorStore } = await import("./pgvector");
       return PGVectorVectorStore;
+
     case "supabase":
       const { SupabaseVectorStore } = await import("./supabase");
       return SupabaseVectorStore;
+
     default:
       throw new Error(`Unsupported vector store provider: ${provider}`);
   }
@@ -141,16 +155,20 @@ function getEffectiveProvider(
   requestedProvider: VectorStoreProviderId
 ): VectorStoreProviderId {
   const isVercel = process.env.VERCEL === "1" || process.env.VERCEL_ENV;
-
-  // On Vercel, if LanceDB or Faiss is requested, fall back to ChromaDB
-  if (
-    isVercel &&
-    (requestedProvider === "lancedb" || requestedProvider === "faiss")
-  ) {
-    console.warn(
-      `${requestedProvider} not available on Vercel, using chromadb instead`
-    );
-    return "chroma";
+  // TODO:: create fixed list of providers on vercel
+  if (isVercel) {
+    const unsupportedProviders: VectorStoreProviderId[] = [
+      "lancedb",
+      "faiss",
+      "chroma",
+    ];
+    if (unsupportedProviders.includes(requestedProvider)) {
+      throw new Error(
+        `${requestedProvider} is not supported on Vercel. ` +
+          `Please use a cloud-based vector store like Pinecone, Qdrant, or Supabase. ` +
+          `Set your VECTOR_STORE_PROVIDER environment variable accordingly.`
+      );
+    }
   }
 
   return requestedProvider;
