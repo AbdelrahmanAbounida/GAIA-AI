@@ -29,7 +29,7 @@ import { orpcQueryClient } from "@/lib/orpc/client";
 import { showErrorToast, showSuccessToast } from "@/components/ui/toast";
 import { maskApiKey } from "@/lib/utils";
 import { useAvailableModels } from "@/hooks/use-availabele-models";
-import type { VectorStoreProvider } from "@gaia/ai/vectorstores";
+import type { VectorStoreProvider } from "@gaia/ai";
 import { PROVIDER_DOCS } from "@/const/docs";
 import { ConfirmModal } from "../confirm-modal";
 import { AlertMessage } from "@/components/alert-message";

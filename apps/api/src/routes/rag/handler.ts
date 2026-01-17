@@ -12,10 +12,7 @@ import {
   count,
 } from "@gaia/db";
 import { createVectorStore, validateVectorstore } from "@gaia/ai/vectorstores";
-import type {
-  VectorStoreProviderId,
-  FullTextSearchProviderId,
-} from "@gaia/ai/vectorstores";
+import type { VectorStoreProviderId, FullTextSearchProviderId } from "@gaia/ai";
 import { v4 as uuidv4 } from "uuid";
 import {
   extractCredentials,

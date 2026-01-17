@@ -52,7 +52,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ProviderIcon } from "./credential-modal/provider-icons";
-import { FullTextSearchProviderId } from "@gaia/ai/vectorstores";
 import { FULLTEXT_SEARCH_TOOLS } from "@gaia/ai/const";
 import { Input } from "../ui/input";
 
@@ -827,7 +826,7 @@ export function RAGSettingsModal({
           RAG Settings
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-full max-w-3xl h-[400px] max-h-[80vh] ">
+      <DialogContent className="w-full max-w-3xl h-100 max-h-[80vh] ">
         <DialogTitle className="sr-only">RAG Settings</DialogTitle>
         {content}
       </DialogContent>

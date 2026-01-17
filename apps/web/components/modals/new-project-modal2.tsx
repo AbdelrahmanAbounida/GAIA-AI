@@ -47,10 +47,9 @@ import { showErrorToast, showSuccessToast } from "@/components/ui/toast";
 import { useAppStore } from "@/store/use-app-store";
 import { CredentialModal } from "./credential-modal/credential-modal";
 import { useAvailableModels } from "@/hooks/use-availabele-models";
-import type { VectorStoreProvider } from "@gaia/ai/vectorstores";
+import type { VectorStoreProvider } from "@gaia/ai";
 import { ProviderIcon } from "./credential-modal/provider-icons";
 import { AlertMessage } from "../alert-message";
-import { Provider } from "@radix-ui/react-tooltip";
 
 type SetupStep = "basic" | "configure";
 
@@ -366,7 +365,7 @@ export function CreateProjectModal2({
         )}
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[650px] max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-162.5 max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {step === "basic" ? "Create New Project" : "Configure Models"}
@@ -478,7 +477,7 @@ export function CreateProjectModal2({
 
                 <PopoverContent
                   onWheel={(e) => e.stopPropagation()}
-                  className="w-[600px]  p-0"
+                  className="w-150  p-0"
                 >
                   <Command className="max-h-[40vh] p-0">
                     <CommandInput placeholder="Search models..." />
@@ -587,7 +586,7 @@ export function CreateProjectModal2({
                 </PopoverTrigger>
                 <PopoverContent
                   onWheel={(e) => e.stopPropagation()}
-                  className="w-[600px]  p-0 "
+                  className="w-150  p-0 "
                 >
                   <Command className="max-h-[40vh] p-0">
                     <CommandInput placeholder="Search models..." />
@@ -696,7 +695,7 @@ export function CreateProjectModal2({
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[600px] p-0">
+                <PopoverContent className="w-150 p-0">
                   <Command className="">
                     <CommandInput placeholder="Search vector stores..." />
                     <CommandEmpty>No vector store found.</CommandEmpty>

@@ -1,6 +1,5 @@
 import type { Embeddings } from "@langchain/core/embeddings";
 import type { Document } from "@langchain/core/documents";
-import { VectorStore } from "@langchain/core/vectorstores";
 import type { SearchType } from "./fulltext";
 
 export type VectorStoreProviderId =
