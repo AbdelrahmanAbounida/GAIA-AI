@@ -135,15 +135,9 @@ async function processMessagesForCompatibility(
         }
         // Handle PDF files
         else if (mimeType?.includes("pdf")) {
-          console.log("Processing PDF file:", part.filename);
           try {
             const base64Data = part.url.split(",")[1];
             const textData = await extractPDFText(base64Data, part.filename);
-
-            console.log(
-              "PDF text extracted successfully, length:",
-              textData.length
-            );
 
             (newMessage.content as any[]).push({
               type: "text",
@@ -548,14 +542,6 @@ async function cleanupMCPConnections(
   const failedCleanups = cleanupResults.filter(
     (result) => result.status === "rejected"
   );
-
-  if (failedCleanups.length > 0) {
-    console.warn(
-      `⚠ Failed to clean up ${failedCleanups.length} MCP connections`
-    );
-  } else {
-    console.log("✓ All MCP connections cleaned up successfully");
-  }
 }
 
 /**
@@ -585,7 +571,6 @@ const ragTool = ({ projectId }: { projectId: string }) => {
         }
 
         if (!res.documents || res.documents.length === 0) {
-          console.log(`ℹ No documents found for query: "${query}"`);
           return {
             answer: `No documents found matching "${query}" in the knowledge base.`,
           };

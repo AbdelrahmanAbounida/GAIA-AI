@@ -50,7 +50,6 @@ export const ChatView = ({
 }: ChatViewProps) => {
   const hasMessages = messages?.length > 0;
 
-  console.log({ messages });
   return (
     <motion.div
       className="flex flex-col h-full w-full "

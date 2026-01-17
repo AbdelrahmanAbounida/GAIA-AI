@@ -49,10 +49,6 @@ export class WeaviateVectorStore extends BaseVectorStore {
 
     this.url = config.url!;
     this.apiKey = config.apiKey!;
-
-    console.log(
-      `🔍 WeaviateVectorStore initialized with collection: "${this.collectionName}"`
-    );
   }
 
   /**
@@ -87,10 +83,6 @@ export class WeaviateVectorStore extends BaseVectorStore {
           collectionName.charAt(0).toUpperCase() + collectionName.slice(1);
         const collectionExists =
           await client.collections.exists(normalizedName);
-        console.log(
-          `✓ Collection "${normalizedName}" exists:`,
-          collectionExists
-        );
       }
 
       await client.close();
@@ -141,8 +133,6 @@ export class WeaviateVectorStore extends BaseVectorStore {
           },
         });
       }
-
-      console.log(`✓ Connected to Weaviate at ${url}`);
     } catch (error) {
       throw VectorStoreErrorHandler.handleError(
         "initialize Weaviate client",
@@ -162,16 +152,8 @@ export class WeaviateVectorStore extends BaseVectorStore {
         console.error("❌ Collection name is undefined in storeExists");
         return false;
       }
-
-      const collections = await this.client?.collections.listAll();
-      console.log(
-        "Available collections:",
-        collections?.map((c) => c.name)
-      );
-
       const exists = await this.client?.collections.exists(this.collectionName);
 
-      console.log(`✓ Collection "${this.collectionName}" exists:`, exists);
       return exists || false;
     } catch (error) {
       console.error(
@@ -197,10 +179,6 @@ export class WeaviateVectorStore extends BaseVectorStore {
         client: this.client!,
         indexName: this.collectionName,
       });
-
-      console.log(
-        `✓ Loaded WeaviateStore with collection "${this.collectionName}"`
-      );
     } catch (error) {
       throw VectorStoreErrorHandler.handleError("load Weaviate store", error);
     }
@@ -221,10 +199,6 @@ export class WeaviateVectorStore extends BaseVectorStore {
         client: this.client!,
         indexName: this.collectionName,
       });
-
-      console.log(
-        `✓ Created WeaviateStore with collection "${this.collectionName}"`
-      );
     } catch (error) {
       throw VectorStoreErrorHandler.handleError("create Weaviate store", error);
     }
@@ -243,18 +217,10 @@ export class WeaviateVectorStore extends BaseVectorStore {
         throw new Error("Collection name is undefined");
       }
 
-      console.log(
-        `📝 Creating store with ${documents.length} documents for collection "${this.collectionName}"`
-      );
-
       // Check if collection exists
       const exists = await this.storeExists();
 
       if (exists) {
-        console.log(
-          `✓ Collection "${this.collectionName}" already exists, adding documents to it`
-        );
-
         // Use existing collection
         this.store = new WeaviateStore(this.config.embeddings, {
           client: this.client!,
@@ -274,19 +240,12 @@ export class WeaviateVectorStore extends BaseVectorStore {
               indexName: this.collectionName,
             }
           );
-          console.log(
-            `✓ Created new collection "${this.collectionName}" with documents`
-          );
         } catch (createError: any) {
           // If creation fails because collection already exists (race condition)
           if (
             createError.message?.includes("already exists") ||
             createError.message?.includes("422")
           ) {
-            console.log(
-              `✓ Collection "${this.collectionName}" was created by another process, using it`
-            );
-
             // Fallback: use the existing collection
             this.store = new WeaviateStore(this.config.embeddings, {
               client: this.client!,
@@ -333,17 +292,11 @@ export class WeaviateVectorStore extends BaseVectorStore {
     const minScore = options?.minScore;
 
     try {
-      console.log(
-        `🔍 Searching in collection "${this.collectionName}" with query: "${query}"`
-      );
-
       const weaviateStore = this.store as WeaviateStore;
       const results = await weaviateStore.similaritySearchWithScore(
         query,
         topK
       );
-
-      console.log(`✓ Found ${results.length} results`);
 
       // Map all results first
       const allMappedResults = results.map(([doc, score]) => ({
@@ -351,8 +304,6 @@ export class WeaviateVectorStore extends BaseVectorStore {
         metadata: doc.metadata,
         score: score,
       }));
-
-      console.log({ allMappedResults });
 
       // Apply filtering if minScore is provided
       if (minScore) {
@@ -362,15 +313,9 @@ export class WeaviateVectorStore extends BaseVectorStore {
 
         // If filtering produces zero results, return all results
         if (filteredResults.length === 0) {
-          console.log(
-            `⚠️ No results met minScore threshold (${minScore}), returning all ${allMappedResults.length} results`
-          );
           return allMappedResults;
         }
 
-        console.log(
-          `✓ ${filteredResults.length} results met minScore threshold (${minScore})`
-        );
         return filteredResults;
       }
 
@@ -614,7 +559,6 @@ export class WeaviateVectorStore extends BaseVectorStore {
         await collection.data.deleteMany(
           collection.filter.byProperty("documentId").equal(documentId)
         );
-        console.log(`✓ Deleted documents with documentId: ${documentId}`);
       }
     } catch (error) {
       throw VectorStoreErrorHandler.handleError("delete documents", error);
@@ -638,11 +582,6 @@ export class WeaviateVectorStore extends BaseVectorStore {
       if (exists) {
         await this.client!.collections.delete(this.collectionName);
         this.store = null;
-        console.log(`✓ Deleted collection "${this.collectionName}"`);
-      } else {
-        console.log(
-          `✓ Collection "${this.collectionName}" does not exist, nothing to delete`
-        );
       }
     } catch (error) {
       throw VectorStoreErrorHandler.handleError("delete collection", error);

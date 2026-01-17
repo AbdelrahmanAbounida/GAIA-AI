@@ -107,16 +107,8 @@ export class FlexSearchFullTextSearch extends BaseFullTextSearch {
         }
 
         this.mounted = true;
-        console.log(`✓ Loaded FlexSearch index from: ${this.indexPath}`);
       } else {
         this.mounted = true;
-        if (this.useFileSystem) {
-          console.log(`✓ Created new FlexSearch index: ${this.indexPath}`);
-        } else {
-          console.log(
-            `✓ Created new in-memory FlexSearch index (serverless mode)`
-          );
-        }
       }
     } catch (error) {
       throw new Error(`Failed to load FlexSearch index: ${error}`);
@@ -141,9 +133,6 @@ export class FlexSearchFullTextSearch extends BaseFullTextSearch {
       });
 
       this.mounted = true;
-      console.log(
-        `✓ Created FlexSearch index: ${this.useFileSystem ? this.indexPath : "in-memory"}`
-      );
     } catch (error) {
       throw new Error(`Failed to create FlexSearch index: ${error}`);
     }
@@ -315,8 +304,6 @@ export class FlexSearchFullTextSearch extends BaseFullTextSearch {
         Array.from(this.documentStore.entries())
       );
       await fs.writeFile(docStorePath, docStoreData, "utf-8");
-
-      console.log(`✓ Saved FlexSearch index to: ${this.indexPath}`);
     } catch (error) {
       throw new Error(`Failed to save index: ${error}`);
     }
@@ -338,7 +325,6 @@ export class FlexSearchFullTextSearch extends BaseFullTextSearch {
       this.documentStore = new Map(entries);
     } catch (error) {
       // File doesn't exist yet, that's ok
-      console.log("No existing document store found");
     }
   }
 

@@ -12,8 +12,6 @@ pnpm add @gaia/db
 
 ```typescript
 import { hello } from "@gaia/db";
-
-console.log(hello("World"));
 ```
 
 ## Development

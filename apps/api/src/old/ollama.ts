@@ -62,9 +62,6 @@
 //     if (ollamaCred?.baseUrl) {
 //       // If in Docker and saved URL is localhost, override with Docker URL
 //       if (isDockerEnvironment() && ollamaCred.baseUrl.includes("localhost")) {
-//         console.log(
-//           "Docker environment detected, overriding localhost with host.docker.internal"
-//         );
 //         return "http://host.docker.internal:11434";
 //       }
 //       return ollamaCred.baseUrl;
@@ -91,13 +88,10 @@
 //     try {
 //       const isConnected = await checkOllamaConnection(dockerUrl, apiKey);
 //       if (isConnected) {
-//         console.log("Successfully connected using host.docker.internal");
 //         return dockerUrl;
 //       }
 //     } catch (error) {
-//       console.log(
-//         "Failed to connect with host.docker.internal, trying original URL"
-//       );
+//
 //     }
 //   }
 

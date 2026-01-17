@@ -31,7 +31,6 @@ const ChatPage = async (props: {
     return <ChatNotfound errorMessage={res?.message} />;
   }
   const uiMessages = convertToUIMessages(res?.messages);
-  console.log({ uiMessages });
 
   return (
     <ChatPageView

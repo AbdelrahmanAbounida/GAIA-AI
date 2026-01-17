@@ -10,8 +10,6 @@ const runMigrate = async () => {
     throw new Error("TURSO_CONNECTION_URL is not defined");
   }
 
-  console.log("🚀 Running migrations...");
-
   try {
     // Create Turso client
     const client = createClient({
@@ -26,7 +24,6 @@ const runMigrate = async () => {
     await migrate(db, { migrationsFolder: "drizzle" });
     const end = Date.now();
 
-    console.log(`✅ Migrations completed successfully in ${end - start}ms`);
     process.exit(0);
   } catch (err: any) {
     console.error("❌ Migration failed:");
@@ -37,12 +34,6 @@ const runMigrate = async () => {
       err?.message?.includes("table") &&
       err?.message?.includes("already exists")
     ) {
-      console.log(
-        "⚠️  Tables already exist. Migration might already be applied."
-      );
-      console.log(
-        "💡 Tip: Check your database or use 'drizzle-kit push' to sync schema."
-      );
       process.exit(1);
     }
 

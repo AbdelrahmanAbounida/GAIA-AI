@@ -47,7 +47,6 @@ export interface CreateVectorStoreOptions {
 function getDataDirectory(): string {
   // 1. Check for explicit VECTOR_STORE_PATH environment variable first
   if (process.env.VECTOR_STORE_PATH) {
-    console.log(`📁 Using VECTOR_STORE_PATH: ${process.env.VECTOR_STORE_PATH}`);
     return process.env.VECTOR_STORE_PATH;
   }
 
@@ -61,13 +60,11 @@ function getDataDirectory(): string {
     process.cwd().startsWith("/app/");
 
   if (isDocker) {
-    console.log("📁 Detected Docker/production environment, using /app/data");
     return "/app/data";
   }
 
   // 3. Default to process.cwd()/data for local development
   const localPath = path.join(process.cwd(), "data");
-  console.log(`📁 Using local development path: ${localPath}`);
   return localPath;
 }
 
@@ -77,7 +74,6 @@ function getDataDirectory(): string {
 async function ensureDirectory(dirPath: string): Promise<void> {
   try {
     await fs.mkdir(dirPath, { recursive: true, mode: 0o755 });
-    console.log(`✅ Directory created/verified: ${dirPath}`);
   } catch (error: any) {
     if (error.code !== "EEXIST") {
       throw new Error(
@@ -93,7 +89,6 @@ async function ensureDirectory(dirPath: string): Promise<void> {
     const testFile = path.join(dirPath, ".write-test");
     await fs.writeFile(testFile, "test");
     await fs.unlink(testFile);
-    console.log(`✅ Write permission verified for: ${dirPath}`);
   } catch (error: any) {
     throw new Error(
       `Directory ${dirPath} exists but is not writable: ${error.message}\n` +
@@ -118,13 +113,6 @@ export async function createVectorStore({
   fullTextSearchTool,
   ftsConfig,
 }: CreateVectorStoreOptions): Promise<BaseVectorStore> {
-  console.log("🔍 Environment check:", {
-    NODE_ENV: process.env.NODE_ENV,
-    DATABASE_URL: process.env.DATABASE_URL,
-    VECTOR_STORE_PATH: process.env.VECTOR_STORE_PATH,
-    cwd: process.cwd(),
-  });
-
   const embeddings = new OpenAIEmbeddings({
     apiKey: embeddingApiKey,
     configuration: {
@@ -143,8 +131,6 @@ export async function createVectorStore({
     provider,
     projectId
   );
-
-  console.log(`📁 Vector store will be created at: ${persistDirectory}`);
 
   await ensureDirectory(persistDirectory);
 

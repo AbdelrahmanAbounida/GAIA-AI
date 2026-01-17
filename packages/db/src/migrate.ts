@@ -37,9 +37,6 @@ async function runMigrate() {
   }
 
   console.log("🚀 Running migrations...");
-  console.log("📁 Monorepo root:", monorepoRoot);
-  console.log("📁 __dirname:", __dirname);
-
   try {
     // Resolve DB path from monorepo root
     const dbPath = path.resolve(
@@ -47,11 +44,8 @@ async function runMigrate() {
       databaseUrl.replace(/^file:/, "")
     );
 
-    console.log("📂 Database path:", dbPath);
-
     // Resolve migrations folder relative to this file
     const migrationsFolder = path.resolve(__dirname, "..", "drizzle");
-    console.log("📂 Migrations folder:", migrationsFolder);
 
     // Check if migrations folder exists
     if (!fs.existsSync(migrationsFolder)) {

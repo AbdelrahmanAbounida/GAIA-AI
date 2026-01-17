@@ -10,8 +10,6 @@ pnpm add @gaia/api
 
 ```typescript
 import { hello } from "@gaia/api";
-
-console.log(hello("World"));
 ```
 
 ## Development

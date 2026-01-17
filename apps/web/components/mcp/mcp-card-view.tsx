@@ -112,7 +112,6 @@ const ServerCard = ({
     serverId: server.id,
     showToasts: true,
   });
-  console.log({ tools });
 
   const handleReconnect = async () => {
     try {
@@ -190,7 +189,7 @@ const ServerCard = ({
             <AlertCircle className="h-4 w-4 text-destructive" />
             <span className="text-sm text-destructive">Error</span>
             {server.lastError && (
-              <span className="text-xs text-destructive/70 ml-1 max-w-[200px] truncate">
+              <span className="text-xs text-destructive/70 ml-1 max-w-50 truncate">
                 ({server.lastError})
               </span>
             )}

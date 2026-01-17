@@ -6,8 +6,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, url, apiKey } = body;
 
-    console.log({ url, apiKey });
-
     // Validate input
     if (!url || !apiKey) {
       return NextResponse.json(

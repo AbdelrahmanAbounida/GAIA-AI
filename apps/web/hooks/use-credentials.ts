@@ -171,7 +171,6 @@ export function useCredentials(refetchIntervalSeconds?: number) {
           description: data.message,
           position: "bottom-right",
         });
-        console.log({ data });
         queryClient.invalidateQueries({
           queryKey: orpcQueryClient.authed.credentials.list.key(),
         });

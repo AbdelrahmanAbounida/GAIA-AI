@@ -150,15 +150,8 @@ export class PineconeVectorStore extends BaseVectorStore {
       const BATCH_SIZE = 100;
       const batches = this.chunkArray(documents, BATCH_SIZE);
 
-      console.log(
-        `📦 Adding ${documents.length} documents in ${batches.length} batches...`
-      );
-
       for (let i = 0; i < batches.length; i++) {
         const batch = batches[i];
-        console.log(
-          `  └─ Batch ${i + 1}/${batches.length}: ${batch.length} docs`
-        );
 
         await this.store!.addDocuments(batch);
 
@@ -167,8 +160,6 @@ export class PineconeVectorStore extends BaseVectorStore {
           await this.delay(100);
         }
       }
-
-      console.log(`✓ Successfully added all documents`);
     } catch (error: any) {
       if (error?.status === 404 || error?.message?.includes("404")) {
         throw new Error(
@@ -202,15 +193,9 @@ export class PineconeVectorStore extends BaseVectorStore {
         const batches = this.chunkArray(normalizedDocs, BATCH_SIZE);
         const allIds: string[] = [];
 
-        console.log(
-          `📦 Adding ${normalizedDocs.length} documents in ${batches.length} batches...`
-        );
-
         for (let i = 0; i < batches.length; i++) {
           const batch = batches[i];
           const batchIds = ids?.slice(i * BATCH_SIZE, (i + 1) * BATCH_SIZE);
-
-          console.log(`  └─ Batch ${i + 1}/${batches.length}`);
 
           const addedIds = await this.store!.addDocuments(batch, {
             ids: batchIds,

@@ -9,11 +9,6 @@ export async function POST(req: Request) {
     baseUrl: baseUrl,
     ...props,
   });
-  console.log({
-    apiKey,
-    baseUrl,
-    isValid,
-  });
 
   return NextResponse.json({
     isValid,

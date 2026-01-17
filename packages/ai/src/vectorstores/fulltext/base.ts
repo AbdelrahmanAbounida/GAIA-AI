@@ -29,7 +29,6 @@ export abstract class BaseFullTextSearch implements IFullTextSearch {
    */
   async initialize(): Promise<void> {
     if (this.initialized) {
-      console.log(`${this.config.provider} index already initialized`);
       return;
     }
 
@@ -41,14 +40,8 @@ export abstract class BaseFullTextSearch implements IFullTextSearch {
 
       if (exists) {
         await this.loadIndex();
-        console.log(
-          `✓ Loaded existing ${this.config.provider} index from ${this.persistPath}`
-        );
       } else {
         await this.createIndex();
-        console.log(
-          `✓ Created new ${this.config.provider} index at ${this.persistPath}`
-        );
       }
 
       this.initialized = true;
@@ -68,20 +61,12 @@ export abstract class BaseFullTextSearch implements IFullTextSearch {
    */
   protected async ensurePersistDirectory(): Promise<void> {
     try {
-      console.log(`📁 FTS persist path (before): ${this.persistPath}`);
       const absolutePath = path.isAbsolute(this.persistPath)
         ? this.persistPath
         : path.resolve(process.cwd(), this.persistPath);
 
-      console.log(`📁 FTS absolute path: ${absolutePath}`);
-
       await fs.mkdir(absolutePath, { recursive: true, mode: 0o755 });
-
       this.persistPath = absolutePath;
-
-      console.log(
-        `✓ Ensured FTS persist directory exists: ${this.persistPath}`
-      );
     } catch (error) {
       console.error(
         `❌ Failed to create persist directory: ${this.persistPath}`,
@@ -100,7 +85,6 @@ export abstract class BaseFullTextSearch implements IFullTextSearch {
     try {
       const dir = path.dirname(filePath);
       await fs.mkdir(dir, { recursive: true });
-      console.log(`✓ Ensured file directory exists: ${dir}`);
     } catch (error) {
       console.error(
         `❌ Failed to create file directory for: ${filePath}`,
@@ -141,13 +125,9 @@ export abstract class BaseFullTextSearch implements IFullTextSearch {
       const normalizedDocs = this.normalizeDocuments(documents);
       const docIds = ids || normalizedDocs.map((_, i) => this.generateId(i));
 
-      console.log(
-        `📝 Indexing ${normalizedDocs.length} documents to ${this.config.provider}...`
-      );
       await this.indexDocuments(normalizedDocs, docIds);
       await this.save();
 
-      console.log(`✓ Successfully indexed ${docIds.length} documents`);
       return docIds;
     } catch (error) {
       console.error(

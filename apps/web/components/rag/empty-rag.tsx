@@ -88,7 +88,7 @@ export function EmptyRAG({ projectId }: EmptyRAGProps) {
   if (isLoadingCredentials || isLoadingDocuments) {
     return (
       <Empty className="h-full w-full">
-        <EmptyHeader className="max-w-[500px]">
+        <EmptyHeader className="max-w-125">
           <EmptyMedia variant="icon">
             <LoaderIcon className="size-12 animate-spin" />
           </EmptyMedia>
@@ -114,9 +114,8 @@ export function EmptyRAG({ projectId }: EmptyRAGProps) {
         query: "mango",
         topK: 2,
       });
-      console.log(data);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -124,7 +123,7 @@ export function EmptyRAG({ projectId }: EmptyRAGProps) {
   if (hasValidCredentials && hasIndexedDocuments) {
     return (
       <Empty className="h-full w-full">
-        <EmptyHeader className="max-w-[500px]">
+        <EmptyHeader className="max-w-125">
           <EmptyMedia
             variant="icon"
             className="bg-background! hover:bg-background!"
@@ -150,7 +149,7 @@ export function EmptyRAG({ projectId }: EmptyRAGProps) {
   if (!hasValidCredentials) {
     return (
       <Empty className="h-full w-full">
-        <EmptyHeader className="max-w-[500px]">
+        <EmptyHeader className="max-w-125">
           <EmptyMedia variant="icon">
             <div className="flex items-center bg-transparent!">
               <Image
@@ -168,7 +167,7 @@ export function EmptyRAG({ projectId }: EmptyRAGProps) {
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <div className="space-y-3 w-full max-w-[500px]">
+          <div className="space-y-3 w-full max-w-125">
             <CredentialModal
               activeTab="providers"
               trigger={
@@ -185,7 +184,7 @@ export function EmptyRAG({ projectId }: EmptyRAGProps) {
   }
   return (
     <Empty className="w-full h-full">
-      <EmptyHeader className="max-w-[500px]">
+      <EmptyHeader className="max-w-125">
         <EmptyMedia variant="icon">
           {/* <FolderCodeIcon /> */}
           <div className="bg-gaia-100 dark:bg-gaia-900! flex items-center">

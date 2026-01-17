@@ -416,7 +416,6 @@ export const mcpHandlers = {
             capabilities,
           };
         } catch (error) {
-          console.log("⚠️ Existing connection is stale, reconnecting...");
           await manager.disconnect(server.id);
         }
       }

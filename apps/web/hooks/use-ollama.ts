@@ -343,7 +343,7 @@ export const useOllamaPull = (baseUrl?: string): UseOllamaPullReturn => {
             baseUrl: OLLAMA_BASE_URL,
           });
         } catch (e) {
-          console.log(e);
+          console.error(e);
         }
         removePull(modelName);
       } else {
@@ -389,7 +389,7 @@ export const useOllamaPull = (baseUrl?: string): UseOllamaPullReturn => {
           baseUrl: OLLAMA_BASE_URL,
         });
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
     },
     [removePull, deleteModel, OLLAMA_BASE_URL]

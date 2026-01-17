@@ -41,7 +41,6 @@ const useTurso = isVercel || hasTursoConfig;
 let db: DB;
 
 if (useTurso) {
-  console.log("🌐 Using Turso database");
   const client = createClient({
     url: process.env.TURSO_CONNECTION_URL!,
     authToken: process.env.TURSO_AUTH_TOKEN,
@@ -49,7 +48,6 @@ if (useTurso) {
   // Cast to DB to resolve type conflicts
   db = drizzleTurso(client, { schema }) as unknown as DB;
 } else {
-  console.log("💾 Using local SQLite database");
   const DATABASE_URL = process.env.DATABASE_URL || "file:./database.db";
   const dbPath = path.resolve(monorepoRoot, DATABASE_URL.replace(/^file:/, ""));
 

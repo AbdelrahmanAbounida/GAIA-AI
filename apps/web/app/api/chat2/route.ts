@@ -268,7 +268,6 @@ const dataAgent = new Agent({
 // ============= AGENT ROUTER =============
 
 async function routeToAgent(messages: ChatMessage[], model?: string) {
-  console.log(JSON.stringify(messages[messages.length - 1]));
   // const lastMessage = messages[messages.length - 1].content.toLowerCase();
   let lastMessageContent = "";
 

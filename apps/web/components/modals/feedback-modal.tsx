@@ -73,7 +73,7 @@ function FeedbackModal({ children }: { children?: React.ReactNode }) {
         setopenDialog(false);
       }
     } catch (e: any) {
-      console.log(e);
+      console.error(e);
       showErrorToast({
         title: "Failed to submit feedback",
         position: "top-right",

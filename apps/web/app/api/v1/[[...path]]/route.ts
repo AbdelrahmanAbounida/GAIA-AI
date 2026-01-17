@@ -23,8 +23,6 @@ async function handleRequest(request: Request) {
     },
   });
 
-  console.log({ response });
-
   // Handle case where no route matched
   if (!matched) {
     return new NextResponse(

@@ -562,7 +562,6 @@
 //           };
 //         } catch (error) {
 //           // Connection is stale, disconnect and reconnect
-//           console.log("⚠️ Existing connection is stale, reconnecting...");
 //           await manager.disconnect(server.id);
 //         }
 //       }

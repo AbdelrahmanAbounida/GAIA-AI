@@ -45,31 +45,21 @@ export abstract class BaseVectorStore implements IVectorStore {
    * Initialize or load the vector store
    */
   async initialize(): Promise<void> {
-    console.log(`✅ Initializing ${this.config.provider} vector store...`);
-
     try {
       const exists = await this.storeExists();
 
       if (exists) {
         await this.loadStore();
-        console.log(`✓ Loaded existing ${this.config.provider} index`);
       } else {
         await this.createStore();
-        console.log(`✓ Created new ${this.config.provider} index`);
       }
 
       // ✅ Only initialize FTS if searchType requires it
       const searchType: SearchType = this.config.searchType || "hybrid";
       const needsFTS = searchType === "mrr" || searchType === "hybrid";
 
-      console.log("✅ ✅✅✅✅✅✅✅✅✅✅");
       if (needsFTS) {
-        console.log("✅ ✅✅✅✅✅✅✅✅✅✅");
         await this.initializeFullTextSearch();
-      } else {
-        console.log(
-          `✓ Skipping FTS initialization (searchType: ${searchType})`
-        );
       }
     } catch (error) {
       throw VectorStoreErrorHandler.handleError(
@@ -92,7 +82,6 @@ export abstract class BaseVectorStore implements IVectorStore {
 
     // Skip if provider has native FTS and it's configured
     if (this.ftsProvider === "native" && this.supportsNativeFullTextSearch()) {
-      console.log(`✓ Using native FTS for ${this.config.provider}`);
       return;
     }
 
@@ -108,9 +97,6 @@ export abstract class BaseVectorStore implements IVectorStore {
         projectId
       );
 
-      console.log(`📁 FTS provider: ${this.ftsProvider}`);
-      console.log(`📁 FTS persist directory: ${ftsPersistDirectory}`);
-
       const ftsConfig: FullTextSearchConfig = {
         persistDirectory: ftsPersistDirectory,
         provider: this.ftsProvider,
@@ -119,16 +105,9 @@ export abstract class BaseVectorStore implements IVectorStore {
       };
 
       await fs.mkdir(ftsPersistDirectory, { recursive: true, mode: 0o755 });
-      console.log(
-        `✓ Ensured FTS persist directory exists: ${ftsPersistDirectory}`
-      );
 
       this.ftsInstance = await this.createFullTextSearchInstance(ftsConfig);
       await this.ftsInstance.initialize();
-
-      console.log(
-        `✓ Initialized ${this.ftsProvider} full-text search at ${ftsPersistDirectory}`
-      );
     } catch (error) {
       console.warn(`⚠️ Failed to initialize FTS: ${error}`);
       this.ftsInstance = null;
@@ -234,7 +213,6 @@ export abstract class BaseVectorStore implements IVectorStore {
 
     try {
       await this.ftsInstance.addDocuments(documents, ids);
-      console.log(`✓ Indexed ${documents.length} documents to FTS`);
     } catch (error) {
       console.warn(`⚠️ Failed to index to FTS: ${error}`);
       // Don't fail the main operation if FTS indexing fails
@@ -263,10 +241,9 @@ export abstract class BaseVectorStore implements IVectorStore {
             metadata: metadatas?.[i] || {},
           })
       );
-      console.log(`📝 Adding ${texts.length} texts with custom IDs...`);
       return this.addDocuments(documents, ids);
     } catch (error) {
-      console.log({ error });
+      console.error({ error });
       throw VectorStoreErrorHandler.handleError(
         "add texts",
         error,

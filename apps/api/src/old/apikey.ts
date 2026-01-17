@@ -49,7 +49,6 @@
 //         message: "Project not found",
 //       };
 //     }
-//     console.log({ projectExist, dbUser });
 //     try {
 //       // Insert new API key
 //       const [newApiKey] = await db
@@ -69,7 +68,7 @@
 //         apiKey: newApiKey,
 //       };
 //     } catch (error) {
-//       console.log({ error });
+//       { error });
 //       return {
 //         success: false,
 //         message: "Failed to create API key",

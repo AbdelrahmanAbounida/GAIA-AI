@@ -49,9 +49,6 @@ async function getOllamaBaseUrl(context: AppContext): Promise<string> {
 
     if (ollamaCred?.baseUrl) {
       if (isDockerEnvironment() && ollamaCred.baseUrl.includes("localhost")) {
-        console.log(
-          "Docker environment detected, overriding localhost with host.docker.internal"
-        );
         return "http://host.docker.internal:11434";
       }
       return ollamaCred.baseUrl;
@@ -76,13 +73,10 @@ async function validateAndFixBaseUrl(
     try {
       const isConnected = await checkOllamaConnection(dockerUrl, apiKey);
       if (isConnected) {
-        console.log("Successfully connected using host.docker.internal");
         return dockerUrl;
       }
     } catch (error) {
-      console.log(
-        "Failed to connect with host.docker.internal, trying original URL"
-      );
+      console.error("Error connecting to host.docker.internal:", error);
     }
   }
 

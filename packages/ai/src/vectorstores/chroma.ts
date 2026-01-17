@@ -183,7 +183,6 @@ export class ChromaVectorStore extends BaseVectorStore {
           },
         });
       }
-      console.log(`✓ Loaded existing Chroma collection: ${this.tableName}`);
     } catch (error) {
       throw VectorStoreErrorHandler.handleError("load store", error);
     }
@@ -199,8 +198,6 @@ export class ChromaVectorStore extends BaseVectorStore {
         await this.loadStore();
       }
       await this.store?.ensureCollection();
-
-      console.log(`✓ Created new Chroma collection: ${this.tableName}`);
     } catch (error) {
       throw VectorStoreErrorHandler.handleError("create store", error);
     }
@@ -309,7 +306,6 @@ export class ChromaVectorStore extends BaseVectorStore {
       const client = await this.getChromaClient();
       await client.deleteCollection({ name: this.tableName! });
       this.store = null;
-      console.log(`✓ Deleted Chroma collection: ${this.tableName}`);
     } catch (error) {
       throw VectorStoreErrorHandler.handleError("delete collection", error);
     }
@@ -333,7 +329,6 @@ export class ChromaVectorStore extends BaseVectorStore {
     //   const collections = await client.listCollections();
     //   documentCount = collections.length;
     // } catch (error) {
-    //   console.log({ StatsError: error });
     //   console.warn("Could not fetch document count:", error);
     // }
 

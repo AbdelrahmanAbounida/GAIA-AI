@@ -127,7 +127,6 @@ export class PGVectorVectorStore extends BaseVectorStore {
       });
       await client.connect();
       const maxListeners = client.getMaxListeners();
-      console.log({ maxListeners });
       return true;
     } catch (err) {
       console.error("✗ Qdrant connection failed:", err);

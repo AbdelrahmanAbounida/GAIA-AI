@@ -100,7 +100,6 @@ export class SupabaseVectorStore extends BaseVectorStore {
         throw new Error("Invalid Supabase API key");
       }
 
-      console.log("✓ Supabase connection validated");
       return true;
     } catch (err: any) {
       if (err.message?.includes("Invalid Supabase API key")) {
@@ -175,11 +174,6 @@ export class SupabaseVectorStore extends BaseVectorStore {
         tableName: this.tableName,
         queryName: this.queryName,
       });
-
-      console.log(`
-        Note: Supabase table must exist. If not created, run:
-        SupabaseVectorStore.getSetupSQL('${this.tableName}', ${this.embeddingDimension})
-      `);
     } catch (error) {
       throw VectorStoreErrorHandler.handleError("create store", error);
     }
@@ -211,8 +205,6 @@ export class SupabaseVectorStore extends BaseVectorStore {
         const batch = processedDocs.slice(i, i + this.upsertBatchSize);
         await this.store?.addDocuments(batch);
       }
-
-      console.log(`✓ Added ${documents.length} documents to ${this.tableName}`);
     } catch (error) {
       throw VectorStoreErrorHandler.handleError("add documents", error);
     }
@@ -419,8 +411,6 @@ export class SupabaseVectorStore extends BaseVectorStore {
       if (error) {
         throw error;
       }
-
-      console.log(`✓ Deleted documents matching metadata filter`);
     } catch (error) {
       throw VectorStoreErrorHandler.handleError("delete by metadata", error);
     }
@@ -441,8 +431,6 @@ export class SupabaseVectorStore extends BaseVectorStore {
       if (error) {
         throw error;
       }
-
-      console.log(`✓ Cleared all documents from ${this.tableName}`);
     } catch (error) {
       throw VectorStoreErrorHandler.handleError("clear store", error);
     }
@@ -634,18 +622,5 @@ using gin (metadata);
       embeddingDimension,
       useUUID
     );
-
-    console.log(`
-═══════════════════════════════════════════════════════════════
-SUPABASE SETUP INSTRUCTIONS
-═══════════════════════════════════════════════════════════════
-
-Run this SQL in Supabase SQL Editor:
-Dashboard → SQL Editor → New Query
-
-${setupSQL}
-
-═══════════════════════════════════════════════════════════════
-    `);
   }
 }

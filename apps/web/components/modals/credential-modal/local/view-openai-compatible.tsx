@@ -75,7 +75,6 @@ export const OpenAICompatibleView = () => {
           errorMessage =
             "The connection failed to this api endpoint. Please check the URL";
         }
-        console.log({ data });
 
         showErrorToast({
           title: errorTitle,

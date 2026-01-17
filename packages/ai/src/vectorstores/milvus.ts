@@ -97,17 +97,6 @@ export class MilvusVectorStore extends BaseVectorStore {
     } else if (this.isCloudMode) {
       clientConfig.ssl = true;
     }
-
-    console.log("🔧 Milvus client config:", {
-      address: clientConfig.address,
-      hasToken: !!clientConfig.token,
-      hasCredentials: !!(clientConfig.username && clientConfig.password),
-      ssl: clientConfig.ssl,
-      database: clientConfig.database || "default",
-      collection: this.collectionName,
-      dropOld: this.dropOld,
-    });
-
     this.client = new MilvusClient(clientConfig);
     this.enableFullText = config.enableFullTextSearch === true;
   }
@@ -182,7 +171,6 @@ export class MilvusVectorStore extends BaseVectorStore {
       const client = new MilvusClient(clientConfig);
       await client.listCollections();
 
-      console.log("✅ Milvus connection validated");
       return true;
     } catch (err) {
       console.error("❌ Milvus validation failed:", err);
@@ -212,8 +200,6 @@ export class MilvusVectorStore extends BaseVectorStore {
 
   protected async loadStore(): Promise<void> {
     try {
-      console.log(`📂 Loading collection: ${this.collectionName}`);
-
       const desc = await this.client.describeCollection({
         collection_name: this.collectionName,
       });
@@ -248,10 +234,6 @@ export class MilvusVectorStore extends BaseVectorStore {
       await this.client.loadCollection({
         collection_name: this.collectionName,
       });
-
-      console.log(
-        `✅ Collection loaded (field: ${vectorField.name}, dim: ${this.vectorDimension})`
-      );
     } catch (error) {
       throw VectorStoreErrorHandler.handleError("load collection", error);
     }
@@ -259,13 +241,10 @@ export class MilvusVectorStore extends BaseVectorStore {
 
   protected async createStore(): Promise<void> {
     try {
-      console.log(`🆕 Creating collection: ${this.collectionName}`);
-
       const sampleEmbedding = await this.config.embeddings.embedQuery("sample");
       this.vectorDimension = sampleEmbedding.length;
 
       await this.createSimpleCollection();
-      console.log(`✅ Collection created successfully`);
     } catch (error) {
       throw VectorStoreErrorHandler.handleError("create collection", error);
     }
@@ -275,8 +254,6 @@ export class MilvusVectorStore extends BaseVectorStore {
     documents: Document[]
   ): Promise<void> {
     try {
-      console.log(`🆕 Creating collection with ${documents.length} docs`);
-
       if (documents.length > 0) {
         const embedding = await this.config.embeddings.embedQuery(
           documents[0].pageContent
@@ -292,8 +269,6 @@ export class MilvusVectorStore extends BaseVectorStore {
       if (documents.length > 0) {
         await this.insertDocuments(documents);
       }
-
-      console.log(`✅ Collection created with documents`);
     } catch (error) {
       throw VectorStoreErrorHandler.handleError(
         "create collection with docs",
@@ -334,12 +309,6 @@ export class MilvusVectorStore extends BaseVectorStore {
       },
     ];
 
-    console.log("📝 Creating collection with schema:", {
-      collection_name: this.collectionName,
-      vector_dim: this.vectorDimension,
-      fields: fields.length,
-    });
-
     await this.client.createCollection({
       collection_name: this.collectionName,
       schema: fields,
@@ -349,16 +318,12 @@ export class MilvusVectorStore extends BaseVectorStore {
     await this.client.loadCollection({
       collection_name: this.collectionName,
     });
-
-    console.log("✅ Collection created and loaded");
   }
 
   private async insertDocuments(documents: Document[]): Promise<string[]> {
     if (documents.length === 0) return [];
 
     try {
-      console.log(`📝 Inserting ${documents.length} documents...`);
-
       const texts = documents.map((doc) => doc.pageContent);
       const embeddings = await this.config.embeddings.embedDocuments(texts);
 
@@ -374,7 +339,6 @@ export class MilvusVectorStore extends BaseVectorStore {
       });
 
       const count = typeof res.insert_cnt === "number" ? res.insert_cnt : 0;
-      console.log(`✅ Inserted ${count} documents`);
 
       return Array.from({ length: count }, (_, i) => i.toString());
     } catch (error) {
@@ -409,14 +373,8 @@ export class MilvusVectorStore extends BaseVectorStore {
     if (texts.length === 0) return [];
 
     try {
-      console.log(`📝 Adding ${texts.length} texts with custom IDs...`);
-
       // Sanitize IDs if provided
       const sanitizedIds = ids?.map((id) => sanitizeId(id));
-
-      console.log("Original IDs:", ids?.slice(0, 3));
-      console.log("Sanitized IDs:", sanitizedIds?.slice(0, 3));
-
       const embeddings = await this.config.embeddings.embedDocuments(texts);
 
       const data = texts.map((text, i) => ({
@@ -431,7 +389,6 @@ export class MilvusVectorStore extends BaseVectorStore {
       });
 
       const count = typeof res.insert_cnt === "number" ? res.insert_cnt : 0;
-      console.log(`✅ Inserted ${count} texts`);
 
       // Return sanitized IDs if provided, otherwise return generated IDs
       return (
@@ -527,8 +484,6 @@ export class MilvusVectorStore extends BaseVectorStore {
   }
 
   async delete(ids: string[], documentId?: string): Promise<void> {
-    console.log(`🗑️ Deleting ${ids.length} documents...`);
-
     let store = this.store;
     if (!store) {
       const clientConfig = MilvusVectorStore.getClientConfig(this.config);
@@ -595,13 +550,10 @@ export class MilvusVectorStore extends BaseVectorStore {
 
   async initialize(): Promise<void> {
     try {
-      console.log("✅ Initializing milvus vector store...");
-
       const exists = await this.storeExists();
 
       if (exists) {
         if (this.dropOld) {
-          console.log("🗑️ Dropping existing collection (dropOld=true)...");
           await this.deleteCollection();
           await this.createStore();
         } else {
@@ -619,8 +571,6 @@ export class MilvusVectorStore extends BaseVectorStore {
       } else {
         await this.createStore();
       }
-
-      console.log("✅ Vector store initialized successfully");
     } catch (error) {
       throw VectorStoreErrorHandler.handleError(
         "initialize vector store",
@@ -661,25 +611,5 @@ export class MilvusVectorStore extends BaseVectorStore {
     }
 
     return store;
-  }
-
-  async inspectCollection(): Promise<void> {
-    try {
-      const desc = await this.client.describeCollection({
-        collection_name: this.collectionName,
-      });
-
-      console.log("🔍 Collection Schema:");
-      console.log("Name:", desc.collection_name);
-      console.log("Fields:");
-      desc.schema.fields.forEach((field: any) => {
-        console.log(
-          `  - ${field.name}: ${field.data_type}`,
-          field.dim ? `(dim: ${field.dim})` : ""
-        );
-      });
-    } catch (error) {
-      console.error("Inspection failed:", error);
-    }
   }
 }

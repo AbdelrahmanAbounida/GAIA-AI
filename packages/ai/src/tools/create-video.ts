@@ -38,7 +38,6 @@ export const createVideoArtifact = ({
         .describe("Video generation model to use"),
     }),
     execute: async ({ prompt, duration, aspectRatio, model }) => {
-      console.log("✅✅✅✅✅✅✅✅");
       // Generate the video using AI SDK
       const result = streamText({
         model: aiModel("sora-2-2025-10-06"),
@@ -73,10 +72,6 @@ export const createVideoArtifact = ({
             data: progressArtifact,
             transient: true,
           });
-        }
-
-        if (delta.type === "file") {
-          console.log("Video file received during stream:", delta.file);
         }
       }
 

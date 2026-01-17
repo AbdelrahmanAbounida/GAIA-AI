@@ -103,18 +103,15 @@ export async function validateApiKey({
 
           // Check if it's a model error (means auth worked)
           if (data.error && data.error.type === "invalid_request_error") {
-            console.log(`✓ Valid credentials (model error) via ${endpoint}`);
             return true;
           }
 
           if (response.ok) {
-            console.log(`✓ Valid credentials via ${endpoint}`);
             return true;
           }
         }
 
         if (response.status === 401 || response.status === 403) {
-          console.log(`✗ Authentication failed at ${endpoint}`);
           continue;
         }
       } catch (error) {

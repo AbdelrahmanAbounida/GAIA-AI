@@ -128,12 +128,6 @@ export class QdrantVectorStore extends BaseVectorStore {
       const client = this.getClient();
       const { exists } = await client.collectionExists(this.collectionName);
 
-      if (exists) {
-        console.log(`✓ Collection '${this.collectionName}' exists`);
-      } else {
-        console.log(`ℹ Collection '${this.collectionName}' does not exist yet`);
-      }
-
       return exists;
     } catch (error) {
       if (
@@ -145,7 +139,6 @@ export class QdrantVectorStore extends BaseVectorStore {
         throw error;
       }
 
-      console.log(`ℹ Collection '${this.collectionName}' does not exist yet`);
       return false;
     }
   }
@@ -157,8 +150,6 @@ export class QdrantVectorStore extends BaseVectorStore {
     const exists = await this.storeExists();
 
     if (!exists) {
-      console.log(`📝 Creating collection '${this.collectionName}'...`);
-
       if (this.enableFullText) {
         await this.createCollectionWithSparseVectors();
       } else {
@@ -173,8 +164,6 @@ export class QdrantVectorStore extends BaseVectorStore {
             distance: "Cosine",
           },
         });
-
-        console.log(`✓ Created collection '${this.collectionName}'`);
       }
 
       // Initialize store connection
@@ -207,8 +196,6 @@ export class QdrantVectorStore extends BaseVectorStore {
           collectionName: this.collectionName,
         }
       );
-
-      console.log(`✓ Loaded collection '${this.collectionName}'`);
     } catch (error) {
       throw VectorStoreErrorHandler.handleError("load store", error);
     }
@@ -246,9 +233,6 @@ export class QdrantVectorStore extends BaseVectorStore {
 
       if (this.enableFullText) {
         await this.addDocumentsWithSparseVectors(documents);
-        console.log(
-          `✓ Added ${documents.length} documents with sparse vectors`
-        );
       } else {
         const client = this.getClient();
         const points = await Promise.all(
@@ -271,8 +255,6 @@ export class QdrantVectorStore extends BaseVectorStore {
           wait: true,
           points,
         });
-
-        console.log(`✓ Added ${documents.length} documents`);
       }
     } catch (error) {
       throw VectorStoreErrorHandler.handleError(
@@ -291,8 +273,6 @@ export class QdrantVectorStore extends BaseVectorStore {
       const testEmbedding = await this.config.embeddings.embedQuery("test");
       const vectorSize = testEmbedding.length;
 
-      console.log(`🔧 Creating collection with vector size: ${vectorSize}`);
-
       await client.createCollection(this.collectionName, {
         vectors: {
           [this.denseVectorName]: {
@@ -306,8 +286,6 @@ export class QdrantVectorStore extends BaseVectorStore {
           },
         },
       });
-
-      console.log(`✓ Collection created with sparse vector support`);
     } catch (error) {
       throw VectorStoreErrorHandler.handleError(
         "create collection with sparse vectors",
@@ -352,8 +330,6 @@ export class QdrantVectorStore extends BaseVectorStore {
         wait: true,
         points,
       });
-
-      console.log(`✓ Added ${points.length} points with sparse vectors`);
     } catch (error) {
       throw VectorStoreErrorHandler.handleError(
         "add documents with sparse vectors",
@@ -679,14 +655,11 @@ export class QdrantVectorStore extends BaseVectorStore {
           if (!scrollResult.next_page_offset) break;
         } while (offset !== null);
 
-        console.log(`Total points fetched: ${allPoints.length}`);
-
         const matchingPoints = allPoints.filter((point: any) => {
           return point.payload?.metadata?.documentId === documentId;
         });
 
         if (matchingPoints.length === 0) {
-          console.log(`ℹ No points found with documentId: ${documentId}`);
           return;
         }
 
@@ -700,7 +673,6 @@ export class QdrantVectorStore extends BaseVectorStore {
             wait: true,
             points: batch,
           });
-          console.log(`✓ Deleted batch of ${batch.length} points`);
         }
 
         return;
@@ -755,12 +727,10 @@ export class QdrantVectorStore extends BaseVectorStore {
       await client.deleteCollection(this.collectionName);
 
       this.store = null;
-      console.log(`✓ Collection '${this.collectionName}' deleted`);
     } catch (error) {
       if (error instanceof Error && !error.message.includes("404")) {
         throw VectorStoreErrorHandler.handleError("delete collection", error);
       }
-      console.log(`ℹ Collection '${this.collectionName}' did not exist`);
     }
   }
 

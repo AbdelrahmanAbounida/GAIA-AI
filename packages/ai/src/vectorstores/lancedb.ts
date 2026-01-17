@@ -39,18 +39,12 @@ export class LanceDBVectorStore extends BaseVectorStore {
     config: Record<string, any>
   ): Promise<boolean | Error> {
     try {
-      console.log({
-        uri: config.uri || config.url,
-        apiKey: config.apiKey,
-        region: config.region,
-      });
       const client = await lancedb.connect({
         uri: config.uri || config.url,
         apiKey: config.apiKey,
         region: config.region,
       });
       const tableNames = await client.tableNames();
-      console.log({ tableNames });
       return true;
     } catch (err) {
       console.error("✗ LanceDB connection failed:", err);
@@ -179,12 +173,10 @@ export class LanceDBVectorStore extends BaseVectorStore {
       );
 
       if (!this.ftsIndexCreated) {
-        console.log("Creating FTS index on 'text' column...");
         await this.nativeTable.createIndex("text", {
           config: lancedb.Index.fts(),
         });
         this.ftsIndexCreated = true;
-        console.log("FTS index created successfully");
       }
     } catch (error) {
       console.warn("Could not check/create FTS index:", error);
@@ -277,7 +269,7 @@ export class LanceDBVectorStore extends BaseVectorStore {
       await this.nativeTable.delete(deleteCondition);
       await this.save();
     } catch (error) {
-      console.log({ error });
+      console.error({ error });
       throw VectorStoreErrorHandler.handleError(
         "delete documents",
         error,
@@ -488,7 +480,6 @@ export class LanceDBVectorStore extends BaseVectorStore {
   async save(): Promise<void> {
     this.ensureInitialized();
     // LanceDB auto-persists to disk, no explicit save needed
-    console.log(`LanceDB automatically persisted to ${this.persistPath}`);
   }
 
   async close(): Promise<void> {
@@ -496,7 +487,6 @@ export class LanceDBVectorStore extends BaseVectorStore {
       this.store = null;
       this.nativeTable = null;
       this.ftsIndexCreated = false;
-      console.log("LanceDB connection closed");
     }
   }
 }

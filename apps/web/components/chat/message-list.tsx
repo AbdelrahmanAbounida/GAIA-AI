@@ -199,8 +199,6 @@ function extractSources(message: ChatMessage): Source[] {
       const toolName = part.toolName;
       const output = part.output;
 
-      console.log("Found dynamic tool:", toolName, output);
-
       // Check if this is RAG tool by name
       if (toolName === "ragTool" && output?.documents?.length > 0) {
         output.documents.forEach((doc: any) => {

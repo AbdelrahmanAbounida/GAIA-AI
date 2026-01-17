@@ -59,10 +59,6 @@ export const createImageArtifact = ({
             transient: true,
           });
         }
-
-        if (delta.type === "file") {
-          console.log("File received during stream:", delta.file);
-        }
       }
 
       // After streaming is complete, access the files

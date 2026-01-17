@@ -120,7 +120,6 @@ export class MCPConnectionManager {
     }
 
     try {
-      console.log(`Attempting to reconnect to ${server.name}...`);
       const client = await this.connect(server);
       return client;
     } catch (error) {
@@ -600,7 +599,6 @@ export class MCPConnectionManager {
         config: server,
       });
 
-      console.log(`✓ Connected to MCP server: ${server.name}`);
       return client;
     } catch (error) {
       console.error(`✗ Failed to connect to ${server.name}:`, error);
@@ -620,7 +618,6 @@ export class MCPConnectionManager {
     try {
       await connection.client.close();
       this.connections.delete(serverId);
-      console.log(`✓ Disconnected from: ${connection.serverName}`);
     } catch (error) {
       console.error(
         `✗ Error disconnecting from ${connection.serverName}:`,
@@ -885,7 +882,6 @@ export class MCPConnectionManager {
       const inactiveTime = now.getTime() - connection.lastActivity.getTime();
 
       if (inactiveTime > this.staleThresholdMs) {
-        console.log(`⚠ Cleaning up stale connection: ${connection.serverName}`);
         this.disconnect(id);
       }
     }

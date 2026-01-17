@@ -138,7 +138,7 @@ export const NewToolDialog = ({
           )
         )}
       </DialogTrigger>
-      <DialogContent className="w-[90vw]! max-w-3xl! h-[90vh]! max-h-[700px] p-4 flex flex-col">
+      <DialogContent className="w-[90vw]! max-w-3xl! h-[90vh]! max-h-175 p-4 flex flex-col">
         <DialogHeader>
           <DialogTitle>Add Custom Tool</DialogTitle>
           <DialogDescription>
