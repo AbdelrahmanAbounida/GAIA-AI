@@ -13,25 +13,38 @@ if (!isVercel) {
 const nextConfig: NextConfig = {
   transpilePackages: ["@gaia/db", "@gaia/api", "@gaia/ai"],
 
-  serverExternalPackages: [
-    "better-sqlite3",
-    "faiss-node",
-    "@lancedb/lancedb",
-    "@orpc/server",
-    "@orpc/client",
-    "pg",
-    "chromadb",
-    "@chroma-core/default-embed",
-    "onnxruntime-node",
-    "@huggingface/transformers",
-  ],
+  serverExternalPackages: isVercel
+    ? [
+        "better-sqlite3",
+        "@orpc/server",
+        "@orpc/client",
+        "pg",
+        "chromadb",
+        "@chroma-core/default-embed",
+        "onnxruntime-node",
+        "@huggingface/transformers",
+        "@lancedb/lancedb",
+        "faiss-node",
+      ]
+    : [
+        "better-sqlite3",
+        "faiss-node",
+        "@lancedb/lancedb",
+        "@orpc/server",
+        "@orpc/client",
+        "pg",
+        "chromadb",
+        "@chroma-core/default-embed",
+        "onnxruntime-node",
+        "@huggingface/transformers",
+      ],
 
   ...(isDockerBuild && { output: "standalone" }),
   outputFileTracingExcludes: {
     "*": [
       "node_modules/faiss-node/**",
-      // "node_modules/@lancedb/**",
-      // "node_modules/.pnpm/*lancedb*/**",
+      "node_modules/@lancedb/**",
+      "node_modules/.pnpm/*lancedb*/**",
     ],
   },
   experimental: {
@@ -57,8 +70,7 @@ const nextConfig: NextConfig = {
       ];
 
       if (isVercel) {
-        // config.externals.push("@lancedb/lancedb", "faiss-node");
-        config.externals.push("@lancedb/lancedb");
+        config.externals.push("@lancedb/lancedb", "faiss-node");
       }
     } else {
       // Prevent client-side bundling
@@ -71,7 +83,7 @@ const nextConfig: NextConfig = {
       };
 
       if (isVercel) {
-        // config.resolve.alias["@lancedb/lancedb"] = false;
+        config.resolve.alias["@lancedb/lancedb"] = false;
         config.resolve.alias["faiss-node"] = false;
       }
     }
@@ -98,6 +110,7 @@ const nextConfig: NextConfig = {
       ],
     };
 
+    // ✅ Enhanced Vercel-specific optimizations
     if (isVercel) {
       config.resolve.alias = {
         ...config.resolve.alias,
