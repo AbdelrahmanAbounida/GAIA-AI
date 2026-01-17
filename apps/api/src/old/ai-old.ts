@@ -74,7 +74,6 @@
 //         message: "Unauthorized",
 //       };
 //     }
-//     // TODO:: can we cache
 //     const aiModels = (await aiGateway.getAvailableModels()).models;
 
 //     const llms = aiModels.filter((model) => model.modelType === "language");

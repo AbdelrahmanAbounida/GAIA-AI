@@ -10,6 +10,7 @@ import {
   and,
   desc,
   count,
+  sql,
 } from "@gaia/db";
 import { chatSchemas } from "./schema";
 
@@ -65,7 +66,9 @@ export const chatHandlers = {
         .limit(limit + 1)
         .offset(input.offset),
       db
-        .select({ count: count() })
+        .select({
+          count: count(),
+        })
         .from(chat)
         .where(eq(chat.userId, context.session.user.id)),
     ]);

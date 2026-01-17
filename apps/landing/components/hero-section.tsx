@@ -92,12 +92,7 @@ export function HeroSection() {
             </Button>
             <Button
               onClick={() => {
-                // TODO: Add documentation link
-                showInfoToast({
-                  title: "Soon",
-                  description: "Documentation coming soon",
-                });
-                // window.open("https://docs.gaiadocs.com/", "_blank"); // gaia-docs.aboneda.com
+                window.open("https://gaia-docs.com/", "_blank");
               }}
               size="sm"
               variant="outline"

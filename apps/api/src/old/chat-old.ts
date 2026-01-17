@@ -50,7 +50,7 @@
 //       .values({
 //         name: input.name,
 //         userId: context.session?.user.id,
-//         id: input.chatId || undefined, // TODO:: recheck
+//         id: input.chatId || undefined,
 //       })
 //       .returning();
 

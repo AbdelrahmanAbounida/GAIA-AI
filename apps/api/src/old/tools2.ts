@@ -5,7 +5,6 @@
 // import { getPackageManager } from "../lib/package-manager";
 // import { ToolCodeValidator } from "../lib/tool-validator";
 
-// // TODO;: this should be new implementation
 // /**
 //  * Validate tool code before creation/update
 //  */

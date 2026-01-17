@@ -254,9 +254,15 @@ export function validateRequiredCredentials(
   settings: any,
   credentials: ReturnType<typeof extractCredentials>
 ) {
-  // TODO;: handle the validation
-  // TODO:: if model is from ollama no need for api key
   const missing: string[] = [];
+  const embeddingBaseUrl = credentials.embedding?.baseURL;
+  const isOllama =
+    embeddingBaseUrl?.includes("ollama") ||
+    embeddingBaseUrl?.includes("localhost") ||
+    embeddingBaseUrl?.includes("host.docker.internal");
+  if (!isOllama && !credentials.embedding?.apiKey) {
+    missing.push("LLM Model API Key");
+  }
 
   if (settings.embeddingProvider && !credentials.embedding?.apiKey) {
     missing.push("Embedding Model API Key");

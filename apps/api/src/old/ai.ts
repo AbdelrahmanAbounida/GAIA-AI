@@ -470,7 +470,7 @@
 //         })
 //       )
 //       .output(
-//         z.any() // TODO:: add schema
+//         z.any()
 //       )
 //       .handler(async function* ({ input, context }) {
 //         if (!context.session?.user) {

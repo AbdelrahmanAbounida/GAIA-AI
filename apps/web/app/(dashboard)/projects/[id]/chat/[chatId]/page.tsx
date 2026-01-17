@@ -12,9 +12,7 @@ const ChatPage = async (props: {
   const params = await props.params;
   const chatId = params.chatId;
 
-  console.log({ id: params.id, chatId });
-
-  // 0- TODO:: handle the auth operation
+  // 0- TODO:: handle the auth operation when sharing chat
   const user = await getServerAuth();
   if (!user) {
     return redirect("/auth");

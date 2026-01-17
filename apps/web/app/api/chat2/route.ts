@@ -386,7 +386,6 @@ export async function POST(request: Request) {
       // Structured Output (if using output schema)
       structuredOutput: result.experimental_output || undefined,
 
-      // Todos (if createTask was called)
       todos: result.toolCalls
         ?.filter((tc: any) => tc.toolName === "createTask")
         .map((tc: any) => ({

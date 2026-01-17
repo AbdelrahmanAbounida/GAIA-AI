@@ -3,8 +3,6 @@ import dotenv from "dotenv";
 import z from "zod";
 import type { AIProvider as Provider, ProviderCapability } from "./types";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import { createOpenAI } from "@ai-sdk/openai";
-import { convertToOpenAICompatibleChatMessages } from "@ai-sdk/openai-compatible/internal";
 
 dotenv.config();
 
