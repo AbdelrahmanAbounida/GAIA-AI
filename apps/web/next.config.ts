@@ -28,9 +28,24 @@ const nextConfig: NextConfig = {
 
   ...(isDockerBuild && { output: "standalone" }),
 
+  // 1. Fix Size Limit: Explicitly exclude the Alpine (musl) and other OS binaries
   outputFileTracingExcludes: {
-    "*": ["node_modules/faiss-node/**"],
+    "*": [
+      // Exclude Alpine Linux (the huge 129MB file you don't need)
+      "**/@lancedb+lancedb-linux-x64-musl*/**",
+      "**/@lancedb/lancedb-linux-x64-musl/**",
+
+      // Exclude Mac/Windows just to be safe
+      "**/@lancedb+lancedb-darwin*/**",
+      "**/@lancedb/lancedb-darwin*/**",
+      "**/@lancedb+lancedb-win32*/**",
+      "**/@lancedb/lancedb-win32*/**",
+
+      // Exclude Faiss if not strictly needed or if too large
+      "node_modules/faiss-node/**",
+    ],
   },
+  outputFileTracingRoot: path.join(__dirname, "../../"),
   experimental: {
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
   },
@@ -42,7 +57,6 @@ const nextConfig: NextConfig = {
 
   webpack: (config, { isServer }) => {
     if (isServer) {
-      // Keep existing externals
       config.externals = [
         ...(config.externals || []),
         "@orpc/client/fetch",
@@ -65,19 +79,7 @@ const nextConfig: NextConfig = {
       };
     }
 
-    config.plugins = config.plugins || [];
-
-    config.module = {
-      ...config.module,
-      rules: [
-        ...(config.module?.rules || []),
-        {
-          test: /\.node$/,
-          use: "node-loader",
-        },
-      ],
-    };
-
+    // Keep the Vercel-specific alias exclusions to prevent webpack bundling
     if (isVercel) {
       config.resolve.alias = {
         ...config.resolve.alias,
@@ -86,34 +88,12 @@ const nextConfig: NextConfig = {
         "@lancedb/lancedb-darwin-arm64": false,
         "@lancedb/lancedb-win32-x64-msvc": false,
       };
-
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        "@lancedb/lancedb-linux-x64-musl": false,
-        "@lancedb/lancedb-darwin-x64": false,
-        "@lancedb/lancedb-darwin-arm64": false,
-        "@lancedb/lancedb-win32-x64-msvc": false,
-      };
-
-      config.optimization = {
-        ...config.optimization,
-        moduleIds: "deterministic",
-        runtimeChunk: false,
-        splitChunks: {
-          chunks: "all",
-          cacheGroups: {
-            default: false,
-            vendors: false,
-          },
-        },
-      };
     }
 
     // Docker optimizations
     if (isDockerBuild) {
       config.cache = false;
       config.parallelism = 1;
-
       config.optimization = {
         ...config.optimization,
         minimize: false,
