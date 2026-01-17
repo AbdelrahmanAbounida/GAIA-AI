@@ -13,11 +13,10 @@ if (!isVercel) {
 const nextConfig: NextConfig = {
   transpilePackages: ["@gaia/db", "@gaia/api", "@gaia/ai"],
 
-  // Conditional serverExternalPackages based on environment
   serverExternalPackages: isVercel
     ? [
-        // Exclude heavy native packages on Vercel
-        // "better-sqlite3",
+        "better-sqlite3",
+        "@libsql/client",
         "@orpc/server",
         "@orpc/client",
         "pg",
@@ -27,7 +26,6 @@ const nextConfig: NextConfig = {
         "@huggingface/transformers",
       ]
     : [
-        // Include all packages for local/Docker
         "better-sqlite3",
         "faiss-node",
         "@lancedb/lancedb",
