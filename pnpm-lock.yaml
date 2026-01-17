@@ -275,6 +275,9 @@ importers:
       better-sqlite3:
         specifier: ^12.5.0
         version: 12.6.2
+      chromadb:
+        specifier: ^3.1.6
+        version: 3.2.2
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
