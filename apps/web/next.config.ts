@@ -13,33 +13,27 @@ if (!isVercel) {
 const nextConfig: NextConfig = {
   transpilePackages: ["@gaia/db", "@gaia/api", "@gaia/ai"],
 
-  serverExternalPackages: isVercel
-    ? [
-        "better-sqlite3",
-        "@orpc/server",
-        "@orpc/client",
-        "pg",
-        "chromadb",
-        "@chroma-core/default-embed",
-        "onnxruntime-node",
-        "@huggingface/transformers",
-        "@lancedb/lancedb",
-        "faiss-node",
-      ]
-    : [
-        "better-sqlite3",
-        "faiss-node",
-        "@lancedb/lancedb",
-        "@orpc/server",
-        "@orpc/client",
-        "pg",
-        "chromadb",
-        "@chroma-core/default-embed",
-        "onnxruntime-node",
-        "@huggingface/transformers",
-      ],
+  serverExternalPackages: [
+    "better-sqlite3",
+    "@orpc/server",
+    "@orpc/client",
+    "pg",
+    "chromadb",
+    "@chroma-core/default-embed",
+    "onnxruntime-node",
+    "@huggingface/transformers",
+    "@lancedb/lancedb",
+    "faiss-node",
+    // Add all LanceDB native bindings
+    "@lancedb/lancedb-linux-x64-gnu",
+    "@lancedb/lancedb-linux-x64-musl",
+    "@lancedb/lancedb-darwin-x64",
+    "@lancedb/lancedb-darwin-arm64",
+    "@lancedb/lancedb-win32-x64-msvc",
+  ],
 
   ...(isDockerBuild && { output: "standalone" }),
+
   outputFileTracingExcludes: {
     "*": [
       "node_modules/faiss-node/**",
@@ -47,6 +41,20 @@ const nextConfig: NextConfig = {
       "node_modules/.pnpm/*lancedb*/**",
     ],
   },
+
+  outputFileTracingIncludes: isVercel
+    ? {
+        "/auth": [
+          "../../node_modules/@lancedb/lancedb/**/*",
+          "../../node_modules/@lancedb/lancedb-linux-x64-gnu/**/*",
+        ],
+        "/**": [
+          "../../node_modules/@lancedb/lancedb/**/*",
+          "../../node_modules/@lancedb/lancedb-linux-x64-gnu/**/*",
+        ],
+      }
+    : undefined,
+
   experimental: {
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
   },
@@ -58,7 +66,7 @@ const nextConfig: NextConfig = {
 
   webpack: (config, { isServer }) => {
     if (isServer) {
-      // Keep existing externals
+      // Ensure all native modules are externalized
       config.externals = [
         ...(config.externals || []),
         "@orpc/client/fetch",
@@ -67,11 +75,14 @@ const nextConfig: NextConfig = {
         "@chroma-core/default-embed",
         "@huggingface/transformers",
         "faiss-node",
+        "@lancedb/lancedb",
+        // Explicitly external all native bindings
+        "@lancedb/lancedb-linux-x64-gnu",
+        "@lancedb/lancedb-linux-x64-musl",
+        "@lancedb/lancedb-darwin-x64",
+        "@lancedb/lancedb-darwin-arm64",
+        "@lancedb/lancedb-win32-x64-msvc",
       ];
-
-      if (isVercel) {
-        config.externals.push("@lancedb/lancedb", "faiss-node");
-      }
     } else {
       // Prevent client-side bundling
       config.resolve.alias = {
@@ -80,25 +91,27 @@ const nextConfig: NextConfig = {
         chromadb: false,
         "@chroma-core/default-embed": false,
         "@huggingface/transformers": false,
+        "@lancedb/lancedb": false,
+        "faiss-node": false,
+        "@lancedb/lancedb-linux-x64-gnu": false,
+        "@lancedb/lancedb-linux-x64-musl": false,
+        "@lancedb/lancedb-darwin-x64": false,
+        "@lancedb/lancedb-darwin-arm64": false,
+        "@lancedb/lancedb-win32-x64-msvc": false,
       };
-
-      if (isVercel) {
-        config.resolve.alias["@lancedb/lancedb"] = false;
-        config.resolve.alias["faiss-node"] = false;
-      }
     }
 
     config.plugins = config.plugins || [];
 
-    if (isVercel) {
-      config.plugins.push(
-        new (require("webpack").IgnorePlugin)({
-          resourceRegExp: /@lancedb\/lancedb-(linux|darwin|win32)/,
-        })
-      );
-    }
+    // Ignore platform-specific bindings
+    config.plugins.push(
+      new (require("webpack").IgnorePlugin)({
+        resourceRegExp: /@lancedb\/lancedb-(linux|darwin|win32)/,
+        contextRegExp: /node_modules/,
+      })
+    );
 
-    // Ignore .node files
+    // Handle .node files
     config.module = {
       ...config.module,
       rules: [
@@ -110,42 +123,6 @@ const nextConfig: NextConfig = {
       ],
     };
 
-    // ✅ Enhanced Vercel-specific optimizations
-    if (isVercel) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        "@lancedb/lancedb-linux-x64-musl": false,
-        "@lancedb/lancedb-linux-x64-gnu": false,
-        "@lancedb/lancedb-darwin-x64": false,
-        "@lancedb/lancedb-darwin-arm64": false,
-        "@lancedb/lancedb-win32-x64-msvc": false,
-      };
-
-      // Add fallback for missing modules
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        "@lancedb/lancedb-linux-x64-gnu": false,
-        "@lancedb/lancedb-linux-x64-musl": false,
-        "@lancedb/lancedb-darwin-x64": false,
-        "@lancedb/lancedb-darwin-arm64": false,
-        "@lancedb/lancedb-win32-x64-msvc": false,
-      };
-
-      config.optimization = {
-        ...config.optimization,
-        moduleIds: "deterministic",
-        runtimeChunk: false,
-        splitChunks: {
-          chunks: "all",
-          cacheGroups: {
-            default: false,
-            vendors: false,
-          },
-        },
-      };
-    }
-
-    // Docker optimizations
     if (isDockerBuild) {
       config.cache = false;
       config.parallelism = 1;
