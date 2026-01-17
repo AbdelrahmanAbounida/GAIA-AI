@@ -1,6 +1,15 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const isDockerBuild = process.env.DOCKER_BUILD === "true";
+const isVercel = process.env.VERCEL === "1" || process.env.VERCEL_ENV;
+
+if (!isVercel) {
+  // require("dotenv").config({ path: "../../.env" });
+  require("dotenv").config({
+    path: path.resolve(process.cwd(), "../../.env"),
+  });
+}
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@gaia/db", "@gaia/api", "@gaia/ai"],

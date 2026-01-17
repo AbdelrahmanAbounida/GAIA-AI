@@ -30,7 +30,7 @@ export const ChatNotfound = ({ errorMessage }: { errorMessage?: string }) => {
   return (
     <div className="flex h-full w-full items-center justify-center">
       <Empty className="h-full w-full">
-        <EmptyHeader className="max-w-[500px]">
+        <EmptyHeader className="max-w-125">
           <EmptyMedia
             variant="icon"
             className="bg-background! hover:bg-background!"
