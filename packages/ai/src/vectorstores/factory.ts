@@ -6,16 +6,47 @@ import type {
   VectorStoreConfig,
   FullTextSearchProviderId,
 } from "./types";
-import { FaissVectorStore } from "./faiss";
-import { LanceDBVectorStore } from "./lancedb";
-import { PineconeVectorStore } from "./pinecone";
-import { QdrantVectorStore } from "./qdrant";
-import { WeaviateVectorStore } from "./weaviate";
-import { ChromaVectorStore } from "./chroma";
-import { MilvusVectorStore } from "./milvus";
-import { PGVectorVectorStore } from "./pgvector";
-import { SupabaseVectorStore } from "./supabase";
 import type { BaseVectorStore } from "./base";
+
+async function loadVectorStoreClass(provider: VectorStoreProviderId) {
+  switch (provider) {
+    case "faiss":
+      const { FaissVectorStore } = await import("./faiss");
+      return FaissVectorStore;
+    case "lancedb":
+      try {
+        const { LanceDBVectorStore } = await import("./lancedb");
+        return LanceDBVectorStore;
+      } catch (error) {
+        console.warn("LanceDB not available, falling back to ChromaDB");
+        const { ChromaVectorStore } = await import("./chroma");
+        return ChromaVectorStore;
+      }
+    case "pinecone":
+      const { PineconeVectorStore } = await import("./pinecone");
+      return PineconeVectorStore;
+    case "qdrant":
+      const { QdrantVectorStore } = await import("./qdrant");
+      return QdrantVectorStore;
+    case "weaviate":
+      const { WeaviateVectorStore } = await import("./weaviate");
+      return WeaviateVectorStore;
+    case "chroma":
+      const { ChromaVectorStore } = await import("./chroma");
+      return ChromaVectorStore;
+    case "milvus":
+      const { MilvusVectorStore } = await import("./milvus");
+      return MilvusVectorStore;
+    case "pgvector":
+      const { PGVectorVectorStore } = await import("./pgvector");
+      return PGVectorVectorStore;
+    case "supabase":
+      const { SupabaseVectorStore } = await import("./supabase");
+      return SupabaseVectorStore;
+    default:
+      throw new Error(`Unsupported vector store provider: ${provider}`);
+  }
+}
 
 export interface CreateVectorStoreOptions {
   // Core options
@@ -51,12 +82,10 @@ function getDataDirectory(): string {
   }
 
   // 2. In Docker/production, use /app/data
-  // Check multiple indicators of Docker/production environment
   const isDocker =
     process.env.NODE_ENV === "production" ||
     process.env.DATABASE_URL?.includes("/app/data") ||
     process.env.DATABASE_URL?.startsWith("file:/app/data") ||
-    // Additional check: if we're in /app directory structure (Docker)
     process.cwd().startsWith("/app/");
 
   if (isDocker) {
@@ -100,6 +129,28 @@ async function ensureDirectory(dirPath: string): Promise<void> {
 }
 
 /**
+ * Get effective provider (with fallback logic for unavailable providers)
+ */
+function getEffectiveProvider(
+  requestedProvider: VectorStoreProviderId
+): VectorStoreProviderId {
+  const isVercel = process.env.VERCEL === "1" || process.env.VERCEL_ENV;
+
+  // On Vercel, if LanceDB or Faiss is requested, fall back to ChromaDB
+  if (
+    isVercel &&
+    (requestedProvider === "lancedb" || requestedProvider === "faiss")
+  ) {
+    console.warn(
+      `${requestedProvider} not available on Vercel, using chromadb instead`
+    );
+    return "chroma";
+  }
+
+  return requestedProvider;
+}
+
+/**
  * Factory function to create and initialize a vector store
  */
 export async function createVectorStore({
@@ -121,14 +172,12 @@ export async function createVectorStore({
     model: embeddingModel,
   });
 
-  // ✅ Use centralized data directory function
+  const effectiveProvider = getEffectiveProvider(provider);
   const baseDataDir = getDataDirectory();
-
-  // ✅ Create flat structure: /app/data/vector_stores/{provider}/{project-id}
   const persistDirectory = path.join(
     baseDataDir,
     "vector_stores",
-    provider,
+    effectiveProvider,
     projectId
   );
 
@@ -136,14 +185,14 @@ export async function createVectorStore({
 
   // Determine FTS provider
   const effectiveFTSProvider = determineEffectiveFTSProvider(
-    provider,
+    effectiveProvider,
     fullTextSearchTool
   );
 
-  const vectorStore = createVectorStoreInstance(provider, {
+  const vectorStore = await createVectorStoreInstance(effectiveProvider, {
     persistDirectory,
     embeddings,
-    provider,
+    provider: effectiveProvider,
     tableName,
     projectId,
     fullTextSearchTool: effectiveFTSProvider!,
@@ -200,76 +249,53 @@ export async function validateVectorstore({
   provider: VectorStoreProviderId;
   config: Record<string, any>;
 }): Promise<boolean | Error> {
-  switch (provider) {
-    case "faiss":
-      return FaissVectorStore.validateApiKey(config);
-    case "lancedb":
-      return LanceDBVectorStore.validateApiKey(config);
-    case "pinecone":
-      return PineconeVectorStore.validateApiKey(config);
-    case "qdrant":
-      return QdrantVectorStore.validateApiKey(config);
-    case "weaviate":
-      return WeaviateVectorStore.validateApiKey(config);
-    case "chroma":
-      return ChromaVectorStore.validateApiKey(config);
-    case "milvus":
-      return MilvusVectorStore.validateApiKey(config);
-    case "pgvector":
-      return PGVectorVectorStore.validateApiKey(config);
-    case "supabase":
-      return SupabaseVectorStore.validateApiKey(config);
-    default:
-      throw new Error(`Unsupported vector store provider: ${provider}`);
-  }
+  const VectorStoreClass = await loadVectorStoreClass(provider);
+  return VectorStoreClass.validateApiKey(config);
 }
 
 /**
- * Create a vector store instance based on provider
+ * Create a vector store instance based on provider (async now)
  */
-export function createVectorStoreInstance(
+export async function createVectorStoreInstance(
   provider: VectorStoreProviderId,
   config: VectorStoreConfig
-): BaseVectorStore {
-  switch (provider) {
-    case "faiss":
-      return new FaissVectorStore(config);
-    case "lancedb":
-      return new LanceDBVectorStore(config);
-    case "pinecone":
-      return new PineconeVectorStore(config);
-    case "qdrant":
-      return new QdrantVectorStore(config);
-    case "weaviate":
-      return new WeaviateVectorStore(config);
-    case "chroma":
-      return new ChromaVectorStore(config);
-    case "milvus":
-      return new MilvusVectorStore(config);
-    case "pgvector":
-      return new PGVectorVectorStore(config);
-    case "supabase":
-      return new SupabaseVectorStore(config);
-    default:
-      throw new Error(`Unsupported vector store provider: ${provider}`);
-  }
+): Promise<BaseVectorStore> {
+  const VectorStoreClass = await loadVectorStoreClass(provider);
+  return new VectorStoreClass(config);
 }
 
 /**
- * Get available vector store providers
+ * Get available vector store providers (checks runtime availability)
  */
-export function getAvailableProviders(): VectorStoreProviderId[] {
-  return [
-    "faiss",
-    "lancedb",
+export async function getAvailableProviders(): Promise<
+  VectorStoreProviderId[]
+> {
+  const allProviders: VectorStoreProviderId[] = [
+    "chroma",
     "pinecone",
     "qdrant",
     "weaviate",
-    "chroma",
     "milvus",
     "pgvector",
     "supabase",
   ];
+
+  const isVercel = process.env.VERCEL === "1" || process.env.VERCEL_ENV;
+
+  // Only include native-binding providers if not on Vercel
+  if (!isVercel) {
+    try {
+      await import("./faiss");
+      allProviders.push("faiss");
+    } catch {}
+
+    try {
+      await import("./lancedb");
+      allProviders.push("lancedb");
+    } catch {}
+  }
+
+  return allProviders;
 }
 
 /**
