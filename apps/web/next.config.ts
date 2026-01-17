@@ -22,26 +22,15 @@ const nextConfig: NextConfig = {
     "@chroma-core/default-embed",
     "onnxruntime-node",
     "@huggingface/transformers",
+    "@lancedb/lancedb",
     "faiss-node",
-
-    // "@lancedb/lancedb",
-    // "@lancedb/lancedb-linux-x64-gnu",
-    // "@lancedb/lancedb-linux-x64-musl",
-    // "@lancedb/lancedb-darwin-x64",
-    // "@lancedb/lancedb-darwin-arm64",
-    // "@lancedb/lancedb-win32-x64-msvc",
   ],
 
   ...(isDockerBuild && { output: "standalone" }),
 
   outputFileTracingExcludes: {
-    "*": [
-      "node_modules/faiss-node/**",
-      // "node_modules/@lancedb/**",
-      // "node_modules/.pnpm/*lancedb*/**",
-    ],
+    "*": ["node_modules/faiss-node/**"],
   },
-
   experimental: {
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
   },
@@ -53,6 +42,7 @@ const nextConfig: NextConfig = {
 
   webpack: (config, { isServer }) => {
     if (isServer) {
+      // Keep existing externals
       config.externals = [
         ...(config.externals || []),
         "@orpc/client/fetch",
@@ -61,16 +51,9 @@ const nextConfig: NextConfig = {
         "@chroma-core/default-embed",
         "@huggingface/transformers",
         "faiss-node",
-
-        // "@lancedb/lancedb",
-        // "@lancedb/lancedb-linux-x64-gnu",
-        // "@lancedb/lancedb-linux-x64-musl",
-        // "@lancedb/lancedb-darwin-x64",
-        // "@lancedb/lancedb-darwin-arm64",
-        // "@lancedb/lancedb-win32-x64-msvc",
+        "@lancedb/lancedb",
       ];
     } else {
-      // Prevent client-side bundling
       config.resolve.alias = {
         ...config.resolve.alias,
         "onnxruntime-node": false,
@@ -79,25 +62,11 @@ const nextConfig: NextConfig = {
         "@huggingface/transformers": false,
         "@lancedb/lancedb": false,
         "faiss-node": false,
-        // "@lancedb/lancedb-linux-x64-gnu": false,
-        // "@lancedb/lancedb-linux-x64-musl": false,
-        // "@lancedb/lancedb-darwin-x64": false,
-        // "@lancedb/lancedb-darwin-arm64": false,
-        // "@lancedb/lancedb-win32-x64-msvc": false,
       };
     }
 
     config.plugins = config.plugins || [];
 
-    // Ignore platform-specific bindings
-    config.plugins.push(
-      new (require("webpack").IgnorePlugin)({
-        resourceRegExp: /@lancedb\/lancedb-(linux|darwin|win32)/,
-        contextRegExp: /node_modules/,
-      })
-    );
-
-    // Handle .node files
     config.module = {
       ...config.module,
       rules: [
@@ -109,6 +78,38 @@ const nextConfig: NextConfig = {
       ],
     };
 
+    if (isVercel) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        "@lancedb/lancedb-linux-x64-musl": false,
+        "@lancedb/lancedb-darwin-x64": false,
+        "@lancedb/lancedb-darwin-arm64": false,
+        "@lancedb/lancedb-win32-x64-msvc": false,
+      };
+
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        "@lancedb/lancedb-linux-x64-musl": false,
+        "@lancedb/lancedb-darwin-x64": false,
+        "@lancedb/lancedb-darwin-arm64": false,
+        "@lancedb/lancedb-win32-x64-msvc": false,
+      };
+
+      config.optimization = {
+        ...config.optimization,
+        moduleIds: "deterministic",
+        runtimeChunk: false,
+        splitChunks: {
+          chunks: "all",
+          cacheGroups: {
+            default: false,
+            vendors: false,
+          },
+        },
+      };
+    }
+
+    // Docker optimizations
     if (isDockerBuild) {
       config.cache = false;
       config.parallelism = 1;
