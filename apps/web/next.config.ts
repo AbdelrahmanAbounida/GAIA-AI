@@ -22,7 +22,7 @@ const nextConfig: NextConfig = {
     "@chroma-core/default-embed",
     "onnxruntime-node",
     "@huggingface/transformers",
-    "@lancedb/lancedb",
+    // "@lancedb/lancedb",
     "faiss-node",
     // Add all LanceDB native bindings
     "@lancedb/lancedb-linux-x64-gnu",
@@ -37,7 +37,7 @@ const nextConfig: NextConfig = {
   outputFileTracingExcludes: {
     "*": [
       "node_modules/faiss-node/**",
-      "node_modules/@lancedb/**",
+      // "node_modules/@lancedb/**",
       "node_modules/.pnpm/*lancedb*/**",
     ],
   },
