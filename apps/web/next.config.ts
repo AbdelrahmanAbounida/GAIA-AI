@@ -22,14 +22,14 @@ const nextConfig: NextConfig = {
     "@chroma-core/default-embed",
     "onnxruntime-node",
     "@huggingface/transformers",
-    // "@lancedb/lancedb",
     "faiss-node",
-    // Add all LanceDB native bindings
-    "@lancedb/lancedb-linux-x64-gnu",
-    "@lancedb/lancedb-linux-x64-musl",
-    "@lancedb/lancedb-darwin-x64",
-    "@lancedb/lancedb-darwin-arm64",
-    "@lancedb/lancedb-win32-x64-msvc",
+
+    // "@lancedb/lancedb",
+    // "@lancedb/lancedb-linux-x64-gnu",
+    // "@lancedb/lancedb-linux-x64-musl",
+    // "@lancedb/lancedb-darwin-x64",
+    // "@lancedb/lancedb-darwin-arm64",
+    // "@lancedb/lancedb-win32-x64-msvc",
   ],
 
   ...(isDockerBuild && { output: "standalone" }),
@@ -38,22 +38,9 @@ const nextConfig: NextConfig = {
     "*": [
       "node_modules/faiss-node/**",
       // "node_modules/@lancedb/**",
-      "node_modules/.pnpm/*lancedb*/**",
+      // "node_modules/.pnpm/*lancedb*/**",
     ],
   },
-
-  outputFileTracingIncludes: isVercel
-    ? {
-        "/auth": [
-          "../../node_modules/@lancedb/lancedb/**/*",
-          "../../node_modules/@lancedb/lancedb-linux-x64-gnu/**/*",
-        ],
-        "/**": [
-          "../../node_modules/@lancedb/lancedb/**/*",
-          "../../node_modules/@lancedb/lancedb-linux-x64-gnu/**/*",
-        ],
-      }
-    : undefined,
 
   experimental: {
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
@@ -66,7 +53,6 @@ const nextConfig: NextConfig = {
 
   webpack: (config, { isServer }) => {
     if (isServer) {
-      // Ensure all native modules are externalized
       config.externals = [
         ...(config.externals || []),
         "@orpc/client/fetch",
@@ -75,13 +61,13 @@ const nextConfig: NextConfig = {
         "@chroma-core/default-embed",
         "@huggingface/transformers",
         "faiss-node",
-        "@lancedb/lancedb",
-        // Explicitly external all native bindings
-        "@lancedb/lancedb-linux-x64-gnu",
-        "@lancedb/lancedb-linux-x64-musl",
-        "@lancedb/lancedb-darwin-x64",
-        "@lancedb/lancedb-darwin-arm64",
-        "@lancedb/lancedb-win32-x64-msvc",
+
+        // "@lancedb/lancedb",
+        // "@lancedb/lancedb-linux-x64-gnu",
+        // "@lancedb/lancedb-linux-x64-musl",
+        // "@lancedb/lancedb-darwin-x64",
+        // "@lancedb/lancedb-darwin-arm64",
+        // "@lancedb/lancedb-win32-x64-msvc",
       ];
     } else {
       // Prevent client-side bundling
@@ -93,11 +79,11 @@ const nextConfig: NextConfig = {
         "@huggingface/transformers": false,
         "@lancedb/lancedb": false,
         "faiss-node": false,
-        "@lancedb/lancedb-linux-x64-gnu": false,
-        "@lancedb/lancedb-linux-x64-musl": false,
-        "@lancedb/lancedb-darwin-x64": false,
-        "@lancedb/lancedb-darwin-arm64": false,
-        "@lancedb/lancedb-win32-x64-msvc": false,
+        // "@lancedb/lancedb-linux-x64-gnu": false,
+        // "@lancedb/lancedb-linux-x64-musl": false,
+        // "@lancedb/lancedb-darwin-x64": false,
+        // "@lancedb/lancedb-darwin-arm64": false,
+        // "@lancedb/lancedb-win32-x64-msvc": false,
       };
     }
 
