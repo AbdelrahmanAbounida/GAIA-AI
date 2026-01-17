@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
   serverExternalPackages: isVercel
     ? [
         // Exclude heavy native packages on Vercel
-        "better-sqlite3",
+        // "better-sqlite3",
         "@orpc/server",
         "@orpc/client",
         "pg",
@@ -40,7 +40,7 @@ const nextConfig: NextConfig = {
         "@huggingface/transformers",
       ],
 
-  output: "standalone",
+  output: isVercel ? "export" : "standalone",
   outputFileTracingExcludes: {
     "*": [
       "node_modules/@lancedb/**",
