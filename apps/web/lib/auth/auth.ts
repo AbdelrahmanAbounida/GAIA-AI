@@ -15,23 +15,22 @@ export function initAuth<
   emailVerification?: BetterAuthOptions["emailVerification"];
   emailAndPassword?: BetterAuthOptions["emailAndPassword"];
 }): any {
+  const baseURL = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : process.env.NODE_ENV === "production"
+      ? "http://0.0.0.0:3000" // Docker fallback
+      : "http://localhost:3000";
+
   const trustedOrigins = [
     options.productionUrl,
-    // Development origins
     "http://localhost:5679",
     "http://localhost:3000",
     "http://localhost:3001",
     "http://127.0.0.1:5679",
     "http://127.0.0.1:3000",
     "http://0.0.0.0:3000",
-    process.env.VERCEL_URL!,
-  ];
-
-  const baseURL = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : process.env.NODE_ENV === "production"
-      ? "http://0.0.0.0:3000" // Docker fallback
-      : "http://localhost:3000";
+    baseURL,
+  ].filter(Boolean);
 
   const config = {
     database: drizzleAdapter(db, {
