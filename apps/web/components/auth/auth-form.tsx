@@ -110,7 +110,9 @@ export function AuthForm() {
   const setView = useAuthModal((state) => state.setView);
   const setIsLogin = useAuthModal((state) => state.setIsLogin);
 
-  const isVercel = !!(process.env.VERCEL === "1" || process.env.VERCEL_ENV);
+  const isVercel = !!(
+    !!process.env.NEXT_PUBLIC_VERCEL || process.env.VERCEL_ENV
+  );
 
   useEffect(() => {
     const isDismissed = localStorage.getItem(ALERT_STORAGE_KEY);
