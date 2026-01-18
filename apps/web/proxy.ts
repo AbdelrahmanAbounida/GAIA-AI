@@ -1,13 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-// import { getServerAuth } from "./lib/auth/actions";
+import { getServerAuth } from "./lib/auth/actions";
 
 export async function proxy(request: NextRequest) {
   const currentpath = request.nextUrl.pathname;
-  const user =
-    request.cookies.has("better-auth.session_token") ||
-    request.cookies.has("better_auth_session_token");
-  // const { user } = await getServerAuth();
+  const { user } = await getServerAuth();
 
   if (!user && !(currentpath.startsWith("/auth") || currentpath === "/")) {
     return NextResponse.redirect(new URL("/auth", request.url));
