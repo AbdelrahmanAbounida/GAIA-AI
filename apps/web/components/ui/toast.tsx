@@ -3,6 +3,7 @@ import { toast } from "sonner";
 type Position =
   | "top-left"
   | "top-right"
+  | "top-center"
   | "bottom-left"
   | "bottom-right"
   | "bottom-center";

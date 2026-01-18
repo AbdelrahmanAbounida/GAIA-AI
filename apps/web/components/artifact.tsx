@@ -84,7 +84,7 @@ export function ArtifactCard({
     switch (artifact.type) {
       case "image":
         return (
-          <div className="mt-3 rounded-lg bg-muted p-2 overflow-hidden flex items-center justify-center min-h-[120px]">
+          <div className="mt-3 rounded-lg bg-muted p-2 overflow-hidden flex items-center justify-center min-h-30">
             <img
               src={`data:image/png;base64,${artifact.content}`}
               alt={artifact.title}
@@ -94,7 +94,7 @@ export function ArtifactCard({
         );
       case "video":
         return (
-          <div className="mt-3 rounded-lg bg-muted p-2 overflow-hidden flex items-center justify-center min-h-[120px]">
+          <div className="mt-3 rounded-lg bg-muted p-2 overflow-hidden flex items-center justify-center min-h-30">
             <Video className="w-12 h-12 text-muted-foreground/50" />
           </div>
         );
@@ -316,7 +316,7 @@ export function ArtifactPanel({
       className="flex flex-col h-full bg-background border-l border-border overflow-hidden"
     >
       {/* Header */}
-      <div className="p-4 h-[60px] flex flex-row justify-between items-center bg-muted/30 border-b border-border">
+      <div className="p-4 h-15 flex flex-row justify-between items-center bg-muted/30 border-b border-border">
         {/* Left side - Tabs or Title */}
         {shouldShowTabs() ? (
           <Tabs

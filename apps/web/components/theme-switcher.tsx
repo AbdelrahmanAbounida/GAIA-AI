@@ -3,7 +3,7 @@ import { Monitor, Sun, Moon, PaletteIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 
-export function ThemeSwitcher() {
+export function ThemeSwitcher({ withIcon }: { withIcon?: boolean }) {
   const { theme, setTheme } = useTheme();
 
   return (
@@ -13,10 +13,12 @@ export function ThemeSwitcher() {
         "relative flex cursor-pointer first:rounded-t-xl last:rounded-b-xl select-none items-center gap-2 rounded-md px-2 h-9 text-sm outline-none transition-colors dark:focus:bg-gaia-700/30 dark:focus:text-bg-gaia-700-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0"
       )}
     >
-      <div className="flex items-center gap-2">
-        <PaletteIcon className="w-4 h-4 dark:text-white" />
-        <span className="text-xs  text-muted-foreground">Theme</span>
-      </div>
+      {withIcon && (
+        <div className="flex items-center gap-2">
+          <PaletteIcon className="w-4 h-4 dark:text-white" />
+          <span className="text-xs  text-muted-foreground">Theme</span>
+        </div>
+      )}
       <div className="flex items-center gap-0.5 rounded-full bg-gaia-200 dark:bg-gaia-800 p-0.5 border dark:border-gaia-700">
         <button
           onClick={() => setTheme("system")}
