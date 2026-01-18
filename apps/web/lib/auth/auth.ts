@@ -22,14 +22,14 @@ export function initAuth<
       : "http://localhost:3000";
 
   const trustedOrigins = [
-    options.productionUrl,
+    process.env.VERCEL_URL!,
+    options.productionUrl!,
     "http://localhost:5679",
     "http://localhost:3000",
     "http://localhost:3001",
     "http://127.0.0.1:5679",
     "http://127.0.0.1:3000",
     "http://0.0.0.0:3000",
-    baseURL,
   ].filter(Boolean);
 
   const config = {
