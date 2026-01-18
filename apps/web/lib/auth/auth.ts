@@ -14,14 +14,14 @@ export function initAuth<
   emailVerification?: BetterAuthOptions["emailVerification"];
   emailAndPassword?: BetterAuthOptions["emailAndPassword"];
 }): any {
-  const baseURL = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
+  const baseURL = process.env.NEXT_PUBLIC_APP_URL
+    ? process.env.NEXT_PUBLIC_APP_URL
     : process.env.NODE_ENV === "production"
       ? "http://0.0.0.0:3000" // Docker fallback
       : "http://localhost:3000";
 
   const trustedOrigins = [
-    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "",
+    process.env.NEXT_PUBLIC_APP_URL!,
     "http://localhost:5679",
     "http://localhost:3000",
     "http://localhost:3001",
@@ -29,7 +29,6 @@ export function initAuth<
     "http://127.0.0.1:3000",
     "http://0.0.0.0:3000",
   ].filter((url) => !!url);
-  console.log({ trustedOrigins, VERCEL_URL: process.env.VERCEL_URL });
 
   const config = {
     database: drizzleAdapter(db, {
@@ -46,7 +45,7 @@ export function initAuth<
     emailAndPassword: options.emailAndPassword,
     plugins: [
       oAuthProxy({
-        productionURL: process.env.VERCEL_URL || baseURL,
+        productionURL: baseURL,
       }),
       ...(options.extraPlugins ?? []),
     ],
