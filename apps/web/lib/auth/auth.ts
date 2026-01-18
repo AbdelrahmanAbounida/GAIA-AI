@@ -8,7 +8,6 @@ import type { SocialProviders } from "better-auth/social-providers";
 export function initAuth<
   TExtraPlugins extends BetterAuthPlugin[] = [],
 >(options: {
-  productionUrl: string;
   secret: string | undefined;
   extraPlugins?: TExtraPlugins;
   socialProviders?: SocialProviders;
@@ -22,15 +21,14 @@ export function initAuth<
       : "http://localhost:3000";
 
   const trustedOrigins = [
-    process.env.VERCEL_URL!,
-    options.productionUrl!,
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "",
     "http://localhost:5679",
     "http://localhost:3000",
     "http://localhost:3001",
     "http://127.0.0.1:5679",
     "http://127.0.0.1:3000",
     "http://0.0.0.0:3000",
-  ].filter(Boolean);
+  ].filter((url) => !!url);
 
   const config = {
     database: drizzleAdapter(db, {
@@ -47,7 +45,7 @@ export function initAuth<
     emailAndPassword: options.emailAndPassword,
     plugins: [
       oAuthProxy({
-        productionURL: options.productionUrl,
+        productionURL: process.env.VERCEL_URL || baseURL,
       }),
       ...(options.extraPlugins ?? []),
     ],

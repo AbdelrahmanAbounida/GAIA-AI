@@ -5,18 +5,9 @@ import { initAuth } from "./auth";
 import { emailOTP } from "better-auth/plugins";
 import { sendEmail } from "./resend";
 
-function getProductionUrl(): string {
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  // Fallback for local development
-  return "http://localhost:3000";
-}
-
 const isVercel = process.env.VERCEL === "1" || process.env.VERCEL_ENV;
 
 export const auth = initAuth({
-  productionUrl: getProductionUrl(),
   secret: process.env.BETTER_AUTH_SECRET,
   extraPlugins: [
     nextCookies(),
