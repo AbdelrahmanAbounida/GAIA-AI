@@ -113,6 +113,11 @@ export function AuthForm() {
   const isVercel = !!(
     !!process.env.NEXT_PUBLIC_VERCEL || process.env.VERCEL_ENV
   );
+  console.log({
+    isVercel,
+    VERCEL_URL: process.env.VERCEL_URL,
+    vercel: process.env.NEXT_PUBLIC_VERCEL,
+  });
 
   useEffect(() => {
     const isDismissed = localStorage.getItem(ALERT_STORAGE_KEY);
