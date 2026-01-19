@@ -73,7 +73,7 @@ export default function ProjectsPage() {
 
   if (isPending) {
     return (
-      <div className="flex flex-wrap max-w-5xl mx-auto gap-9 items-start justify-center">
+      <div className="flex flex-wrap max-w-5xl mx-auto gap-9 mt-12 items-start justify-center">
         <Skeleton className="h-42 w-100! animate-pulse" />
         <Skeleton className="h-42 w-100! animate-pulse" />
         <Skeleton className="h-42 w-100! animate-pulse" />

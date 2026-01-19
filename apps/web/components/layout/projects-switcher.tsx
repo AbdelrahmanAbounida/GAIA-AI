@@ -94,15 +94,21 @@ export const ProjectsSwitcher = ({ className }: { className?: string }) => {
             )}
 
             <DropdownMenuSeparator />
-
+            <DropdownMenuItem
+              onClick={() => {
+                router.push(`/projects/`);
+              }}
+              className=""
+            >
+              All Projects
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <CreateProjectModal2>
               <DropdownMenuItem
                 onSelect={(e) => e.preventDefault()}
                 className="gap-2 p-2"
               >
-                <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
-                  <Plus className="size-4" />
-                </div>
+                <Plus className="size-4" />
                 <div className="font-medium text-muted-foreground">
                   New Project
                 </div>

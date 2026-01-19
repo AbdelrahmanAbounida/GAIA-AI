@@ -79,7 +79,7 @@ export const ChatView = ({
         )}
       </div>
 
-      <div className="shrink-0 w-full max-w-4xl mx-auto px-2 sm:px-4 pb-2 sm:pb-4 pt-2">
+      <div className="shrink-0 w-full max-w-4xl mx-auto px-2 sm:px-4  ">
         <PromptInput
           onSubmit={onSubmit}
           className="border bg-white dark:bg-gaia-950 border-gaia-400 dark:border-none rounded-2xl sm:rounded-3xl dark:shadow-sm"
