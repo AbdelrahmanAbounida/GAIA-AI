@@ -128,7 +128,7 @@ export function ApiKeyTable({ keys, onDelete, onCreateNew }: ApiKeyTableProps) {
                     {formatDate(key.createdAt)}
                   </TableCell>
                   <TableCell>
-                    <code className="rounded bg-muted px-2 py-1 font-mono text-sm">
+                    <code className=" bg-gaia-200 dark:bg-gaia-800  p-1 rounded-md px-2 py-1 font-mono text-sm">
                       {maskApiKey(key.value)}
                     </code>
                   </TableCell>

@@ -18,9 +18,10 @@ const AISdkMessageSchema = z.object({
 export const aiSchemas = {
   // Input schemas
   chatCompletionsInput: z.object({
-    chatId: z.string().describe("The chat session identifier"),
+    projectId: z.string().optional().describe("The project identifier"),
+    chatId: z.string().optional().describe("The chat session identifier"),
     messages: z.array(OpenAIMessageSchema).describe("Conversation messages"),
-    model: z.string().default("gpt-4o").describe("Model identifier"),
+    model: z.string().optional().default("gpt-4o").describe("Model identifier"),
     provider: z.string().optional().describe("Provider name"),
     temperature: z.number().optional().default(0.7).describe("Temperature"),
     max_tokens: z.number().optional().describe("Maximum tokens"),
@@ -55,7 +56,7 @@ export const aiSchemas = {
         name: z.string(),
         capabilities: z.array(z.enum(["embedding", "language", "image"])),
         models: z.array(gatewayLanguageModelEntrySchema),
-      })
+      }),
     ),
     vectorstoresProviders: z.array(VectorStoreSchema).optional(),
   }),

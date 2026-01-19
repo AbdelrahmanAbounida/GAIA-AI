@@ -32,20 +32,16 @@ const nextConfig: NextConfig = {
 
   outputFileTracingExcludes: {
     "*": [
-      // Exclude Alpine Linux
       "**/@lancedb+lancedb-linux-x64-musl*/**",
       "**/@lancedb/lancedb-linux-x64-musl/**",
 
-      // Exclude Mac/Windows
       "**/@lancedb+lancedb-darwin*/**",
       "**/@lancedb/lancedb-darwin*/**",
       "**/@lancedb+lancedb-win32*/**",
       "**/@lancedb/lancedb-win32*/**",
 
-      // Exclude Faiss
       "node_modules/faiss-node/**",
 
-      // Exclude ChromaDB on Vercel
       ...(isVercel
         ? ["node_modules/chromadb/**", "node_modules/@chroma-core/**"]
         : []),
@@ -54,16 +50,13 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname, "../../"),
   experimental: {
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
-    // Disable memory-intensive features in Docker
     ...(isDockerBuild && {
-      webpackBuildWorker: false, // Disable webpack worker to save memory
+      webpackBuildWorker: false,
     }),
   },
 
   poweredByHeader: false,
   compress: true,
-
-  // Disable source maps in Docker to save memory during build
   ...(isDockerBuild && {
     productionBrowserSourceMaps: false,
   }),
@@ -114,26 +107,20 @@ const nextConfig: NextConfig = {
       };
     }
 
-    // IMPROVED: Docker-specific optimizations that actually help
     if (isDockerBuild && !dev) {
-      // Keep minification enabled - it reduces final bundle size
       config.optimization = {
         ...config.optimization,
-        minimize: true, // Changed from false - smaller bundles use less memory
-        minimizer: config.optimization?.minimizer, // Keep default minimizer
-        // Disable code splitting to reduce complexity
-        splitChunks: false,
-        // Reduce concurrent processing
+        minimize: true,
+        minimizer: config.optimization?.minimizer,
+        splitChunks: true,
         runtimeChunk: false,
       };
 
-      // Disable cache to avoid memory accumulation
       config.cache = false;
 
-      // Reduce parallelism to avoid memory spikes
       config.parallelism = 1;
+      config.devtool = false;
 
-      // Disable performance hints to save memory
       config.performance = {
         hints: false,
       };

@@ -5,6 +5,7 @@ import {
   createOpenAICompatible,
   createGateway as createAIGateway,
   type CoreMessage,
+  type ModelMessage,
 } from "@gaia/ai";
 import { db, chat, credential, eq, and } from "@gaia/db";
 import {
@@ -12,6 +13,7 @@ import {
   ALL_VECTOR_STORES,
   getAllProvidersWithModels as getModelsProviders,
 } from "@gaia/ai/models";
+import type { UIMessage } from "@gaia/ai";
 
 /**
  * Get provider configuration for a user's model
@@ -19,7 +21,7 @@ import {
 async function getProviderConfig(
   userId: string,
   modelId: string,
-  provider?: string
+  provider?: string,
 ) {
   const userCredentials = await db
     .select()
@@ -28,8 +30,8 @@ async function getProviderConfig(
       and(
         eq(credential.userId, userId),
         eq(credential.isValid, true),
-        eq(credential.credentialType, "ai_model")
-      )
+        eq(credential.credentialType, "ai_model"),
+      ),
     );
 
   if (!userCredentials || userCredentials.length === 0) {
@@ -48,7 +50,7 @@ async function getProviderConfig(
 
   if (!matchingCredential) {
     throw new Error(
-      `No valid credential found for model: ${modelId}${provider ? ` with provider: ${provider}` : ""}`
+      `No valid credential found for model: ${modelId}${provider ? ` with provider: ${provider}` : ""}`,
     );
   }
 
@@ -91,6 +93,58 @@ function createModelInstance(config: {
   return providerInstance(modelId);
 }
 
+/**
+ * Convert OpenAI format messages to UIMessage format
+ */
+function convertOpenAIMessagesToUI(
+  messages: Array<{
+    role: string;
+    content: string | Array<{ type: string; text?: string; image_url?: any }>;
+    name?: string;
+  }>,
+): UIMessage[] {
+  return messages.map((msg, index) => {
+    const parts: any[] = [];
+
+    if (typeof msg.content === "string") {
+      parts.push({
+        type: "text",
+        text: msg.content,
+      });
+    } else if (Array.isArray(msg.content)) {
+      for (const part of msg.content) {
+        if (part.type === "text" && part.text) {
+          parts.push({
+            type: "text",
+            text: part.text,
+          });
+        } else if (part.type === "image_url" && part.image_url) {
+          parts.push({
+            type: "source-url",
+            url:
+              typeof part.image_url === "string"
+                ? part.image_url
+                : part.image_url.url,
+          });
+        }
+      }
+    }
+
+    if (parts.length === 0) {
+      parts.push({
+        type: "text",
+        text: "",
+      });
+    }
+
+    return {
+      id: `msg-${Date.now()}-${index}`,
+      role: msg.role as "user" | "assistant" | "system",
+      parts: parts,
+    };
+  });
+}
+
 export const aiHandlers: {
   getAllProviders: () => Promise<{
     success: boolean;
@@ -118,6 +172,24 @@ export const aiHandlers: {
       temperature?: number;
       max_tokens?: number;
       stream?: boolean;
+    };
+    context: AppContext;
+  }) => AsyncGenerator<any, void, unknown>;
+  openAIChatCompletions: (args: {
+    input: {
+      messages: Array<{
+        role: string;
+        content:
+          | string
+          | Array<{ type: string; text?: string; image_url?: any }>;
+        name?: string;
+      }>;
+      model?: string;
+      temperature?: number;
+      max_tokens?: number;
+      stream?: boolean;
+      chatId?: string;
+      projectId?: string;
     };
     context: AppContext;
   }) => AsyncGenerator<any, void, unknown>;
@@ -163,7 +235,7 @@ export const aiHandlers: {
 
     const llms = aiModels.filter((model) => model.modelType === "language");
     const embeddings = aiModels.filter(
-      (model) => model.modelType === "embedding"
+      (model) => model.modelType === "embedding",
     );
     const image = aiModels.filter((model) => model.modelType === "image");
 
@@ -192,15 +264,15 @@ export const aiHandlers: {
       .where(
         and(
           eq(credential.userId, context.session.user.id),
-          eq(credential.isValid, true)
-        )
+          eq(credential.isValid, true),
+        ),
       );
 
     const ai_models = userCredentials.filter(
-      (cred) => cred.credentialType === "ai_model"
+      (cred) => cred.credentialType === "ai_model",
     );
     const embeddings = userCredentials.filter(
-      (cred) => cred.credentialType === "embedding"
+      (cred) => cred.credentialType === "embedding",
     );
 
     return {
@@ -233,7 +305,10 @@ export const aiHandlers: {
       .select()
       .from(chat)
       .where(
-        and(eq(chat.id, input.chatId), eq(chat.userId, context.session.user.id))
+        and(
+          eq(chat.id, input.chatId),
+          eq(chat.userId, context.session.user.id),
+        ),
       );
 
     if (!chatExists) {
@@ -243,7 +318,7 @@ export const aiHandlers: {
     const providerConfig = await getProviderConfig(
       context.session.user.id,
       input.model,
-      input.provider
+      input.provider,
     );
 
     const model = createModelInstance({
@@ -251,7 +326,7 @@ export const aiHandlers: {
       modelId: input.model,
     });
 
-    const messages: CoreMessage[] = input.messages
+    const messages: ModelMessage[] = input.messages
       .filter((msg) => msg.role !== "system")
       .map((msg) => ({
         role: msg.role as "user" | "assistant",
@@ -326,6 +401,225 @@ export const aiHandlers: {
     }
   },
 
+  /**
+   * OpenAI-compatible chat completions using the chat route
+   * This reuses the chat route logic with tools, MCP, RAG, etc.
+   */
+  openAIChatCompletions: async function* ({
+    input,
+    context,
+  }: {
+    input: {
+      messages: Array<{
+        role: string;
+        content:
+          | string
+          | Array<{ type: string; text?: string; image_url?: any }>;
+        name?: string;
+      }>;
+      model?: string;
+      temperature?: number;
+      max_tokens?: number;
+      stream?: boolean;
+      chatId?: string;
+      projectId?: string;
+    };
+    context: AppContext;
+  }) {
+    if (!context.session?.user) {
+      throw new Error("Unauthorized");
+    }
+
+    const {
+      messages,
+      model = "gpt-4o",
+      stream = false,
+      chatId,
+      projectId,
+    } = input;
+
+    // Convert OpenAI messages to UI format
+    const uiMessages = convertOpenAIMessagesToUI(messages);
+
+    // Create the request body for the chat route
+    const chatRequestBody = {
+      messages: uiMessages,
+      model,
+      chatId,
+      projectId,
+      webSearch: false,
+    };
+
+    // Determine base URL
+    const baseUrl =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      (typeof window !== "undefined"
+        ? window.location.origin
+        : "http://localhost:3000");
+
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 280000); // 280 seconds (slightly less than maxDuration)
+
+    try {
+      // Call the chat route internally with timeout
+      const chatResponse = await fetch(`${baseUrl}/api/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(context.headers || {}),
+        },
+        body: JSON.stringify(chatRequestBody),
+        signal: controller.signal,
+      });
+
+      // Clear timeout if request succeeds
+      clearTimeout(timeoutId);
+
+      if (!chatResponse.ok) {
+        const errorText = await chatResponse.text();
+        throw new Error(
+          `Chat API error: ${chatResponse.status} ${chatResponse.statusText} - ${errorText}`,
+        );
+      }
+
+      const reader = chatResponse.body?.getReader();
+      if (!reader) {
+        throw new Error("No response body");
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      if (stream) {
+        // Streaming mode - yield chunks as they come
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || "";
+
+            for (const line of lines) {
+              if (line.startsWith("data: ")) {
+                const data = line.slice(6);
+                if (data === "[DONE]") {
+                  continue;
+                }
+
+                try {
+                  const parsed = JSON.parse(data);
+
+                  if (parsed.type === "text-delta") {
+                    yield {
+                      id: `chatcmpl-${Date.now()}`,
+                      object: "chat.completion.chunk",
+                      created: Math.floor(Date.now() / 1000),
+                      model: model,
+                      choices: [
+                        {
+                          index: 0,
+                          delta: {
+                            content: parsed.textDelta,
+                          },
+                          finish_reason: null,
+                        },
+                      ],
+                    };
+                  } else if (parsed.type === "finish") {
+                    yield {
+                      id: `chatcmpl-${Date.now()}`,
+                      object: "chat.completion.chunk",
+                      created: Math.floor(Date.now() / 1000),
+                      model: model,
+                      choices: [
+                        {
+                          index: 0,
+                          delta: {},
+                          finish_reason: parsed.finishReason || "stop",
+                        },
+                      ],
+                    };
+                  }
+                } catch (e) {
+                  console.error("Error parsing stream data:", e);
+                }
+              }
+            }
+          }
+        } finally {
+          reader.releaseLock();
+        }
+      } else {
+        // Non-streaming mode - collect all text first
+        let fullText = "";
+
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || "";
+
+            for (const line of lines) {
+              if (line.startsWith("data: ")) {
+                const data = line.slice(6);
+                if (data === "[DONE]") {
+                  continue;
+                }
+
+                try {
+                  const parsed = JSON.parse(data);
+                  if (parsed.type === "text-delta") {
+                    fullText += parsed.textDelta;
+                  }
+                } catch (e) {
+                  console.error("Error parsing stream data:", e);
+                }
+              }
+            }
+          }
+        } finally {
+          reader.releaseLock();
+        }
+
+        // Yield single complete response
+        yield {
+          id: `chatcmpl-${Date.now()}`,
+          object: "chat.completion",
+          created: Math.floor(Date.now() / 1000),
+          model: model,
+          choices: [
+            {
+              index: 0,
+              message: {
+                role: "assistant",
+                content: fullText,
+              },
+              finish_reason: "stop",
+            },
+          ],
+          usage: {
+            prompt_tokens: 0,
+            completion_tokens: 0,
+            total_tokens: 0,
+          },
+        };
+      }
+    } catch (error) {
+      clearTimeout(timeoutId);
+
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new Error("Request timeout: Chat API took too long to respond");
+      }
+      throw error;
+    }
+  },
+
   streamChat: async ({
     input,
     context,
@@ -347,7 +641,10 @@ export const aiHandlers: {
       .select()
       .from(chat)
       .where(
-        and(eq(chat.id, input.chatId), eq(chat.userId, context.session.user.id))
+        and(
+          eq(chat.id, input.chatId),
+          eq(chat.userId, context.session.user.id),
+        ),
       );
 
     if (!chatExists) {
@@ -357,7 +654,7 @@ export const aiHandlers: {
     const providerConfig = await getProviderConfig(
       context.session.user.id,
       input.model,
-      input.provider
+      input.provider,
     );
 
     const model = createModelInstance({
@@ -365,7 +662,7 @@ export const aiHandlers: {
       modelId: input.model,
     });
 
-    const messages: CoreMessage[] = input.messages
+    const messages: ModelMessage[] = input.messages
       .filter((msg) => msg.role !== "system")
       .map((msg) => ({
         role: msg.role as "user" | "assistant",
@@ -398,20 +695,17 @@ export const aiHandlers: {
       throw new Error("Unauthorized");
     }
 
-    // Get provider configuration for the user's model
     const providerConfig = await getProviderConfig(
       context.session.user.id,
       input.model,
-      input.provider
+      input.provider,
     );
 
-    // Create model instance using AI SDK Gateway
     const model = createModelInstance({
       ...providerConfig,
       modelId: input.model,
     });
 
-    // Use AI SDK for image generation with streaming
     const result = streamText({
       model,
       prompt: input.prompt,
@@ -421,7 +715,6 @@ export const aiHandlers: {
       let textContent = "";
       let files: any[] = [];
 
-      // Stream progress updates
       for await (const delta of result.fullStream) {
         if (delta.type === "text-delta") {
           textContent += delta.text;
@@ -434,11 +727,9 @@ export const aiHandlers: {
         }
       }
 
-      // Get final result with generated images
       const finalResult = result;
       files = (await finalResult.files) || [];
 
-      // Final response with images
       yield {
         type: "complete",
         created: Math.floor(Date.now() / 1000),

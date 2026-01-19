@@ -80,7 +80,8 @@ export function HeroSection() {
             <Button
               onClick={() => {
                 setrouteLoading(true);
-                router.push("https://github.com/AbdelrahmanAbounida/GAIA-AI");
+                // router.push("https://github.com/AbdelrahmanAbounida/GAIA-AI");
+                window.open("https://www.gaia-ai.app/", "_blank");
               }}
               disabled={routeLoading}
               variant={"brand"}

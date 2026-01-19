@@ -27,6 +27,9 @@ importers:
       env:
         specifier: ^0.0.2
         version: 0.0.2
+      openai:
+        specifier: ^6.16.0
+        version: 6.16.0(ws@8.19.0)(zod@4.3.5)
       prettier:
         specifier: ^3.6.2
         version: 3.8.0

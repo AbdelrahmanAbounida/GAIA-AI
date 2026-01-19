@@ -59,7 +59,7 @@ export function CredentialsTable({
             <TableHead>API Key</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Added</TableHead>
-            <TableHead className="w-[70px]"></TableHead>
+            <TableHead className="w-17.5"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

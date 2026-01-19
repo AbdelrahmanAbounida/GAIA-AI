@@ -233,11 +233,10 @@ async function processMessagesForCompatibility(
 export async function POST(req: Request) {
   const mcpManager = getMCPManager();
   const connectedServerIds: string[] = [];
-
+  const body = await req.json();
   try {
     const {
       messages,
-      projectId,
       model,
       chatId,
       webSearch = false,
@@ -246,8 +245,16 @@ export async function POST(req: Request) {
       model?: string;
       webSearch?: boolean;
       chatId?: string;
-      projectId: string;
-    } = await req.json();
+    } = body;
+
+    const projectId = body.projectId || req.headers.get("x-project-id");
+    console.log(">>>>> Getting projectID >>>>>>>> ", projectId);
+    console.log({
+      model,
+      messages,
+      chatId,
+      projectId,
+    });
 
     // Create chat on first message
     let chat;

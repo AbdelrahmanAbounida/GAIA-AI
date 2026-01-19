@@ -145,7 +145,6 @@ export const aiSpecs = {
       },
     },
   } satisfies OpenAPIV3_1.OperationObject,
-
   chatCompletions: {
     summary: "OpenAI-compatible chat completion",
     description:
@@ -158,48 +157,63 @@ export const aiSpecs = {
         "application/json": {
           schema: {
             type: "object",
-            required: ["chatId", "messages"],
+            required: ["projectId", "messages"],
             properties: {
+              projectId: {
+                type: "string",
+                description: "Project identifier (required)",
+              },
               chatId: {
                 type: "string",
-                description: "Chat session identifier",
+                description: "Chat session identifier (optional)",
               },
               messages: {
                 type: "array",
+                description: "Array of conversation messages",
                 items: {
                   type: "object",
+                  required: ["role", "content"],
                   properties: {
                     role: {
                       type: "string",
                       enum: ["system", "user", "assistant"],
+                      description: "Message role",
                     },
-                    content: { type: "string" },
-                    name: { type: "string" },
+                    content: {
+                      type: "string",
+                      description: "Message content",
+                    },
+                    name: {
+                      type: "string",
+                      description: "Optional message name",
+                    },
                   },
                 },
               },
               model: {
                 type: "string",
                 default: "gpt-4o",
-                description: "Model identifier",
+                description: "Model identifier (defaults to gpt-4o)",
               },
               provider: {
                 type: "string",
-                description: "Provider name",
+                description: "Provider name (optional)",
               },
               temperature: {
                 type: "number",
                 default: 0.7,
-                description: "Sampling temperature",
+                minimum: 0,
+                maximum: 2,
+                description: "Sampling temperature (0-2, default 0.7)",
               },
               max_tokens: {
                 type: "number",
-                description: "Maximum tokens",
+                description: "Maximum tokens to generate",
               },
               stream: {
                 type: "boolean",
                 default: false,
-                description: "Stream response",
+                description: "Enable streaming response",
               },
             },
           },
@@ -209,9 +223,72 @@ export const aiSpecs = {
     responses: {
       "200": {
         description: "Chat completion response",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                object: { type: "string" },
+                created: { type: "number" },
+                model: { type: "string" },
+                choices: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      index: { type: "number" },
+                      message: {
+                        type: "object",
+                        properties: {
+                          role: { type: "string" },
+                          content: { type: "string" },
+                        },
+                      },
+                      finish_reason: { type: "string" },
+                    },
+                  },
+                },
+                usage: {
+                  type: "object",
+                  properties: {
+                    prompt_tokens: { type: "number" },
+                    completion_tokens: { type: "number" },
+                    total_tokens: { type: "number" },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
       "401": {
-        description: "Unauthorized",
+        description: "Unauthorized - Invalid or missing authentication",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                success: { type: "boolean", example: false },
+                message: { type: "string", example: "Unauthorized" },
+              },
+            },
+          },
+        },
+      },
+      "404": {
+        description: "Chat not found",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                success: { type: "boolean", example: false },
+                message: { type: "string", example: "Chat not found" },
+              },
+            },
+          },
+        },
       },
     },
   } satisfies OpenAPIV3_1.OperationObject,
