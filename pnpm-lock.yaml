@@ -293,6 +293,9 @@ importers:
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
       embla-carousel-react:
         specifier: ^8.6.0
         version: 8.6.0(react@19.2.0)
@@ -529,9 +532,6 @@ importers:
       flexsearch:
         specifier: 0.7.43
         version: 0.7.43
-      milvus:
-        specifier: link:@langchain/classic/vectorstores/milvus
-        version: link:@langchain/classic/vectorstores/milvus
       minisearch:
         specifier: ^7.2.0
         version: 7.2.0

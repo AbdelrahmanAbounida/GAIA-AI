@@ -1,5 +1,26 @@
 {
-  "extends": "../../gen/ts-base.json",
+  "compilerOptions": {
+    "composite": false,
+    "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "inlineSources": false,
+    "isolatedModules": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "verbatimModuleSyntax": true,
+    "preserveWatchOutput": true,
+    "skipLibCheck": true,
+    "strict": true
+  },
   "include": ["src", "../web/archive/rag.ts"],
   "exclude": ["dist", "build", "node_modules"]
 }

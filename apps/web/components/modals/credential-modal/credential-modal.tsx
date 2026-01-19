@@ -2,7 +2,13 @@
 import { useEffect, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Database, Puzzle, Sparkles } from "lucide-react";
+import {
+  CheckCircle2,
+  CpuIcon,
+  Database,
+  Puzzle,
+  Sparkles,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -61,7 +67,7 @@ export function CredentialModal({
     {
       id: "providers" as const,
       label: "AI Providers",
-      icon: Sparkles,
+      icon: CpuIcon,
       badge: aiConfiguredCount > 0 ? aiConfiguredCount.toString() : undefined,
     },
     {
@@ -91,7 +97,11 @@ export function CredentialModal({
         <DialogTrigger asChild>{trigger}</DialogTrigger>
       ) : (
         <DialogTrigger asChild>
-          <Button variant="outline" size="tiny" className={cn("", className)}>
+          <Button
+            variant="outline"
+            size="tiny"
+            className={cn("h-9", className)}
+          >
             Add Credential
           </Button>
         </DialogTrigger>
@@ -100,7 +110,7 @@ export function CredentialModal({
         // onInteractOutside={(e) => {
         //   e.preventDefault();
         // }}
-        className="overflow-hidden p-0 w-[90%]! max-w-7xl! max-h-[90vh] h-[800px]"
+        className="overflow-hidden z-9999 p-0 w-[90%]! max-w-7xl! max-h-[90vh] h-200"
       >
         <DialogTitle className="sr-only">Credential Settings</DialogTitle>
         <DialogDescription className="sr-only">
@@ -121,7 +131,13 @@ export function CredentialModal({
                         >
                           <button
                             onClick={() => setActiveTab(item.id)}
-                            className="flex items-center gap-3 h-[35px]"
+                            className={cn(
+                              "flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-xs transition-colors",
+                              "hover:bg-gaia-200 dark:hover:bg-gaia-800/80",
+                              activeTab === item.id
+                                ? "bg-gaia-200! border text-accent-foreground border-gaia-300! dark:border-gaia-800! h-9  dark:bg-gaia-700!"
+                                : "",
+                            )}
                           >
                             <item.icon className="h-4 w-4" />
                             <span className="flex-1 text-left">
@@ -164,16 +180,16 @@ export function CredentialModal({
 
 function AIProvidersContent({ activeProvider }: { activeProvider?: string }) {
   const [deploymentMode, setDeploymentMode] = useState<"cloud" | "local">(
-    "cloud"
+    "cloud",
   );
   const [selectedProvider, setSelectedProvider] = useState<string | null>(
-    activeProvider || "openai"
+    activeProvider || "openai",
   );
   const { isPending, modelsProviders } = useAllProviders();
   const { aiCredentials } = useAvailableModels();
 
   const selectedProviderData = modelsProviders.find(
-    (p) => p.name.toLowerCase() === selectedProvider
+    (p) => p.name.toLowerCase() === selectedProvider,
   );
 
   return (
@@ -196,7 +212,7 @@ function AIProvidersContent({ activeProvider }: { activeProvider?: string }) {
       <div className="flex flex-1 overflow-hidden">
         {deploymentMode === "cloud" ? (
           <>
-            <aside className="hidden md:flex w-60 flex-col border-r border-border overflow-hidden pb-[130px]">
+            <aside className="hidden md:flex w-60 flex-col border-r border-border overflow-hidden pb-32.5">
               <ScrollArea className="h-full">
                 <div className="p-3 space-y-1">
                   {isPending ? (
@@ -210,7 +226,7 @@ function AIProvidersContent({ activeProvider }: { activeProvider?: string }) {
                       const isConfigured = aiCredentials?.some(
                         (cred) =>
                           cred.provider.toLowerCase() ===
-                          provider.name.toLowerCase()
+                          provider.name.toLowerCase(),
                       );
                       const isActive =
                         selectedProvider === provider.name.toLowerCase();
@@ -226,7 +242,7 @@ function AIProvidersContent({ activeProvider }: { activeProvider?: string }) {
                             "hover:bg-gaia-200 dark:hover:bg-gaia-800/80",
                             isActive
                               ? "bg-gaia-200 dark:bg-gaia-800/50 border text-accent-foreground dark:border-gaia-700/40"
-                              : ""
+                              : "",
                           )}
                         >
                           <ProviderIcon provider={provider.name} />
@@ -273,19 +289,19 @@ function AIProvidersContent({ activeProvider }: { activeProvider?: string }) {
 }
 function EmbeddingContent({ activeProvider }: { activeProvider?: string }) {
   const [deploymentMode, setDeploymentMode] = useState<"cloud" | "local">(
-    "cloud"
+    "cloud",
   );
   const [selectedProvider, setSelectedProvider] = useState<string | null>(
-    activeProvider || "openai"
+    activeProvider || "openai",
   );
   const { isPending, modelsProviders } = useAllProviders();
   const { aiCredentials } = useAvailableModels();
 
   const embeddingProviders = modelsProviders.filter((p) =>
-    p.capabilities.includes("embedding")
+    p.capabilities.includes("embedding"),
   );
   const selectedProviderData = embeddingProviders.find(
-    (p) => p.name.toLowerCase() === selectedProvider
+    (p) => p.name.toLowerCase() === selectedProvider,
   );
 
   return (
@@ -323,7 +339,7 @@ function EmbeddingContent({ activeProvider }: { activeProvider?: string }) {
                       const isConfigured = aiCredentials?.some(
                         (cred) =>
                           cred.provider.toLowerCase() ===
-                          provider.name.toLowerCase()
+                          provider.name.toLowerCase(),
                       );
                       const isActive =
                         selectedProvider === provider.name.toLowerCase();
@@ -339,7 +355,7 @@ function EmbeddingContent({ activeProvider }: { activeProvider?: string }) {
                             "hover:bg-gaia-200 dark:hover:bg-gaia-800/80",
                             isActive
                               ? "bg-gaia-200 border text-accent-foreground dark:border-gaia-700/40 dark:bg-gaia-800/50"
-                              : ""
+                              : "",
                           )}
                         >
                           <ProviderIcon provider={provider.name} />
@@ -388,17 +404,17 @@ function EmbeddingContent({ activeProvider }: { activeProvider?: string }) {
 
 function VectorStoreContent({ activeProvider }: { activeProvider?: string }) {
   const [selectedVectorStore, setSelectedVectorStore] = useState<string | null>(
-    activeProvider || "faiss"
+    activeProvider || "faiss",
   );
   const { isPending, vectorstoresProviders } = useAllProviders();
   const { vectorstoreCredentials } = useAvailableModels();
 
   const selectedVectorStoreData = vectorstoresProviders.find(
-    (v) => v.id === selectedVectorStore
+    (v) => v.id === selectedVectorStore,
   );
 
   const vectorHasNoCredentialsRequred = (
-    vec: (typeof vectorstoresProviders)[number]
+    vec: (typeof vectorstoresProviders)[number],
   ) => {
     return (
       vec?.credentials?.length === 0 ||
@@ -428,7 +444,7 @@ function VectorStoreContent({ activeProvider }: { activeProvider?: string }) {
               ) : (
                 vectorstoresProviders.map((vectorStore) => {
                   const isConfigured = vectorstoreCredentials?.some(
-                    (cred) => cred.provider.toLowerCase() === vectorStore.id
+                    (cred) => cred.provider.toLowerCase() === vectorStore.id,
                   );
                   const isActive = selectedVectorStore === vectorStore.id;
 
@@ -441,7 +457,7 @@ function VectorStoreContent({ activeProvider }: { activeProvider?: string }) {
                         "hover:bg-gaia-200 dark:hover:bg-gaia-800/80",
                         isActive
                           ? "bg-gaia-200 border text-accent-foreground dark:border-gaia-700/40 dark:bg-gaia-800/50"
-                          : ""
+                          : "",
                       )}
                     >
                       <ProviderIcon provider={vectorStore.name} />

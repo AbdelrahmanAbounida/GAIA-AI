@@ -7,7 +7,7 @@ const LoginPage = async () => {
   const { user } = await getServerAuth();
 
   if (user) {
-    return redirect("/chat");
+    return redirect("/");
   }
   return (
     <div className="flex h-screen flex-col items-center justify-center bg-gaia-200 dark:bg-gaia-900">

@@ -72,7 +72,7 @@ export const AllView = ({ view }: { view?: "ai_models" | "embeddings" }) => {
   const localAICredentials = credentials.filter(
     (c) =>
       c.credentialType === "ai_model" &&
-      ["ollama", "openai-compatible"].includes(c.provider)
+      ["ollama", "openai-compatible"].includes(c.provider),
   );
 
   // Expand Ollama credential to show individual models
@@ -84,7 +84,7 @@ export const AllView = ({ view }: { view?: "ai_models" | "embeddings" }) => {
         const models = cred.models as string[];
         models.forEach((modelName) => {
           const installedModel = installedModels.find(
-            (m) => m.name === modelName
+            (m) => m.name === modelName,
           );
           expanded.push({
             ...cred,
@@ -111,7 +111,7 @@ export const AllView = ({ view }: { view?: "ai_models" | "embeddings" }) => {
       filtered = filtered.filter(
         (c) =>
           c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          c.provider.toLowerCase().includes(searchQuery.toLowerCase())
+          c.provider.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
     return filtered;
@@ -139,7 +139,7 @@ export const AllView = ({ view }: { view?: "ai_models" | "embeddings" }) => {
       )}
 
       {!isLoadingCredentialsOrModels && filteredCredentials.length === 0 && (
-        <Card className="border-dashed">
+        <Card className="border-none">
           <CardContent className="flex flex-col items-center justify-center py-12 w-full">
             <Box className="w-12 h-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">
@@ -160,7 +160,7 @@ export const AllView = ({ view }: { view?: "ai_models" | "embeddings" }) => {
                   className={cn(
                     "w-4 h-4",
                     (isLoadingCredentialsOrModels || connectionChecking) &&
-                      "animate-spin"
+                      "animate-spin",
                   )}
                 />
                 Refresh
@@ -270,7 +270,7 @@ const TableView = ({
   const localAICredentials = credentials.filter(
     (c) =>
       c.credentialType === "ai_model" &&
-      ["ollama", "openai-compatible"].includes(c.provider)
+      ["ollama", "openai-compatible"].includes(c.provider),
   );
 
   const expandedCredentials = useMemo(() => {
@@ -281,7 +281,7 @@ const TableView = ({
         const models = cred.models as string[];
         models.forEach((modelName) => {
           const installedModel = installedModels.find(
-            (m) => m.name === modelName
+            (m) => m.name === modelName,
           );
           expanded.push({
             ...cred,
@@ -308,7 +308,7 @@ const TableView = ({
       filtered = filtered.filter(
         (c) =>
           c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          c.provider.toLowerCase().includes(searchQuery.toLowerCase())
+          c.provider.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
     return filtered;
@@ -338,7 +338,7 @@ const TableView = ({
             <TableHead>Model</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead className="w-[60px]" />
+            <TableHead className="w-15" />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -438,18 +438,18 @@ const CardsView = ({
   const filteredInstalledModels = useMemo(() => {
     if (view === "ai_models") {
       return installedModels.filter(
-        (model) => !EMBEDDING_MODELS.some((em) => model.name.includes(em))
+        (model) => !EMBEDDING_MODELS.some((em) => model.name.includes(em)),
       );
     }
     return installedModels.filter((model) =>
-      EMBEDDING_MODELS.some((em) => model.name.includes(em))
+      EMBEDDING_MODELS.some((em) => model.name.includes(em)),
     );
   }, [installedModels, view]);
 
   const localAICredentials = credentials.filter(
     (c) =>
       c.credentialType === "ai_model" &&
-      ["ollama", "openai-compatible"].includes(c.provider)
+      ["ollama", "openai-compatible"].includes(c.provider),
   );
 
   const expandedCredentials = useMemo(() => {
@@ -460,7 +460,7 @@ const CardsView = ({
         const models = cred.models as string[];
         models.forEach((modelName) => {
           const installedModel = filteredInstalledModels.find(
-            (m) => m.name === modelName
+            (m) => m.name === modelName,
           );
           expanded.push({
             ...cred,
@@ -487,7 +487,7 @@ const CardsView = ({
       filtered = filtered.filter(
         (c) =>
           c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          c.provider.toLowerCase().includes(searchQuery.toLowerCase())
+          c.provider.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
     return filtered;
@@ -577,7 +577,7 @@ const CardsView = ({
                     <span className="text-muted-foreground">Modified</span>
                     <span className="font-mono">
                       {new Date(
-                        installedModel.modified_at
+                        installedModel.modified_at,
                       ).toLocaleDateString()}
                     </span>
                   </div>

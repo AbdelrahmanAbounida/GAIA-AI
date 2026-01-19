@@ -8,19 +8,21 @@ import { ToolsCardView } from "@/components/tools/tools-card-view";
 import { NewToolDialog } from "@/components/tools/new-tool-dialog";
 import { NewMCPDialog } from "@/components/mcp/new-mcp-dialog";
 import { RAGModal } from "@/components/modals/rag-modal/rag-modal";
+import { useRagDocuments } from "@/hooks/use-rag-docs";
 
 export default function ToolsPage() {
   // tabs state
   const [currentTab, setcurrentTab] = useState<"tools" | "mcp" | "knowledge">(
-    "tools"
+    "tools",
   );
+  const { documents, isLoading } = useRagDocuments(10);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto p-7">
       <div className="flex items-center justify-between">
         <div className="">
           <h2 className="text-xl font-bold text-foreground">Tools & MCP</h2>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-gaia-600 dark:text-gray-400 text-sm">
             Manage tools and MCP server connections for your RAG pipelines
           </p>
         </div>
@@ -37,7 +39,7 @@ export default function ToolsPage() {
           </div>
         )}
 
-        {currentTab === "knowledge" && (
+        {currentTab === "knowledge" && !isLoading && documents?.length > 0 && (
           <div className="flex items-center gap-2">
             <RAGSettingsModal />
             <RAGModal />

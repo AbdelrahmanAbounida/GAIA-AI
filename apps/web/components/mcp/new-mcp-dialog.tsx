@@ -176,23 +176,24 @@ export const NewMCPDialog = ({ forceShow }: { forceShow?: boolean }) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          disabled={isLoadingServers}
-          variant={isLoadingServers ? "outline" : "brand"}
-          size="tiny"
-        >
-          {isLoadingServers ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Loading...
-            </>
-          ) : (
-            <>
-              <Server className="size-3 dark:text-white" />
-              Add Server
-            </>
-          )}
-        </Button>
+        {(forceShow || servers.length > 0) && (
+          <Button
+            disabled={isLoadingServers}
+            variant={isLoadingServers ? "outline" : "brand"}
+            size="sm"
+          >
+            {isLoadingServers ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              </>
+            ) : (
+              <>
+                <Server className="size-3 dark:text-white" />
+                Add Server
+              </>
+            )}
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -400,8 +401,8 @@ export const NewMCPDialog = ({ forceShow }: { forceShow?: boolean }) => {
         <DialogFooter>
           <Button
             variant="outline"
-            size={"tiny"}
-            className="px-5 dark:h-[27px]"
+            size={"sm"}
+            className="px-5 dark:h-6.75"
             onClick={() => {
               setOpen(false);
               setCreatedServerId(null);
@@ -413,7 +414,7 @@ export const NewMCPDialog = ({ forceShow }: { forceShow?: boolean }) => {
           </Button>
           <Button
             variant={"brand"}
-            size={"tiny"}
+            size={"sm"}
             className="px-5"
             onClick={handleAddMCPServer}
             disabled={!isFormValid || isProcessing}

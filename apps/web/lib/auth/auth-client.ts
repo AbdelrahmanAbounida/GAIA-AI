@@ -6,6 +6,8 @@ import {
 } from "better-auth/client/plugins";
 import { auth } from "./server";
 
+const isVercel = process.env.VERCEL === "1" || process.env.VERCEL_ENV;
+
 export const authClient = createAuthClient({
   fetchOptions: {
     onError: (ctx) => {},
@@ -13,16 +15,20 @@ export const authClient = createAuthClient({
   plugins: [
     inferAdditionalFields<typeof auth>(),
     emailOTPClient(),
-    oneTapClient({
-      clientId: process.env.NEXT_PUBLIB_GOOGLE_CLIENT_ID!,
-      autoSelect: false,
-      cancelOnTapOutside: true,
-      context: "signin",
-      additionalOptions: {},
-      promptOptions: {
-        baseDelay: 1000,
-        maxAttempts: 5,
-      },
-    }),
+    ...(isVercel
+      ? [
+          oneTapClient({
+            clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
+            autoSelect: false,
+            cancelOnTapOutside: true,
+            context: "signin",
+            additionalOptions: {},
+            promptOptions: {
+              baseDelay: 1000,
+              maxAttempts: 5,
+            },
+          }),
+        ]
+      : []),
   ],
 });

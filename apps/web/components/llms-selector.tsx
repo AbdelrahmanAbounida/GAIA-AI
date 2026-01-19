@@ -31,12 +31,12 @@ export const LLMSelector = () => {
   // Auto-select first model if none selected
   const effectiveSelectedModel = selectedModel || availableLLMs[0]?.id || "";
   const selectedModelData = availableLLMs.find(
-    (model) => model.id === effectiveSelectedModel
+    (model) => model.id === effectiveSelectedModel,
   );
 
   if (isPending) {
     return (
-      <Button className="w-[150px] h-7" variant="ghost" disabled>
+      <Button className="w-37.5 h-7" variant="ghost" disabled>
         Loading...
       </Button>
     );
@@ -45,7 +45,7 @@ export const LLMSelector = () => {
   return (
     <ModelSelector onOpenChange={setOpen} open={open}>
       <ModelSelectorTrigger asChild>
-        <Button className="w-[150px] h-7 justify-between" variant="ghost">
+        <Button className="w-37.5 h-7 justify-between" variant="ghost">
           {selectedModelData?.id && (
             <ModelSelectorLogo provider={selectedModelData.id} />
           )}

@@ -15,6 +15,7 @@ import {
   Cpu,
   Database,
   FileText,
+  SearchX,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -39,7 +40,7 @@ export default function ProjectsPage() {
       input: {
         limit: 20,
       },
-    })
+    }),
   );
 
   const deleteMutation = useMutation(
@@ -49,7 +50,7 @@ export default function ProjectsPage() {
           queryKey: orpcQueryClient.authed.project.list.key(),
         });
       },
-    })
+    }),
   );
   const projects: Project[] = data?.projects!;
   const router = useRouter();
@@ -85,9 +86,11 @@ export default function ProjectsPage() {
     <div className="space-y-6 w-full max-w-7xl mx-auto mt-7 px-7">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-[20px] font-medium text-foreground">Projects</h2>
-          <p className="text-muted-foreground text-sm">
-            Create and manage your RAG projects
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Your Projects
+          </h1>
+          <p className="text-gray-500/80 text-[14px] dark:text-gray-400 flex items-center gap-1">
+            Projects are isolated workspaces for your AI Agents.
           </p>
         </div>
 
@@ -103,24 +106,39 @@ export default function ProjectsPage() {
       </div>
 
       {projects?.length! === 0 ? (
-        <Card className="border-dashed shadow-none">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gaia-200 dark:bg-gaia-800">
-              <FolderOpen className="h-6 w-6 text-green-700" />
+        <div className="">
+          <div className="max-w-6xl mx-auto">
+            {/* Empty State */}
+            <div className="rounded-lg  py-20">
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-13.75 h-13.75 bg-white dark:bg-gaia-800 border border-gaia-400 dark:border-gaia-700 rounded-xl mb-3">
+                  <FolderOpen className="w-8 h-8 text-[#3BA34A] dark:text-brand-800" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">
+                  No Projects yet
+                </h3>
+                <p className="text-gray-500/80 dark:text-zinc-400 mb-6">
+                  Create your first GAIA project to start building intelligent
+                  AI Agentic Systems.
+                </p>
+                <CreateProjectModal2>
+                  <Button variant={"brand"} size={"sm"}>
+                    <Plus className="h-4 w-4" />
+                    New Project
+                  </Button>
+                </CreateProjectModal2>
+                {/* <Button
+              onClick={hanldeRouting}
+              disabled={routeLoading}
+              variant={"outline"}
+              className="px-6 h-10"
+            >
+              {routeLoading && <Loader className="mr-2 animate-spin" />}
+            </Button> */}
+              </div>
             </div>
-            <h3 className="mb-1 text-lg font-semibold">No projects yet</h3>
-            <p className="mb-4 text-center text-gray-500 text-sm dark:text-muted-foreground">
-              Create your first GAIA project to start building intelligent
-              document Q&A systems.
-            </p>
-            <CreateProjectModal2>
-              <Button variant={"brand"} size={"tiny"}>
-                <Plus className="h-4 w-4" />
-                New Project
-              </Button>
-            </CreateProjectModal2>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {projects.map((project) => (
@@ -128,7 +146,7 @@ export default function ProjectsPage() {
               key={project.id}
               className={cn(
                 "group shadow-none dark:shadow-lg cursor-pointer transition-colors  hover:bg-white/60  hover:border-border dark:border-gaia-700 dark:hover:border-gaia-700 dark:hover:bg-gaia-900",
-                "bg-white dark:bg-gaia-800 group relative"
+                "bg-white dark:bg-gaia-800 group relative",
               )}
               onClick={() => {
                 setActiveProject(project.id);

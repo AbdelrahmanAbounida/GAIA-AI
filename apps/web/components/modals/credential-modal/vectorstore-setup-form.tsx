@@ -49,7 +49,7 @@ export function VectorStoreSetupForm({
     return vectorstoreCredentials?.find(
       (cred) =>
         cred.provider.toLowerCase() === vectorStore?.id?.toLowerCase() &&
-        cred.credentialType === "vectorstore"
+        cred.credentialType === "vectorstore",
     );
   }, [vectorstoreCredentials, vectorStore?.id]);
 
@@ -76,7 +76,7 @@ export function VectorStoreSetupForm({
             offset: 0,
             limit: 20,
           },
-        })
+        }),
       );
 
       queryClient.setQueryData(
@@ -102,7 +102,7 @@ export function VectorStoreSetupForm({
               },
             ],
           };
-        }
+        },
       );
 
       return { previousCredentials };
@@ -133,7 +133,7 @@ export function VectorStoreSetupForm({
               limit: 20,
             },
           }),
-          context.previousCredentials
+          context.previousCredentials,
         );
       }
       showErrorToast({
@@ -156,7 +156,7 @@ export function VectorStoreSetupForm({
     },
   });
   const validateAPIKeyMutation = useMutation(
-    orpcQueryClient.authed.rag.validateVectorstoreConfig.mutationOptions({})
+    orpcQueryClient.authed.rag.validateVectorstoreConfig.mutationOptions({}),
   );
 
   const updateMutation = useMutation({
@@ -315,7 +315,7 @@ export function VectorStoreSetupForm({
   useEffect(() => {
     if (vectorStore) {
       const dynamicFields = JSON.parse(
-        (existingCredential?.dynamicFields as any) || "{}"
+        (existingCredential?.dynamicFields as any) || "{}",
       ) as Record<string, any>;
       const defaultData: Record<string, string> = {};
       vectorStore.credentials?.forEach((field) => {
@@ -330,7 +330,7 @@ export function VectorStoreSetupForm({
       {/* Header */}
       <div className="flex items-start justify-between ">
         <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
+          <div className="h-12 w-12 rounded-xl bg-gaia-200 border border-gaia-300 dark:border-gaia-700 dark:bg-gaia-800 flex items-center justify-center">
             <ProviderIcon provider={vectorStore.name} className="h-6 w-6" />
           </div>
           <div>

@@ -116,7 +116,7 @@ export function RAGModal({
     content: string,
     fileName: string,
     fileType: FileType,
-    sourceType: sourceType
+    sourceType: sourceType,
   ) => {
     if (!projectId) {
       showErrorToast({
@@ -156,7 +156,7 @@ export function RAGModal({
         },
         {
           signal: abortController.signal,
-        }
+        },
       );
 
       for await (const event of iterator) {
@@ -319,7 +319,7 @@ export function RAGModal({
           <Button
             disabled={disabled}
             variant="brand"
-            size="tiny"
+            size="sm"
             className={cn("", className)}
           >
             <DatabaseIcon className="size-3!" />
@@ -329,7 +329,7 @@ export function RAGModal({
       </DialogTrigger>
 
       {hasEmbeddingCredentials ? (
-        <DialogContent className="h-[90vh] z-1000 max-h-[700px] w-full max-w-[90vw] md:max-w-6xl lg:max-w-7xl p-0 gap-0 overflow-hidden flex flex-col">
+        <DialogContent className="h-[90vh] z-1000 max-h-175 w-full max-w-[90vw] md:max-w-6xl lg:max-w-7xl p-0 gap-0 overflow-hidden flex flex-col">
           <DialogTitle className="sr-only">Import Data</DialogTitle>
           <DialogDescription className="sr-only">
             Upload and configure your data sources for RAG processing.
@@ -349,7 +349,16 @@ export function RAGModal({
                               isActive={item.id === activeSection}
                               disabled={indexingState.isIndexing}
                             >
-                              <button onClick={() => setActiveSection(item.id)}>
+                              <button
+                                onClick={() => setActiveSection(item.id)}
+                                className={cn(
+                                  "flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-xs transition-colors",
+                                  "hover:bg-gaia-200 dark:hover:bg-gaia-800/80",
+                                  activeSection === item.id
+                                    ? "bg-gaia-200! border text-accent-foreground border-gaia-300! h-9 dark:bg-gaia-800/50"
+                                    : "",
+                                )}
+                              >
                                 <item.icon className="h-4 w-4" />
                                 <span>{item.name}</span>
                               </button>
@@ -438,7 +447,7 @@ export function RAGModal({
           </SidebarProvider>
         </DialogContent>
       ) : (
-        <DialogContent className="h-[90vh] max-h-[700px] w-full max-w-[90vw] md:max-w-6xl lg:max-w-7xl p-4 gap-0 overflow-hidden">
+        <DialogContent className="h-[90vh] max-h-175 w-full max-w-[90vw] md:max-w-6xl lg:max-w-7xl p-4 gap-0 overflow-hidden">
           <AddEmbeddingEmptyContent />
         </DialogContent>
       )}
@@ -475,7 +484,7 @@ const ProgressIndicator = ({
           "mt-6 p-4 border rounded-lg shrink-0",
           indexingState.status === "completed"
             ? "bg-green-500/10 border-green-500/20"
-            : "bg-red-500/10 border-red-500/20"
+            : "bg-red-500/10 border-red-500/20",
         )}
       >
         <div className="flex items-center gap-2">

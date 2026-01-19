@@ -94,13 +94,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               size="lg"
               asChild
             >
-              <SidebarHeader className="bg-transparent! w-full  hover:bg-transparent! dark:bg-gaia-950! dark:hover:bg-gaia-950! flex items-start justify-start ">
-                <Logo
-                  // isIcon={state == "collapsed"}
-                  isIcon
-                  className=" w-7! h-7  "
-                />
-                <ProjectsSwitcher className="h-7! py-2 absolute top-0 left-15 min-w-27.5" />
+              <SidebarHeader className="bg-transparent w-full hover:bg-transparent dark:bg-gaia-950 dark:hover:bg-gaia-950 flex items-start justify-start gap-2">
+                <ProjectsSwitcher className="flex-1" />
               </SidebarHeader>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -135,7 +130,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <Link href={`/${BASE_URL}/tools`}>
                   <Image
                     className={cn(
-                      "hidden dark:block opacity-60  data-[active=true]/group:opacity-100 "
+                      "hidden dark:block opacity-60  data-[active=true]/group:opacity-100 ",
                     )}
                     alt="mcp"
                     src={MCPIcon.src}
@@ -144,7 +139,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   />
                   <Image
                     className={cn(
-                      "block opacity-70 dark:hidden  data-[active=true]/group:opacity-100 "
+                      "block opacity-70 dark:hidden  data-[active=true]/group:opacity-100 ",
                     )}
                     alt="mcp"
                     src={MCPIconLight.src}
@@ -170,7 +165,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             {/* Chat History Section */}
             <div className="mt-6 px-2 group-data-[collapsible=icon]:hidden">
               <div className="px-2 mb-2">
-                <h3 className="text-[13px] font-medium text-muted-foreground text-start dark:text-gaia-300/70 tracking-wider">
+                <h3 className="text-[13px] font-medium text-gaia-500 text-start dark:text-gaia-300/70 tracking-wider">
                   Recent Chats
                 </h3>
               </div>
@@ -228,7 +223,7 @@ function ChatHistoryList({
           fetchNextPage();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     const currentTarget = observerTarget.current;
@@ -256,9 +251,7 @@ function ChatHistoryList({
 
   if (!chatHistory || chatHistory.length === 0) {
     return (
-      <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-        No chat history yet
-      </div>
+      <div className="px-4 py-8 text-center text-sm text-muted-foreground"></div>
     );
   }
 
@@ -312,7 +305,7 @@ function ChatHistoryItem({
           });
         }
       },
-    })
+    }),
   );
   const handleDelete = async () => {
     try {

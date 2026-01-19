@@ -99,7 +99,7 @@ function ModelSelector({
         acc[provider].push(model);
         return acc;
       },
-      {} as Record<string, typeof models>
+      {} as Record<string, typeof models>,
     );
   }, [models]);
 
@@ -134,7 +134,7 @@ function ModelSelector({
                   heading={
                     <div className="flex items-center justify-start gap-2">
                       <ProviderIcon provider={provider} />
-                      <span className="capitalize text-white text-md">
+                      <span className="capitalize dark:text-white text-md">
                         {provider}
                       </span>
                     </div>
@@ -148,7 +148,7 @@ function ModelSelector({
                       onSelect={() => {
                         onSelect(
                           model.id,
-                          model.fromVercel ? "vercel" : undefined
+                          model.fromVercel ? "vercel" : undefined,
                         );
                         setOpen(false);
                       }}
@@ -156,7 +156,7 @@ function ModelSelector({
                       <CheckIcon
                         className={cn(
                           "mr-2 h-4 w-4",
-                          value === model.id ? "opacity-100" : "opacity-0"
+                          value === model.id ? "opacity-100" : "opacity-0",
                         )}
                       />
                       <div className="flex-1">
@@ -165,7 +165,7 @@ function ModelSelector({
                     </CommandItem>
                   ))}
                 </CommandGroup>
-              )
+              ),
             )}
           </CommandList>
         </Command>
@@ -387,7 +387,7 @@ function FullTextSearchSelector({
           >
             <AlertCircle className="h-4 w-4 text-blue-500" />
             <AlertDescription className="text-xs">
-              <strong>Setup Required:</strong>{" "}
+              <strong className="text-xl!">Setup Required:</strong>{" "}
               {vectorStoreConfig.fullTextSearchConfig.setupInstructions}
               {vectorStoreConfig.fullTextSearchConfig.setupDocUrl && (
                 <>
@@ -579,7 +579,7 @@ export const RAGSettingsView = ({ className }: { className?: string }) => {
   const needsExternalFullTextTool = useMemo(() => {
     if (!settings?.vectorStore) return false;
     const vectorStore = allVectorstores?.find(
-      (v) => v.id === settings.vectorStore
+      (v) => v.id === settings.vectorStore,
     );
     if (!vectorStore) return false;
     const needsLexical = ["mmr", "hybrid"].includes(settings.searchType || "");
@@ -713,10 +713,10 @@ export function RAGSettingsModal({
   showCancelButton = true,
 }: RAGSettingsModalProps) {
   const openRAGSettingsModal = useDialogs(
-    (state) => state.openRAGSettingsDialog
+    (state) => state.openRAGSettingsDialog,
   );
   const setOpenRAGSettingsModal = useDialogs(
-    (state) => state.setOpenRAGSettingsDialog
+    (state) => state.setOpenRAGSettingsDialog,
   );
   const { activeProjectId: projectId } = useAppStore();
   const { settings } = useRAGStore();
@@ -749,7 +749,7 @@ export function RAGSettingsModal({
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ["rag-settings"] });
       },
-    })
+    }),
   );
 
   const handleSave = () => {

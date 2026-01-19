@@ -124,7 +124,7 @@ function FeedbackModal({ children }: { children?: React.ReactNode }) {
         </TooltipContent>
       </Tooltip>
 
-      <DialogContent className="sm:max-w-2xl  ">
+      <DialogContent className="sm:max-w-2xl z-9999 ">
         <DialogHeader>
           <DialogTitle>Leave Feedback</DialogTitle>
           <DialogDescription>
@@ -144,12 +144,11 @@ function FeedbackModal({ children }: { children?: React.ReactNode }) {
           rows={8}
           className={cn(
             "resize-none bg-gaia-200  border-gaia-400 shadow-none",
-            feedbackError && "border! border-red-500!"
+            feedbackError && "border! border-red-500!",
           )}
         />
 
         <DialogFooter>
-          {/* <Button type="submit">Save changes</Button> */}
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between w-full">
             <div className="flex w-full items-center justify-start gap-2">
               <StarRating rating={rating!} setRating={setRating} />
@@ -160,25 +159,19 @@ function FeedbackModal({ children }: { children?: React.ReactNode }) {
               modal-footer=""
             >
               <DialogClose asChild className="">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size={"tiny"}
-                  className="h-7"
-                >
+                <Button type="button" variant="outline" size={"sm"}>
                   Cancel
                 </Button>
               </DialogClose>
 
               {submitLoading ? (
-                <Button className="" size={"tiny"} disabled variant={"brand"}>
+                <Button className="" size={"sm"} disabled variant={"brand"}>
                   <Loader className="animate-spin " size={14} />
-                  Loading...
                 </Button>
               ) : (
                 <Button
                   variant={"brand"}
-                  size={"tiny"}
+                  size={"sm"}
                   className="px-7"
                   onClick={handleSubmit}
                   type="submit"

@@ -28,7 +28,7 @@ export const PromptModal = () => {
   const { data: currentPrompt, isPending: isLoadingPrompt } = useQuery(
     orpcQueryClient.authed.prompt.get.queryOptions({
       input: { projectId },
-    })
+    }),
   );
 
   const { mutate: updatePrompt, isPending: isSaving } = useMutation(
@@ -63,7 +63,7 @@ export const PromptModal = () => {
           queryKey: orpcQueryClient.authed.project.list.key(),
         });
       },
-    })
+    }),
   );
 
   useEffect(() => {
@@ -90,8 +90,8 @@ export const PromptModal = () => {
       <DialogTrigger asChild>
         <div
           className={cn(
-            "w-full h-7 pl-2 flex rounded-md items-center justify-start hover:bg-transparent cursor-pointer",
-            "h-7 text-xs hover:bg-gaia-200 dark:hover:bg-gaia-700/30"
+            "w-full h-9 dark:h-7 pl-2 flex rounded-md items-center justify-start hover:bg-transparent cursor-pointer",
+            "text-xs bg-transparent! hover:bg-gaia-200! dark:hover:bg-gaia-800/30!",
           )}
         >
           <SquareChevronRightIcon className="mr-3 ml-0 size-3.5! dark:text-white" />

@@ -1021,7 +1021,7 @@
 
 //       <div className="flex items-center gap-3 shrink-0 ml-4">
 //         {model.size && (
-//           <span className="text-xs text-muted-foreground font-mono min-w-[60px] text-right">
+//           <span className="text-xs text-muted-foreground font-mono min-w-15 text-right">
 //             {formatBytes(model.size)}
 //           </span>
 //         )}

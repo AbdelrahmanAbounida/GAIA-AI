@@ -142,7 +142,6 @@
     "dotenv": "^17.2.3",
     "faiss-node": "^0.5.1",
     "flexsearch": "0.7.43",
-    "milvus": "link:@langchain/classic/vectorstores/milvus",
     "minisearch": "^7.2.0",
     "pg": "^8.16.3",
     "sqlite3": "5.1.7",

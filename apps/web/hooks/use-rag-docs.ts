@@ -5,8 +5,12 @@ import {
   keepPreviousData,
 } from "@tanstack/react-query";
 import { orpcQueryClient } from "@/lib/orpc/client";
+import { useParams } from "next/navigation";
 
-export function useRagDocuments(projectId: string, pageSize = 10) {
+export function useRagDocuments(pageSize = 10) {
+  const params = useParams<{ id: string }>();
+  const projectId = params.id!;
+
   const [page, setPage] = useState(0);
   const queryClient = useQueryClient();
 
@@ -18,7 +22,7 @@ export function useRagDocuments(projectId: string, pageSize = 10) {
         offset: page * pageSize,
       },
       placeholderData: keepPreviousData,
-    })
+    }),
   );
 
   // Prefetch next page for instant navigation
@@ -35,7 +39,7 @@ export function useRagDocuments(projectId: string, pageSize = 10) {
             limit: pageSize,
             offset: (page + 1) * pageSize,
           },
-        })
+        }),
       );
     }
   }, [data, isPlaceholderData, page, pageSize, queryClient, projectId]);

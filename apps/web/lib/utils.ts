@@ -72,3 +72,22 @@ export const fetcher = async (url: string) => {
 
   return response.json();
 };
+
+export function generateApiKey(): string {
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let key = "gaia_";
+  for (let i = 0; i < 48; i++) {
+    key += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return key;
+}
+
+export const isVercel = () => {
+  return (
+    true ||
+    process.env.VERCEL === "1" ||
+    process.env.VERCEL_ENV ||
+    !!process.env.NEXT_PUBLIC_VERCEL
+  );
+};

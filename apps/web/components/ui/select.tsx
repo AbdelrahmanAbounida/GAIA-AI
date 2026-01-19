@@ -25,11 +25,11 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-xl border   px-3 py-2 text-sm  data-placeholder:text-muted-foreground focus:outline-none   disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+      "flex h-11 dark:h-9 w-full items-center justify-between whitespace-nowrap rounded-xl border   px-3 py-2 text-sm  data-placeholder:text-muted-foreground focus:outline-none   disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
       "hover:border-gaia-400 transition-all  cursor-pointer   ",
       "dark:bg-gaia-800 border-gaia-400 dark:border-gaia-700",
-      "hover:bg-gaia-200 dark:hover:bg-gaia-800 dark:hover:border-gaia-700",
-      className
+      "bg-white hover:bg-gaia-200 dark:hover:bg-gaia-800 dark:hover:border-gaia-700",
+      className,
     )}
     {...props}
   >
@@ -51,7 +51,7 @@ const SelectScrollUpButton = React.forwardRef<
     ref={ref}
     className={cn(
       "flex cursor-default items-center justify-center py-1",
-      className
+      className,
     )}
     {...props}
   >
@@ -68,7 +68,7 @@ const SelectScrollDownButton = React.forwardRef<
     ref={ref}
     className={cn(
       "flex cursor-default items-center justify-center py-1",
-      className
+      className,
     )}
     {...props}
   >
@@ -90,7 +90,7 @@ const SelectContent = React.forwardRef<
         position === "popper" &&
           "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
         "dark:bg-gaia-800 dark:text-gaia-50",
-        className
+        className,
       )}
       position={position}
       {...props}
@@ -100,7 +100,7 @@ const SelectContent = React.forwardRef<
         className={cn(
           "p-1",
           position === "popper" &&
-            "h-(--radix-select-trigger-height) w-full min-w-(--radix-select-trigger-width)"
+            "h-(--radix-select-trigger-height) w-full min-w-(--radix-select-trigger-width)",
         )}
       >
         {children}
@@ -131,7 +131,7 @@ const SelectItem = React.forwardRef<
     ref={ref}
     className={cn(
       "relative flex w-full cursor-pointer select-none items-center rounded-xl py-2 pl-2 pr-8 text-sm outline-none focus:bg-gaia-200 dark:focus:bg-gaia-900 focus:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50",
-      className
+      className,
     )}
     {...props}
   >

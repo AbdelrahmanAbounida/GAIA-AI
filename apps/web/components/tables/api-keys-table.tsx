@@ -6,6 +6,8 @@ import {
   ChevronRight,
   MoreHorizontal,
   Trash2,
+  KeyRoundIcon,
+  Plus,
 } from "lucide-react";
 import {
   Table,
@@ -38,6 +40,7 @@ import { cn } from "@/lib/utils";
 interface ApiKeyTableProps {
   keys: ApiKey[];
   onDelete: (id: string) => void;
+  onCreateNew: () => void;
 }
 
 const ITEMS_PER_PAGE = 10;
@@ -58,20 +61,13 @@ function formatDate(date: Date | string): string {
   }).format(dateObj);
 }
 
-export function ApiKeyTable({ keys, onDelete }: ApiKeyTableProps) {
+export function ApiKeyTable({ keys, onDelete, onCreateNew }: ApiKeyTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const totalPages = Math.ceil(keys.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedKeys = keys.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-
-  const handleCopy = async (key: ApiKey) => {
-    await navigator.clipboard.writeText(key.value);
-    setCopiedId(key.id);
-    setTimeout(() => setCopiedId(null), 2000);
-  };
 
   const handleDelete = () => {
     if (deleteId) {
@@ -89,24 +85,39 @@ export function ApiKeyTable({ keys, onDelete }: ApiKeyTableProps) {
 
   return (
     <>
-      <div className="rounded-xl! ">
-        <Table className="rounded-xl!">
-          <TableHeader className="bg-gaia-250 dark:bg-gaia-800 rounded-3xl!">
-            <TableRow className="border-none">
-              <TableHead className=" rounded-l-xl">Name</TableHead>
+      <div className="">
+        <Table className="">
+          <TableHeader className="bg-gaia-200  h-11 dark:bg-gaia-800 rounded-md!">
+            <TableRow className=" border-none rounded-xl!">
+              <TableHead className="rounded-l-xl">Name</TableHead>
               <TableHead>Created On</TableHead>
-              <TableHead className="">API Key</TableHead>
-              <TableHead className="w-[70px] rounded-r-xl!">Actions</TableHead>
+              <TableHead>API Key</TableHead>
+              <TableHead className="w-17.5 rounded-r-xl">Actions</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody className="">
-            {paginatedKeys.length === 0 ? (
+          <TableBody>
+            {keys.length === 0 ? (
               <TableRow>
-                <TableCell
-                  colSpan={4}
-                  className="h-24 text-center text-muted-foreground"
-                >
-                  No API keys found. Create one to get started.
+                <TableCell colSpan={4} className="h-64">
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <div className="inline-flex items-center justify-center w-13.75 h-13.75 bg-white dark:bg-gaia-800 border border-gaia-400 dark:border-gaia-700 rounded-xl mb-3">
+                      <KeyRoundIcon className="w-8 h-8 text-[#3BA34A] dark:text-brand-800" />
+                    </div>
+
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">
+                      No API keys yet
+                    </h3>
+                    <p className="text-gray-500/80 dark:text-zinc-400 text-sm mb-6">
+                      Create an API key to start using the platform
+                      programmatically. Keys allow you to authenticate API
+                      requests.
+                    </p>
+
+                    <Button variant="brand" size="sm" onClick={onCreateNew}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create API Key
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (
@@ -206,7 +217,7 @@ export function ApiKeyTable({ keys, onDelete }: ApiKeyTableProps) {
             <AlertDialogAction
               onClick={handleDelete}
               className={cn(
-                buttonVariants({ variant: "destructive", size: "sm" })
+                buttonVariants({ variant: "destructive", size: "sm" }),
               )}
             >
               <div>Delete Key</div>

@@ -33,7 +33,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
     className={cn(
       "flex cursor-pointer select-none items-center rounded-lg px-2 py-1.5 text-sm outline-none dark:focus:bg-gaia-700/30 dark:data-[state=open]:bg-gaia-700/30",
       inset && "pl-8",
-      className
+      className,
     )}
     {...props}
   >
@@ -52,7 +52,7 @@ const DropdownMenuSubContent = React.forwardRef<
     ref={ref}
     className={cn(
       "z-50 min-w-32 overflow-hidden rounded-xl border bg-popover p-1 text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-      className
+      className,
     )}
     {...props}
   />
@@ -72,7 +72,7 @@ const DropdownMenuContent = React.forwardRef<
         "z-50 min-w-52 overflow-hidden rounded-md border bg-popover p-1 transition-colors text-popover-foreground shadow-md",
         "data-[state=open]:animate-in  data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
         "dark:bg-gaia-900 dark:border-gaia-700",
-        className
+        className,
       )}
       {...props}
     />
@@ -90,11 +90,11 @@ const DropdownMenuItem = React.forwardRef<
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
-      "relative h-7 dark:text-xs flex cursor-pointer first:rounded-t-xl last:rounded-b-xl select-none items-center gap-2 rounded-md px-2  text-sm outline-none transition-colors dark:focus:bg-gaia-700/30 dark:focus:text-bg-gaia-700-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0",
+      "relative h-9 dark:h-7 dark:text-xs flex cursor-pointer first:rounded-t-xl last:rounded-b-xl select-none items-center gap-2 rounded-md px-2  text-sm outline-none transition-colors dark:focus:bg-gaia-700/30 dark:focus:text-bg-gaia-700-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0",
       isActive && "bg-gaia-300 dark:bg-gaia-700/30",
       inset && "pl-8",
       " hover:bg-gaia-200 dark:hover:bg-gaia-700/30",
-      className
+      className,
     )}
     {...props}
   >
@@ -115,7 +115,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
     ref={ref}
     className={cn(
       "relative flex cursor-default focus:outline-none! focus:ring-0!  select-none items-center rounded-xl py-2.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-gaia-700/30 focus:text-zinc-900 data-disabled:pointer-events-none data-disabled:opacity-50",
-      className
+      className,
     )}
     checked={checked}
     {...props}
@@ -139,7 +139,7 @@ const DropdownMenuRadioItem = React.forwardRef<
     ref={ref}
     className={cn(
       "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-bg-gaia-700/30 focus:text-bg-gaia-700-foreground data-disabled:pointer-events-none data-disabled:opacity-50",
-      className
+      className,
     )}
     {...props}
   >
@@ -164,7 +164,7 @@ const DropdownMenuLabel = React.forwardRef<
     className={cn(
       "px-2 py-1.5 text-sm font-semibold",
       inset && "pl-8",
-      className
+      className,
     )}
     {...props}
   />

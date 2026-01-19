@@ -35,7 +35,7 @@ import { CredentialModal } from "../credential-modal/credential-modal";
 import { FileParser } from "@/lib/file-parser";
 
 const mapFilesToUploadedFiles = async (
-  files: File[]
+  files: File[],
 ): Promise<UploadedFile[]> => {
   const processedFiles = await Promise.all(
     files.map(async (file) => {
@@ -62,7 +62,7 @@ const mapFilesToUploadedFiles = async (
         progress: 0,
         content,
       };
-    })
+    }),
   );
 
   return processedFiles;
@@ -389,7 +389,7 @@ export const AddEmbeddingEmptyContent = () => {
       <EmptyHeader className="w-full! max-w-4xl">
         <EmptyMedia variant="icon">
           {/* <FolderCodeIcon /> */}
-          <div className="bg-gaia-900! flex items-center">
+          <div className="bg-gaia-100 dark:bg-gaia-900 flex items-center">
             <Image src={LogoImage} alt="gaia" width={100} height={100} />
           </div>
         </EmptyMedia>

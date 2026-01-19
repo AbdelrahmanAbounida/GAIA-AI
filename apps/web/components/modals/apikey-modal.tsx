@@ -56,7 +56,7 @@ export function CreateKeyModal({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
-        className={cn("sm:max-w-lg p-0", newlyCreatedKey && "max-w-lg! p-3")}
+        className={cn("sm:max-w-xl p-0", newlyCreatedKey && "max-w-xl! p-3")}
         onInteractOutside={(e) => {
           if (newlyCreatedKey) e.preventDefault();
         }}
@@ -75,7 +75,7 @@ export function CreateKeyModal({
             ) : (
               <span className="text-sm">
                 {
-                  "API Key created successfully! Please save this key somewhere safe, and make sure it is only accessible by you."
+                  " Please save this key somewhere safe, and make sure it is only accessible by you."
                 }
                 <span className="font-semibold  dark:text-white">
                   {"You won't be able to view this key again. "}

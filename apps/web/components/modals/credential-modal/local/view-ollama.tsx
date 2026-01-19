@@ -54,7 +54,7 @@ export const OllamaView = ({ view }: { view: "ai_models" | "embeddings" }) => {
   const setOllamaSearch = useLocalModelStore((s) => s.setOllamaSearch);
   const customOllamaSearch = useLocalModelStore((s) => s.customOllamaSearch);
   const setCustomOllamaSearch = useLocalModelStore(
-    (s) => s.setCustomOllamaSearch
+    (s) => s.setCustomOllamaSearch,
   );
   const showCustomSearch = useLocalModelStore((s) => s.showCustomSearch);
   const setShowCustomSearch = useLocalModelStore((s) => s.setShowCustomSearch);
@@ -64,7 +64,7 @@ export const OllamaView = ({ view }: { view: "ai_models" | "embeddings" }) => {
 
   // Track which model is being added to credential
   const [addingToCredential, setAddingToCredential] = useState<string | null>(
-    null
+    null,
   );
 
   // Get Ollama credential with models
@@ -74,11 +74,11 @@ export const OllamaView = ({ view }: { view: "ai_models" | "embeddings" }) => {
   const filteredInstalledModels = useMemo(() => {
     if (view === "ai_models") {
       return installedModels.filter(
-        (model) => !EMBEDDING_MODELS.some((em) => model.name.includes(em))
+        (model) => !EMBEDDING_MODELS.some((em) => model.name.includes(em)),
       );
     }
     return installedModels.filter((model) =>
-      EMBEDDING_MODELS.some((em) => model.name.includes(em))
+      EMBEDDING_MODELS.some((em) => model.name.includes(em)),
     );
   }, [installedModels, view]);
 
@@ -93,14 +93,14 @@ export const OllamaView = ({ view }: { view: "ai_models" | "embeddings" }) => {
 
     const installedNames = new Set(filteredInstalledModels.map((m) => m.name));
     const installedRecommended = RECOMMENDED_MODELS.filter((m) =>
-      installedNames.has(m.name)
+      installedNames.has(m.name),
     );
     const notInstalledRecommended = RECOMMENDED_MODELS.filter(
-      (m) => !installedNames.has(m.name)
+      (m) => !installedNames.has(m.name),
     );
 
     const otherInstalled = filteredInstalledModels.filter(
-      (m) => !RECOMMENDED_MODELS.some((rm) => rm.name === m.name)
+      (m) => !RECOMMENDED_MODELS.some((rm) => rm.name === m.name),
     );
 
     return {
@@ -125,7 +125,7 @@ export const OllamaView = ({ view }: { view: "ai_models" | "embeddings" }) => {
 
   const checkModelDownloading = (modelName: string): boolean => {
     const isDownloading = activePulls.some(
-      (pull) => pull.modelName === modelName
+      (pull) => pull.modelName === modelName,
     );
 
     if (isDownloading) {
@@ -256,7 +256,7 @@ export const OllamaView = ({ view }: { view: "ai_models" | "embeddings" }) => {
 
   const handleSelectOllama = (modelName: string) => {
     const isInstalled = filteredInstalledModels.some(
-      (m) => m.name === modelName
+      (m) => m.name === modelName,
     );
 
     if (isInstalled) {
@@ -395,7 +395,7 @@ export const OllamaView = ({ view }: { view: "ai_models" | "embeddings" }) => {
                         isInCredential={credentialModels.includes(model.name)}
                         isSearch={false}
                         isRecommended={RECOMMENDED_MODELS.some(
-                          (rm) => rm.name === model.name
+                          (rm) => rm.name === model.name,
                         )}
                         onSelect={() => handleSelectOllama(model.name)}
                         activePulls={activePulls}
@@ -446,7 +446,7 @@ export const OllamaView = ({ view }: { view: "ai_models" | "embeddings" }) => {
                           isInstalled={false}
                           isInCredential={false}
                           isRecommended={RECOMMENDED_MODELS.some(
-                            (m) => m.name === model.name
+                            (m) => m.name === model.name,
                           )}
                           onSelect={() => handleSelectOllama(model.name)}
                           activePulls={activePulls}
@@ -528,7 +528,7 @@ export const OllamaView = ({ view }: { view: "ai_models" | "embeddings" }) => {
                 }
                 variant="brand"
                 size="sm"
-                className="px-3  dark:h-[27px]"
+                className="px-3  dark:h-6.75"
               >
                 <Download className="size-3.5! mr-1" />
                 Pull
@@ -619,7 +619,7 @@ const ModelItem = ({
 
       <div className="flex items-center gap-3 shrink-0 ml-4">
         {model.size && (
-          <span className="text-xs text-muted-foreground font-mono min-w-[60px] text-right">
+          <span className="text-xs text-muted-foreground font-mono min-w-15 text-right">
             {formatBytes(model.size)}
           </span>
         )}

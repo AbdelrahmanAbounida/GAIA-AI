@@ -16,15 +16,15 @@ const buttonVariants = cva(
           "relative justify-center cursor-pointer inline-flex items-center space-x-2 text-center font-regular ease-out duration-200  outline-none transition-all outline-0  border text-foreground ",
           "dark:bg-brand-900! dark:hover:bg-brand-800/90! dark:hover:border-brand-500! dark:data-[state=open]:bg-brand-500/80! dark:border-brand-400/30!  dark:data-[state=open]:bg-brand-400/80! data-[state=open]:bg-gaia-900/80!",
           "bg-gaia-950! hover:bg-gaia-900/90!  border   text-white! data-[state=open]:outline-brand-600!",
-          "rounded-lg dark:rounded-md"
+          "rounded-lg dark:rounded-md",
         ),
         outline2: cn(
-          "group/button inline-flex items-center justify-center font-medium whitespace-nowrap transition duration-100 ease-out select-none px-4 h-10 rounded-xl gap-2 text-base active:opacity-70 border-bg-border bg-bg-base-hover text-label-base border border-solid hover:bg-bg-shade hover:text-label-title cursor-pointer"
+          "group/button inline-flex items-center justify-center font-medium whitespace-nowrap transition duration-100 ease-out select-none px-4 h-10 rounded-xl gap-2 text-base active:opacity-70 border-bg-border bg-bg-base-hover text-label-base border border-solid hover:bg-bg-shade hover:text-label-title cursor-pointer",
         ),
         destructive:
           "dark:hover:bg-red-950! text-white bg-red-500 hover:bg-red-600 dark:bg-[#541B15]! border! dark:border-red-900! dark:hover:border-red-700! transition-colors",
         outline:
-          "border bg-white hover:bg-gaia-200 dark:border-[#464646] hover:border-gaia-400 dark:hover:border-zinc-600 dark:bg-gaia-900  dark:hover:bg-gaia-800/90 hover:text-accent-foreground",
+          "border bg-white hover:bg-gaia-200! dark:border-[#464646] hover:border-gaia-400 dark:hover:border-zinc-600! dark:bg-gaia-900  dark:hover:bg-gaia-800/90! hover:text-accent-foreground",
         outline3:
           "border   dark:bg-[#242325] dark:border-gaia-700 dark:hover:border-gaia-700  dark:hover:bg-gaia-800/90 hover:text-accent-foreground",
 
@@ -37,8 +37,8 @@ const buttonVariants = cva(
       },
       size: {
         default: "h-10 px-4 py-2",
-        sm: "h-10 dark:h-7 rounded-xl dark:rounded-md px-5 text-sm dark:text-xs",
-        md: "h-8 rounded-md px-6",
+        sm: "h-10  dark:h-[26px] rounded-xl dark:rounded-md px-5 text-sm dark:text-xs",
+        md: "h-11 dark:h-7 rounded-xl dark:rounded-md px-5 text-sm dark:text-xs",
         tiny: "text-sm dark:text-xs px-2.5 py-1 h-8 dark:h-[26px]", // px-2.5 py-1 h-[26px]
         lg: "h-10 rounded-md px-8",
         icon: "h-9 w-9",
@@ -49,7 +49,7 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  }
+  },
 );
 
 export interface ButtonProps
@@ -69,7 +69,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       />
     );
-  }
+  },
 );
 Button.displayName = "Button";
 

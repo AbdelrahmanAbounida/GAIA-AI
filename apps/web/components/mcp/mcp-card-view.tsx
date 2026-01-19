@@ -19,6 +19,7 @@ import {
   AlertCircle,
   Globe,
   Command,
+  Loader,
 } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Switch } from "../ui/switch";
@@ -40,12 +41,8 @@ export const MCPCardView = () => {
 
   if (isLoadingServers)
     return (
-      <div className="flex flex-wrap">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <div key={index} className="w-1/3 p-4">
-            <Skeleton className="h-40 rounded-lg" />
-          </div>
-        ))}
+      <div className="flex flex-wrap w-full items-center justify-center h-75">
+        <Loader className="animate-spin text-brand-700" />
       </div>
     );
 
@@ -316,15 +313,16 @@ const ServerCard = ({
 
 const EmptyServers = () => {
   return (
-    <Card className="border-dashed shadow-none">
+    <Card className="border-none shadow-none">
       <CardContent className="flex flex-col items-center justify-center py-12">
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gaia-200 dark:bg-gaia-800">
-          <Server className="h-6 w-6 text-green-700" />
+        <div className="inline-flex items-center justify-center size-11 bg-white dark:bg-gaia-800 border border-gaia-400 dark:border-gaia-700 rounded-xl mb-3">
+          <Server className="size-6  text-[#3BA34A] dark:text-brand-800" />
         </div>
 
-        <h3 className="mb-1 text-lg font-semibold">No Servers Found</h3>
-
-        <p className="mb-4 text-center text-sm text-gray-500 dark:text-muted-foreground">
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">
+          No Servers Found
+        </h3>
+        <p className="text-gray-500/80 dark:text-zinc-400 text-sm mb-6">
           Connect to an MCP server to access additional tools
         </p>
 

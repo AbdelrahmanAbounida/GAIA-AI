@@ -4,7 +4,7 @@ import React from "react";
 const LoadingPage = () => {
   return (
     <div className="flex items-center justify-center">
-      <Loader className="animate-spin size-12 text-brand-700 dark:text-brand-800" />
+      <Loader className="animate-spin size-5 text-brand-700 dark:text-brand-800" />
     </div>
   );
 };

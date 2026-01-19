@@ -14,6 +14,8 @@ import {
   FileTextIcon,
   ChevronLeft,
   ChevronRight,
+  Loader2,
+  DatabaseIcon,
 } from "lucide-react";
 
 import {
@@ -38,11 +40,10 @@ import { RagDocument } from "@gaia/db";
 import { useParams } from "next/navigation";
 import { ConfirmModal } from "../modals/confirm-modal";
 import { useRagDocuments } from "@/hooks/use-rag-docs";
+import { RAGModal } from "../modals/rag-modal/rag-modal";
 
 export function RAGTable() {
   const queryClient = useQueryClient();
-  const params = useParams<{ id: string }>();
-  const projectId = params.id!;
 
   const {
     documents,
@@ -52,7 +53,7 @@ export function RAGTable() {
     setPage,
     isLoading,
     isPlaceholderData,
-  } = useRagDocuments(projectId, 10);
+  } = useRagDocuments(10);
 
   // Delete Mutation
   const deleteMutation = useMutation({
@@ -120,30 +121,49 @@ export function RAGTable() {
   };
 
   if (isLoading) {
-    return <div className="py-6 text-muted-foreground">Loading...</div>;
+    return (
+      <div className="py-6 text-muted-foreground">
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      </div>
+    );
   }
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border">
+      <div className="rounded-lg ">
         <Table>
-          <TableHeader>
-            <TableRow>
+          <TableHeader className="bg-gaia-200  h-11 dark:bg-gaia-800 rounded-md!">
+            <TableRow className=" border-none rounded-xl!">
               <TableHead>Document</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Indexed</TableHead>
-              <TableHead className="w-[60px]" />
+              <TableHead className="w-15" />
             </TableRow>
           </TableHeader>
 
-          <TableBody>
+          <TableBody className="w-full">
             {documents.length === 0 ? (
               <TableRow>
-                <TableCell
-                  colSpan={4}
-                  className="text-center py-6 text-muted-foreground"
-                >
-                  No indexed documents found
+                <TableCell colSpan={4} className="h-64">
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <div className="inline-flex items-center justify-center size-11 bg-white dark:bg-gaia-800 border border-gaia-400 dark:border-gaia-700 rounded-xl mb-3">
+                      <FileIcon className="size-6 text-[#3BA34A] dark:text-brand-800" />
+                    </div>
+
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">
+                      No Indexed Documents
+                    </h3>
+                    <p className="text-gray-500/80 dark:text-zinc-400 text-sm mb-6">
+                      Upload a document, PDF, or CSV, or raw text to get started
+                    </p>
+
+                    <RAGModal>
+                      <Button variant="brand" size="sm">
+                        <DatabaseIcon className="size-3!" />
+                        Add Data
+                      </Button>
+                    </RAGModal>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (

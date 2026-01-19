@@ -1,4 +1,4 @@
-import { KeyRound, LoaderIcon } from "lucide-react";
+import { KeyRound, Loader, LoaderIcon } from "lucide-react";
 import LogoImage from "@/public/logos/logo.png";
 import { Button } from "@/components/ui/button";
 import {
@@ -53,7 +53,7 @@ export function EmptyRAG({ projectId }: EmptyRAGProps) {
         offset: 0,
         limit: 20,
       },
-    })
+    }),
   );
 
   // Fetch indexed documents
@@ -62,7 +62,7 @@ export function EmptyRAG({ projectId }: EmptyRAGProps) {
       input: {
         projectId,
       },
-    })
+    }),
   );
 
   useEffect(() => {
@@ -90,9 +90,11 @@ export function EmptyRAG({ projectId }: EmptyRAGProps) {
       <Empty className="h-full w-full">
         <EmptyHeader className="max-w-125">
           <EmptyMedia variant="icon">
-            <LoaderIcon className="size-12 animate-spin" />
+            <LoaderIcon className="size-5 animate-spin" />
           </EmptyMedia>
-          <EmptyTitle className="text-[17px]">Loading...</EmptyTitle>
+          <EmptyTitle className="text-[17px]">
+            <LoaderIcon className="size-5 animate-spin" />
+          </EmptyTitle>
         </EmptyHeader>
       </Empty>
     );
@@ -148,7 +150,7 @@ export function EmptyRAG({ projectId }: EmptyRAGProps) {
 
   if (!hasValidCredentials) {
     return (
-      <Empty className="h-full w-full">
+      <Empty className="h-full w-full  gap-2">
         <EmptyHeader className="max-w-125">
           <EmptyMedia variant="icon">
             <div className="flex items-center bg-transparent!">
@@ -161,17 +163,17 @@ export function EmptyRAG({ projectId }: EmptyRAGProps) {
               />
             </div>
           </EmptyMedia>
-          <EmptyTitle className="text-[17px]">Setup Required</EmptyTitle>
-          <EmptyDescription className="w-full text-[14px]">
-            Complete the following steps to get started:
+          <EmptyTitle className="text-xl">Setup Required</EmptyTitle>
+          <EmptyDescription className="w-full">
+            Complete the following step to get started:
           </EmptyDescription>
         </EmptyHeader>
-        <EmptyContent>
+        <EmptyContent className="">
           <div className="space-y-3 w-full max-w-125">
             <CredentialModal
               activeTab="providers"
               trigger={
-                <Button variant={"outline"} size={"tiny"}>
+                <Button variant={"outline"} size={"sm"}>
                   <KeyRound className="size-3!" />
                   Setup Credentials
                 </Button>
@@ -192,7 +194,7 @@ export function EmptyRAG({ projectId }: EmptyRAGProps) {
           </div>
         </EmptyMedia>
         <EmptyTitle className="text-[17px]">No Knowledge Base Found</EmptyTitle>
-        <EmptyDescription className="w-full text-[14px] flex flex-col items-center justify-center gap-1">
+        <EmptyDescription className="w-full text-[14px] flex flex-col items-center justify-center gap-0">
           <span className="flex items-center "></span>
           <span className="flex items-center gap-2">
             Start by uploading PDFs, CSVs, or text files to build your knowledge
@@ -519,7 +521,7 @@ export function EmptyRAG({ projectId }: EmptyRAGProps) {
 //                 </CardDescription>
 //               </CardHeader>
 //               <CardContent>
-//                 <ScrollArea className="h-[150px] w-full rounded-md border p-3 mb-3">
+//                 <ScrollArea className="h-37.5 w-full rounded-md border p-3 mb-3">
 //                   <div className="space-y-2 text-sm">
 //                     {demoDocuments.map((doc, idx) => (
 //                       <div key={idx} className="flex gap-2">

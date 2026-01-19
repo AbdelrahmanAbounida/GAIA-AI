@@ -22,6 +22,7 @@ import {
 import { useTools } from "@/hooks/use-tools";
 import { TypeScriptEditor } from "./code-editor";
 import { showErrorToast } from "../ui/toast";
+import Image from "next/image";
 
 const generateChatGPTPrompt = ({ toolConfig }: { toolConfig: any }) => {
   const prompt = `Create a TypeScript tool function for the following use case:
@@ -106,30 +107,12 @@ export const NewToolDialog = ({
         {isLoadingTools ? (
           <Button disabled variant="outline" size="tiny">
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Loading...
           </Button>
         ) : (
           (tools.length > 0 || forceShow) && (
             <div className="flex items-center gap-2 bg-transparent!">
-              {/* ChatGPT action — OUTSIDE dialog trigger */}
-              <Button
-                variant="outline"
-                size="tiny"
-                onClick={openChatGPT}
-                className="flex-1 px-2 dark:h-7 w-fit"
-              >
-                <img
-                  src="/icons/openai.png"
-                  alt="openai"
-                  width={15}
-                  height={15}
-                />
-                Generate with ChatGPT
-              </Button>
-
-              {/* Dialog trigger ONLY for adding tool */}
               <DialogTrigger asChild>
-                <Button variant="brand" size="tiny" className="">
+                <Button variant="brand" size="sm" className="">
                   <PlusIcon className="h-4 w-4" />
                   Add New Tool
                 </Button>

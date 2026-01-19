@@ -12,6 +12,7 @@ import {
   LayoutGrid,
   List,
   CodeIcon,
+  Loader2,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useTools } from "@/hooks/use-tools";
@@ -103,7 +104,7 @@ const CardsView = () => {
   const { tools, isLoadingTools, triggerToolActivation, deleteTool } = useTools(
     {
       showToasts: true,
-    }
+    },
   );
   const handleToggleTool = (toolId: string, activeState: boolean) => {
     triggerToolActivation.mutate({ toolId, activeState });
@@ -122,7 +123,7 @@ const CardsView = () => {
             <Card
               key={tool.id}
               className={cn(
-                "group relative shadow-none bg-gaia-200! border-gaia-400 hover:border-gaia-500 dark:bg-gaia-800! dark:border-gaia-700 cursor-pointer transition-all dark:hover:bg-gaia-800/40 dark:hover:border-zinc-800"
+                "group relative shadow-none bg-gaia-200! border-gaia-400 hover:border-gaia-500 dark:bg-gaia-800! dark:border-gaia-700 cursor-pointer transition-all dark:hover:bg-gaia-800/40 dark:hover:border-zinc-800",
               )}
             >
               <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
@@ -236,7 +237,11 @@ function TableView() {
   };
 
   if (isLoadingTools) {
-    return <div className="py-6 text-muted-foreground">Loading...</div>;
+    return (
+      <div className="py-6 text-muted-foreground">
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      </div>
+    );
   }
 
   return (
@@ -249,7 +254,7 @@ function TableView() {
               <TableHead>Description</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Created</TableHead>
-              <TableHead className="w-[60px]" />
+              <TableHead className="w-15" />
             </TableRow>
           </TableHeader>
 
@@ -317,7 +322,7 @@ function TableView() {
                             onClick={(e) => e.stopPropagation()}
                             className={cn(
                               "relative w-full bg-transparent! justify-start flex cursor-pointer first:rounded-t-xl last:rounded-b-xl select-none items-center gap-2 rounded-md px-2 h-9 text-sm outline-none transition-colors dark:focus:bg-gaia-700/30 dark:focus:text-bg-gaia-700-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0",
-                              "h-7 text-xs hover:bg-gaia-200 dark:hover:bg-gaia-800!"
+                              "h-7 text-xs hover:bg-gaia-200 dark:hover:bg-gaia-800!",
                             )}
                           >
                             <Edit className="h-4 w-4 mr-2" />
@@ -390,15 +395,16 @@ function TableView() {
 
 const EmptyTools = () => {
   return (
-    <Card className="border-dashed shadow-none">
+    <Card className="border-none shadow-none">
       <CardContent className="flex flex-col items-center justify-center py-12">
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gaia-200 dark:bg-gaia-800">
-          <Wrench className="h-6 w-6 text-green-600" />
+        <div className="inline-flex items-center justify-center w-13.75 h-13.75 bg-white dark:bg-gaia-800 border border-gaia-400 dark:border-gaia-700 rounded-xl mb-3">
+          <Wrench className="w-8 h-8 text-[#3BA34A] dark:text-brand-800" />
         </div>
 
-        <h3 className="mb-1 text-lg font-semibold">No Tool Created</h3>
-
-        <p className="mb-4 text-center text-sm text-gray-500 dark:text-muted-foreground">
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">
+          No Tool Created
+        </h3>
+        <p className="text-gray-500/80 dark:text-zinc-400 text-sm mb-6">
           Build and configure AI tools tailored to your workflow. Add your first
           tool to get started.
         </p>
