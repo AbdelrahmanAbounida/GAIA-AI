@@ -37,7 +37,7 @@ export class FlexSearchFullTextSearch extends BaseFullTextSearch {
       "data",
       "vector_stores",
       "flexsearch",
-      lastSegment // Just use the UUID or identifier
+      lastSegment, // Just use the UUID or identifier
     );
 
     this.indexPath = path.join(flexsearchDir, `${this.indexName}.json`);
@@ -143,7 +143,7 @@ export class FlexSearchFullTextSearch extends BaseFullTextSearch {
    */
   protected async indexDocuments(
     documents: LangchainDocument[],
-    ids: string[]
+    ids: string[],
   ): Promise<void> {
     if (!this.index || !this.mounted) {
       throw new Error("Index not initialized or mounted");
@@ -176,7 +176,7 @@ export class FlexSearchFullTextSearch extends BaseFullTextSearch {
    */
   async search(
     query: string,
-    options: FullTextSearchOptions = {}
+    options: FullTextSearchOptions = {},
   ): Promise<FullTextSearchResult[]> {
     this.ensureInitialized();
 
@@ -280,7 +280,6 @@ export class FlexSearchFullTextSearch extends BaseFullTextSearch {
     }
 
     try {
-      // ✅ Ensure directory exists before writing
       await this.ensureFileDirectory(this.indexPath);
 
       let exportedData = "";
@@ -296,12 +295,12 @@ export class FlexSearchFullTextSearch extends BaseFullTextSearch {
       // Save document store separately
       const docStorePath = path.join(
         this.persistPath,
-        `${this.indexName}.docs.json`
+        `${this.indexName}.docs.json`,
       );
       await this.ensureFileDirectory(docStorePath);
 
       const docStoreData = JSON.stringify(
-        Array.from(this.documentStore.entries())
+        Array.from(this.documentStore.entries()),
       );
       await fs.writeFile(docStorePath, docStoreData, "utf-8");
     } catch (error) {
@@ -318,7 +317,7 @@ export class FlexSearchFullTextSearch extends BaseFullTextSearch {
     try {
       const docStorePath = path.join(
         this.persistPath,
-        `${this.indexName}.docs.json`
+        `${this.indexName}.docs.json`,
       );
       const data = await fs.readFile(docStorePath, "utf-8");
       const entries = JSON.parse(data);
@@ -379,7 +378,7 @@ export class FlexSearchFullTextSearch extends BaseFullTextSearch {
  * Factory function to create a FlexSearch index
  */
 export function createFlexSearchIndex(
-  config: FullTextSearchConfig
+  config: FullTextSearchConfig,
 ): FlexSearchFullTextSearch {
   return new FlexSearchFullTextSearch({
     ...config,

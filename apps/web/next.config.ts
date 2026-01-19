@@ -4,7 +4,7 @@ import path from "path";
 const isDockerBuild = !!process.env.DOCKER_BUILD;
 const isVercel = process.env.VERCEL === "1" || process.env.VERCEL_ENV;
 
-if (!isVercel) {
+if (!isVercel && !process.env.DOCKER_BUILD) {
   require("dotenv").config({
     path: path.resolve(process.cwd(), "../../.env"),
   });

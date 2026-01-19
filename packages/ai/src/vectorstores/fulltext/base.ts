@@ -48,10 +48,10 @@ export abstract class BaseFullTextSearch implements IFullTextSearch {
     } catch (error) {
       console.error(
         `❌ Failed to initialize ${this.config.provider} index:`,
-        error
+        error,
       );
       throw new Error(
-        `Failed to initialize ${this.config.provider}: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to initialize ${this.config.provider}: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
@@ -70,10 +70,10 @@ export abstract class BaseFullTextSearch implements IFullTextSearch {
     } catch (error) {
       console.error(
         `❌ Failed to create persist directory: ${this.persistPath}`,
-        error
+        error,
       );
       throw new Error(
-        `Failed to create persist directory: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to create persist directory: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
@@ -88,10 +88,10 @@ export abstract class BaseFullTextSearch implements IFullTextSearch {
     } catch (error) {
       console.error(
         `❌ Failed to create file directory for: ${filePath}`,
-        error
+        error,
       );
       throw new Error(
-        `Failed to create directory for ${filePath}: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to create directory for ${filePath}: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
@@ -132,7 +132,7 @@ export abstract class BaseFullTextSearch implements IFullTextSearch {
     } catch (error) {
       console.error(
         `❌ Error adding documents to ${this.config.provider}:`,
-        error
+        error,
       );
       throw this.handleError("add documents", error);
     }
@@ -144,7 +144,7 @@ export abstract class BaseFullTextSearch implements IFullTextSearch {
   async addTexts(
     texts: string[],
     metadatas?: Record<string, any>[],
-    ids?: string[]
+    ids?: string[],
   ): Promise<string[]> {
     this.ensureInitialized();
 
@@ -158,7 +158,7 @@ export abstract class BaseFullTextSearch implements IFullTextSearch {
           new Document({
             pageContent: text,
             metadata: metadatas?.[i] || {},
-          })
+          }),
       );
 
       return this.addDocuments(documents, ids);
@@ -172,7 +172,7 @@ export abstract class BaseFullTextSearch implements IFullTextSearch {
    */
   protected abstract indexDocuments(
     documents: Document[],
-    ids: string[]
+    ids: string[],
   ): Promise<void>;
 
   /**
@@ -180,7 +180,7 @@ export abstract class BaseFullTextSearch implements IFullTextSearch {
    */
   abstract search(
     query: string,
-    options?: FullTextSearchOptions
+    options?: FullTextSearchOptions,
   ): Promise<FullTextSearchResult[]>;
 
   /**
@@ -249,7 +249,7 @@ export abstract class BaseFullTextSearch implements IFullTextSearch {
   protected ensureInitialized(): void {
     if (!this.initialized) {
       throw new Error(
-        `${this.config.provider} full-text search index not initialized. Call initialize() first.`
+        `${this.config.provider} full-text search index not initialized. Call initialize() first.`,
       );
     }
   }
@@ -261,7 +261,7 @@ export abstract class BaseFullTextSearch implements IFullTextSearch {
     const message = error instanceof Error ? error.message : "Unknown error";
     console.error(
       `❌ Error during ${operation} in ${this.config.provider}:`,
-      error
+      error,
     );
     return new Error(`Failed to ${operation}: ${message}`);
   }

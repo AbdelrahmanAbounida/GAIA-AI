@@ -8,14 +8,14 @@ import type {
 } from "./types";
 import type { BaseVectorStore } from "./base";
 
-async function loadVectorStoreClass(provider: VectorStoreProviderId) {
-  const isVercel = process.env.VERCEL === "1" || process.env.VERCEL_ENV;
+const isVercel = process.env.VERCEL === "1" || process.env.VERCEL_ENV;
 
+async function loadVectorStoreClass(provider: VectorStoreProviderId) {
   switch (provider) {
     case "faiss":
       if (isVercel) {
         throw new Error(
-          "Faiss is not available on Vercel. Use Pinecone, Qdrant, or Supabase instead."
+          "Faiss is not available on Vercel. Use Pinecone, Qdrant, or Supabase instead.",
         );
       }
       const { FaissVectorStore } = await import("./faiss");
@@ -24,7 +24,7 @@ async function loadVectorStoreClass(provider: VectorStoreProviderId) {
     case "lancedb":
       if (isVercel) {
         throw new Error(
-          "LanceDB is not available on Vercel. Use Pinecone, Qdrant, or Supabase instead."
+          "LanceDB is not available on Vercel. Use Pinecone, Qdrant, or Supabase instead.",
         );
       }
       const { LanceDBVectorStore } = await import("./lancedb");
@@ -33,7 +33,7 @@ async function loadVectorStoreClass(provider: VectorStoreProviderId) {
     case "chroma":
       if (isVercel) {
         throw new Error(
-          "ChromaDB is not available on Vercel. Use Pinecone, Qdrant, or Supabase instead."
+          "ChromaDB is not available on Vercel. Use Pinecone, Qdrant, or Supabase instead.",
         );
       }
       const { ChromaVectorStore } = await import("./chroma");
@@ -128,7 +128,7 @@ async function ensureDirectory(dirPath: string): Promise<void> {
       throw new Error(
         `Failed to create directory ${dirPath}: ${error.message}\n` +
           `This might be a permission issue. Ensure the user running the process has write access.\n` +
-          `Current user: ${process.getuid?.() || "unknown"}, path: ${dirPath}`
+          `Current user: ${process.getuid?.() || "unknown"}, path: ${dirPath}`,
       );
     }
   }
@@ -143,7 +143,7 @@ async function ensureDirectory(dirPath: string): Promise<void> {
       `Directory ${dirPath} exists but is not writable: ${error.message}\n` +
         `Check permissions: chmod -R 755 ${dirPath} or chown to the correct user.\n` +
         `Current user: ${process.getuid?.() || "unknown"}, ` +
-        `Current working directory: ${process.cwd()}`
+        `Current working directory: ${process.cwd()}`,
     );
   }
 }
@@ -152,7 +152,7 @@ async function ensureDirectory(dirPath: string): Promise<void> {
  * Get effective provider (with fallback logic for unavailable providers)
  */
 function getEffectiveProvider(
-  requestedProvider: VectorStoreProviderId
+  requestedProvider: VectorStoreProviderId,
 ): VectorStoreProviderId {
   const isVercel = process.env.VERCEL === "1" || process.env.VERCEL_ENV;
 
@@ -166,7 +166,7 @@ function getEffectiveProvider(
       throw new Error(
         `${requestedProvider} is not supported on Vercel. ` +
           `Please use a cloud-based vector store like Pinecone, Qdrant, or Supabase. ` +
-          `Set your VECTOR_STORE_PROVIDER environment variable accordingly.`
+          `Set your VECTOR_STORE_PROVIDER environment variable accordingly.`,
       );
     }
   }
@@ -202,15 +202,17 @@ export async function createVectorStore({
     baseDataDir,
     "vector_stores",
     effectiveProvider,
-    projectId
+    projectId,
   );
 
-  await ensureDirectory(persistDirectory);
+  if (!isVercel) {
+    await ensureDirectory(persistDirectory);
+  }
 
   // Determine FTS provider
   const effectiveFTSProvider = determineEffectiveFTSProvider(
     effectiveProvider,
-    fullTextSearchTool
+    fullTextSearchTool,
   );
 
   const vectorStore = await createVectorStoreInstance(effectiveProvider, {
@@ -234,7 +236,7 @@ export async function createVectorStore({
  */
 function determineEffectiveFTSProvider(
   vectorStoreProvider: VectorStoreProviderId,
-  userSelectedFTS?: FullTextSearchProviderId
+  userSelectedFTS?: FullTextSearchProviderId,
 ): FullTextSearchProviderId | null {
   // Providers that support native FTS
   const nativeFTSProviders: VectorStoreProviderId[] = [
@@ -251,7 +253,7 @@ function determineEffectiveFTSProvider(
       !nativeFTSProviders.includes(vectorStoreProvider)
     ) {
       console.warn(
-        `${vectorStoreProvider} doesn't support native FTS. Falling back to flexsearch.`
+        `${vectorStoreProvider} doesn't support native FTS. Falling back to flexsearch.`,
       );
       return "flexsearch";
     }
@@ -282,7 +284,7 @@ export async function validateVectorstore({
  */
 export async function createVectorStoreInstance(
   provider: VectorStoreProviderId,
-  config: VectorStoreConfig
+  config: VectorStoreConfig,
 ): Promise<BaseVectorStore> {
   const VectorStoreClass = await loadVectorStoreClass(provider);
   return new VectorStoreClass(config);
@@ -328,7 +330,7 @@ export async function getAvailableProviders(): Promise<
  * Check if a provider requires cloud credentials
  */
 export function providerRequiresCredentials(
-  provider: VectorStoreProviderId
+  provider: VectorStoreProviderId,
 ): boolean {
   const cloudProviders: VectorStoreProviderId[] = [
     "pinecone",
@@ -344,7 +346,7 @@ export function providerRequiresCredentials(
  * Check if a provider can run locally without credentials
  */
 export function providerSupportsLocal(
-  provider: VectorStoreProviderId
+  provider: VectorStoreProviderId,
 ): boolean {
   const localProviders: VectorStoreProviderId[] = [
     "faiss",

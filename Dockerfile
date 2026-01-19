@@ -1,67 +1,38 @@
-FROM node:20-alpine AS base
+# Stage 1: Base & Pruning
+FROM node:20-slim AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 
-# Install dependencies only when needed
-FROM base AS deps
-RUN apk add --no-cache libc6-compat python3 make g++
+FROM base AS build-stage
+WORKDIR /app
+COPY . .
+
+# 1. Install dependencies (frozen-lockfile is faster and safer)
+RUN pnpm install --frozen-lockfile
+
+# 2. Deploy only the 'web' app to a separate folder
+# This extracts apps/web and its local dependencies (db, ai)
+RUN pnpm --filter=web deploy /app/pruned
+
+# 3. Build the application inside the pruned folder
+WORKDIR /app/pruned
+# Use NODE_OPTIONS to prevent OOM errors during the build
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+RUN pnpm build
+
+# Stage 2: Runner
+FROM node:20-slim AS runner
 WORKDIR /app
 
-# Enable pnpm
-RUN corepack enable pnpm
+# Create a non-root user for security
+RUN groupadd --system --gid 1001 nodejs
+RUN useradd --system --uid 1001 nextjs
 
-# Copy workspace configuration files
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-COPY apps/web/package.json ./apps/web/package.json
-COPY packages/ai/package.json ./packages/ai/package.json
-COPY packages/db/package.json ./packages/db/package.json
-COPY apps/api/package.json ./apps/api/package.json
+# Copy the pruned and built application
+COPY --from=build-stage --chown=nextjs:nodejs /app/pruned ./
 
-# Install dependencies - use shamefully-hoist to reduce duplication
-RUN pnpm install --frozen-lockfile --shamefully-hoist
-
-# Rebuild the source code only when needed
-FROM base AS builder
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
-
-# Enable pnpm
-RUN corepack enable pnpm
-
-# Copy installed dependencies
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
-COPY --from=deps /app/packages/ai/node_modules ./packages/ai/node_modules
-COPY --from=deps /app/packages/db/node_modules ./packages/db/node_modules
-COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
-
-# Copy workspace files
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-COPY turbo.json ./
-
-# Copy all source code
-COPY apps ./apps
-COPY packages ./packages
-
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV DOCKER_BUILD=1
-# Allocate 10GB to Node.js (adjust if needed, but leave 5GB for system)
-ENV NODE_OPTIONS="--max-old-space-size=10240"
-
-# Build packages first with limited concurrency
-RUN pnpm run build --filter=@gaia/db --filter=@gaia/ai --concurrency=1
-
-# Build Next.js app with aggressive memory limits
-RUN cd apps/web && NODE_OPTIONS="--max-old-space-size=10240" pnpm run build
-
-# Production image
-FROM base AS runner
-WORKDIR /app
-
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
+# Create your required data directories
 RUN mkdir -p /app/data && \
     mkdir -p /app/apps/web/data/vector_stores/faiss && \
     mkdir -p /app/apps/web/data/vector_stores/lancedb && \
@@ -72,15 +43,8 @@ RUN mkdir -p /app/data && \
     chown -R nextjs:nodejs /app/data /app/apps && \
     chmod -R 755 /app/data /app/apps
 
-COPY --from=builder /app/apps/web/public ./apps/web/public
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
-
 USER nextjs
 
 EXPOSE 3000
 
-ENV PORT=3000
-ENV HOSTNAME=0.0.0.0
-
-CMD ["node", "apps/web/server.js"]
+CMD ["pnpm", "start"]
