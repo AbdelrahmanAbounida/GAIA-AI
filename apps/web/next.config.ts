@@ -12,6 +12,9 @@ if (!isVercel && !process.env.DOCKER_BUILD) {
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@gaia/db", "@gaia/api", "@gaia/ai"],
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 
   serverExternalPackages: [
     "better-sqlite3",

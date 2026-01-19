@@ -819,7 +819,7 @@ export function RAGSettingsModal({
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          size="tiny"
+          size="sm"
           className={cn("dark:h-7!", className)}
         >
           <Settings2 className="size-3!" />

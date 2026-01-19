@@ -89,9 +89,9 @@ export function EmptyRAG({ projectId }: EmptyRAGProps) {
     return (
       <Empty className="h-full w-full">
         <EmptyHeader className="max-w-125">
-          <EmptyMedia variant="icon">
+          {/* <EmptyMedia variant="icon">
             <LoaderIcon className="size-5 animate-spin" />
-          </EmptyMedia>
+          </EmptyMedia> */}
           <EmptyTitle className="text-[17px]">
             <LoaderIcon className="size-5 animate-spin" />
           </EmptyTitle>
@@ -140,9 +140,9 @@ export function EmptyRAG({ projectId }: EmptyRAGProps) {
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          {/* <Button variant={"outline"} onClick={demoSearch}>
-            Demo Search
-          </Button> */}
+          <RAGModal>
+            <Button variant={"outline"}>Index more data</Button>
+          </RAGModal>
         </EmptyContent>
       </Empty>
     );

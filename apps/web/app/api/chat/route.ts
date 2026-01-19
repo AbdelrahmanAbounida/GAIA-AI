@@ -37,7 +37,7 @@ const orpc = getOrpcServer();
  */
 function hasFileAttachments(messages: UIMessage[]): boolean {
   return messages.some((message) =>
-    message.parts.some((part) => part.type === "file")
+    message.parts.some((part) => part.type === "file"),
   );
 }
 
@@ -46,7 +46,7 @@ function hasFileAttachments(messages: UIMessage[]): boolean {
  */
 async function extractPDFText(
   base64Data: string,
-  filename?: string
+  filename?: string,
 ): Promise<string> {
   return new Promise(async (resolve, reject) => {
     try {
@@ -94,8 +94,8 @@ async function extractPDFText(
       console.error("PDF extraction error:", error);
       reject(
         new Error(
-          `Failed to extract PDF text: ${error instanceof Error ? error.message : "Unknown error"}`
-        )
+          `Failed to extract PDF text: ${error instanceof Error ? error.message : "Unknown error"}`,
+        ),
       );
     }
   });
@@ -106,7 +106,7 @@ async function extractPDFText(
  * This uses FileParser to extract text content from PDFs and other documents
  */
 async function processMessagesForCompatibility(
-  messages: UIMessage[]
+  messages: UIMessage[],
 ): Promise<ModelMessage[]> {
   const processedMessages: ModelMessage[] = [];
 
@@ -271,7 +271,7 @@ export async function POST(req: Request) {
     const res = await orpc.authed.tools.listTools({ projectId });
     const activeTools = res?.tools || [];
     const dynamicTools = buildDynamicTools(
-      activeTools.filter((tool) => tool.code !== null) as any
+      activeTools.filter((tool) => tool.code !== null) as any,
     );
 
     // Load MCP servers configuration
@@ -321,7 +321,7 @@ export async function POST(req: Request) {
             } catch (err) {
               console.warn(
                 `Failed to list resources from ${server.name}:`,
-                err
+                err,
               );
             }
 
@@ -353,7 +353,7 @@ export async function POST(req: Request) {
           acc[`${name.replace(" ", "_")}`] = tool;
           return acc;
         },
-        {} as Record<string, Tool>
+        {} as Record<string, Tool>,
       ),
       ...mcpTools,
     };
@@ -501,7 +501,7 @@ Example: If user asks "create a React component for a todo list", you would:
 
         // Clean up MCP connections on error
         cleanupMCPConnections(mcpManager, connectedServerIds).catch(
-          console.error
+          console.error,
         );
 
         return "Oops, an error occurred!";
@@ -523,7 +523,7 @@ Example: If user asks "create a React component for a todo list", you would:
       {
         status: 500,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   }
 }
@@ -533,16 +533,16 @@ Example: If user asks "create a React component for a todo list", you would:
  */
 async function cleanupMCPConnections(
   mcpManager: ReturnType<typeof getMCPManager>,
-  serverIds: string[]
+  serverIds: string[],
 ): Promise<void> {
   if (serverIds.length === 0) return;
 
   const cleanupResults = await Promise.allSettled(
-    serverIds.map((serverId) => mcpManager.disconnect(serverId))
+    serverIds.map((serverId) => mcpManager.disconnect(serverId)),
   );
 
   const failedCleanups = cleanupResults.filter(
-    (result) => result.status === "rejected"
+    (result) => result.status === "rejected",
   );
 }
 
@@ -564,6 +564,8 @@ const ragTool = ({ projectId }: { projectId: string }) => {
           topK,
           projectId,
         });
+
+        console.log("RAG search results:", res);
 
         if (!res?.success) {
           console.warn("⚠ RAG search failed:", res);
