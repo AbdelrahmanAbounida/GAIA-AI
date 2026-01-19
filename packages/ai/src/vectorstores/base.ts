@@ -19,6 +19,7 @@ import type {
 import type { FullTextSearchResult as FTSResult } from "./fulltext/types";
 import * as path from "path";
 import * as fs from "fs/promises";
+
 /**
  * Abstract base class for vector store implementations
  */
@@ -31,6 +32,7 @@ export abstract class BaseVectorStore implements IVectorStore {
   // Full-text search support
   protected ftsInstance: IFullTextSearch | null = null;
   protected ftsProvider: FullTextSearchProviderId | null = null;
+  protected ftsInitializationFailed: boolean = false;
 
   constructor(config: VectorStoreConfig) {
     this.config = config;
@@ -66,13 +68,14 @@ export abstract class BaseVectorStore implements IVectorStore {
         "initialize vector store",
         error,
         undefined,
-        this.config
+        this.config,
       );
     }
   }
 
   /**
    * Initialize full-text search based on configuration
+   * Gracefully handles failures and sets fallback flag
    */
   protected async initializeFullTextSearch(): Promise<void> {
     // Skip if no FTS provider specified
@@ -86,16 +89,30 @@ export abstract class BaseVectorStore implements IVectorStore {
     }
 
     try {
-      const pathParts = this.persistPath.split(path.sep);
-      const projectId =
-        this.config.projectId || pathParts[pathParts.length - 1];
-      const baseDataDir = pathParts.slice(0, -2).join(path.sep);
+      // Handle serverless environments (Vercel, AWS Lambda)
+      const isServerless =
+        process.env.VERCEL === "1" ||
+        process.env.VERCEL_ENV ||
+        process.env.AWS_LAMBDA_FUNCTION_NAME;
 
-      const ftsPersistDirectory = path.join(
-        baseDataDir,
-        this.ftsProvider,
-        projectId
-      );
+      let ftsPersistDirectory: string;
+
+      if (isServerless) {
+        // Use /tmp for serverless (ephemeral, but works)
+        const projectId = this.config.projectId || "default";
+        ftsPersistDirectory = path.join("/tmp", this.ftsProvider, projectId);
+      } else {
+        // Use persistent storage for normal environments
+        const pathParts = this.persistPath.split(path.sep);
+        const projectId =
+          this.config.projectId || pathParts[pathParts.length - 1];
+        const baseDataDir = pathParts.slice(0, -2).join(path.sep);
+        ftsPersistDirectory = path.join(
+          baseDataDir,
+          this.ftsProvider,
+          projectId,
+        );
+      }
 
       const ftsConfig: FullTextSearchConfig = {
         persistDirectory: ftsPersistDirectory,
@@ -108,9 +125,14 @@ export abstract class BaseVectorStore implements IVectorStore {
 
       this.ftsInstance = await this.createFullTextSearchInstance(ftsConfig);
       await this.ftsInstance.initialize();
+
+      console.log(`✅ FTS initialized with ${this.ftsProvider}`);
     } catch (error) {
-      console.warn(`⚠️ Failed to initialize FTS: ${error}`);
+      console.warn(
+        `⚠️ FTS initialization failed, will fallback to semantic search: ${error}`,
+      );
       this.ftsInstance = null;
+      this.ftsInitializationFailed = true;
     }
   }
 
@@ -118,9 +140,8 @@ export abstract class BaseVectorStore implements IVectorStore {
    * Create full-text search instance (to be implemented by factory)
    */
   protected async createFullTextSearchInstance(
-    config: FullTextSearchConfig
+    config: FullTextSearchConfig,
   ): Promise<IFullTextSearch> {
-    // This will be injected by the factory or import the factory here
     const { createFullTextSearchInstance } = await import("./fulltext/factory");
     return createFullTextSearchInstance(config);
   }
@@ -129,7 +150,7 @@ export abstract class BaseVectorStore implements IVectorStore {
    * validate apikey
    */
   static async validateApiKey(
-    config: Partial<VectorStoreConfig>
+    config: Partial<VectorStoreConfig>,
   ): Promise<boolean | Error> {
     throw new Error("validateApiKey must be implemented by subclass");
   }
@@ -153,7 +174,7 @@ export abstract class BaseVectorStore implements IVectorStore {
    * Create store with initial documents (implementation-specific)
    */
   protected abstract createStoreWithDocuments(
-    documents: Document[]
+    documents: Document[],
   ): Promise<void>;
 
   /**
@@ -161,7 +182,7 @@ export abstract class BaseVectorStore implements IVectorStore {
    */
   async addDocuments(
     documents: Document[],
-    ids?: string[]
+    ids?: string[],
   ): Promise<string[] | void> {
     this.ensureInitialized();
 
@@ -195,7 +216,7 @@ export abstract class BaseVectorStore implements IVectorStore {
         "add documents",
         error,
         undefined,
-        this.config
+        this.config,
       );
     }
   }
@@ -205,7 +226,7 @@ export abstract class BaseVectorStore implements IVectorStore {
    */
   protected async indexToFullTextSearch(
     documents: Document[],
-    ids: string[]
+    ids: string[],
   ): Promise<void> {
     if (!this.ftsInstance) {
       return;
@@ -225,7 +246,7 @@ export abstract class BaseVectorStore implements IVectorStore {
   async addTexts(
     texts: string[],
     metadatas?: Record<string, any>[],
-    ids?: string[]
+    ids?: string[],
   ): Promise<string[] | void> {
     this.ensureInitialized();
 
@@ -239,7 +260,7 @@ export abstract class BaseVectorStore implements IVectorStore {
           new Document({
             pageContent: text,
             metadata: metadatas?.[i] || {},
-          })
+          }),
       );
       return this.addDocuments(documents, ids);
     } catch (error) {
@@ -248,7 +269,7 @@ export abstract class BaseVectorStore implements IVectorStore {
         "add texts",
         error,
         undefined,
-        this.config
+        this.config,
       );
     }
   }
@@ -258,7 +279,7 @@ export abstract class BaseVectorStore implements IVectorStore {
    */
   abstract search(
     query: string,
-    options?: SearchOptions
+    options?: SearchOptions,
   ): Promise<SearchResult[]>;
 
   /**
@@ -280,7 +301,7 @@ export abstract class BaseVectorStore implements IVectorStore {
         "delete documents",
         error,
         undefined,
-        this.config
+        this.config,
       );
     }
   }
@@ -358,7 +379,7 @@ export abstract class BaseVectorStore implements IVectorStore {
    */
   protected convertToFullTextSearchResult(
     result: FTSResult,
-    searchType: SearchType
+    searchType: SearchType,
   ): FullTextSearchResult {
     return {
       id: result.id,
@@ -371,56 +392,94 @@ export abstract class BaseVectorStore implements IVectorStore {
 
   /**
    * Perform full-text search (BM25, keyword-based)
+   * Automatically falls back to semantic search if FTS is unavailable
    */
   async fullTextSearch(
     query: string,
-    options?: FullTextSearchOptions
+    options?: FullTextSearchOptions,
   ): Promise<FullTextSearchResult[]> {
+    // Check if FTS is supported
     if (!this.supportsFullTextSearch()) {
-      throw new Error(
-        `Full-text search is not supported by ${this.config.provider} provider`
+      console.warn(
+        `⚠️ Full-text search not available for ${this.config.provider}, falling back to semantic search`,
       );
+      return this.fallbackToSemanticSearch(query, options);
     }
 
-    // Future:: Implement native FTS when provider supports it
+    try {
+      // Try native FTS first if supported
+      if (this.supportsNativeFullTextSearch()) {
+        return await this.nativeFullTextSearch(query, options);
+      }
 
-    // Use external FTS provider
-    if (this.ftsInstance) {
-      const results = await this.ftsInstance.search(query, {
-        ...options,
-        searchType: options?.searchType || "mrr",
-      });
-      // Convert FTS results to include searchType
-      return results.map((result) =>
-        this.convertToFullTextSearchResult(result, "mrr")
+      // Use external FTS provider
+      if (this.ftsInstance) {
+        const results = await this.ftsInstance.search(query, {
+          ...options,
+          searchType: options?.searchType || "mrr",
+        });
+        return results.map((result) =>
+          this.convertToFullTextSearchResult(result, "mrr"),
+        );
+      }
+    } catch (error) {
+      console.warn(
+        `⚠️ Full-text search failed, falling back to semantic search:`,
+        error,
       );
+      return this.fallbackToSemanticSearch(query, options);
     }
 
-    throw new Error("Full-text search not properly initialized");
+    // Final fallback
+    return this.fallbackToSemanticSearch(query, options);
   }
 
   /**
-   * Future:: Native full-text search implementation (override in providers that support it)
-   * This will be implemented in subclasses like Weaviate, PGVector that have native BM25/FTS support
+   * Fallback to semantic (vector) search when FTS fails
+   */
+  protected async fallbackToSemanticSearch(
+    query: string,
+    options?: FullTextSearchOptions,
+  ): Promise<FullTextSearchResult[]> {
+    const results = await this.search(query, {
+      topK: options?.topK,
+      minScore: options?.minScore,
+      filter: options?.filter,
+    });
+
+    return results.map((result) => ({
+      id: result.metadata.id || result.content.substring(0, 100),
+      content: result.content,
+      metadata: result.metadata,
+      score: result.score,
+      searchType: "semantic",
+    }));
+  }
+
+  /**
+   * Native full-text search implementation (override in providers that support it)
    */
   protected async nativeFullTextSearch(
     query: string,
-    options?: FullTextSearchOptions
+    options?: FullTextSearchOptions,
   ): Promise<FullTextSearchResult[]> {
     throw new Error("nativeFullTextSearch must be implemented by subclass");
   }
 
   /**
    * Perform hybrid search (vector + full-text combined)
+   * Automatically falls back to semantic search if FTS is unavailable
    */
   async hybridSearch(
     query: string,
-    options?: HybridSearchOptions
+    options?: HybridSearchOptions,
   ): Promise<FullTextSearchResult[]> {
+    // If FTS is not available, fall back to semantic search
     if (!this.supportsFullTextSearch()) {
-      throw new Error(
-        `Hybrid search is not supported by ${this.config.provider} provider`
+      console.warn(
+        `⚠️ Hybrid search not available (no FTS), falling back to semantic search`,
       );
+      return this.fallbackToSemanticSearch(query, options);
     }
 
     try {
@@ -436,12 +495,11 @@ export abstract class BaseVectorStore implements IVectorStore {
       // Merge and return results
       return this.mergeSearchResults(vectorResults, textResults, alpha);
     } catch (error) {
-      throw VectorStoreErrorHandler.handleError(
-        "hybrid search",
+      console.warn(
+        `⚠️ Hybrid search failed, falling back to semantic search:`,
         error,
-        undefined,
-        this.config
       );
+      return this.fallbackToSemanticSearch(query, options);
     }
   }
 
@@ -451,7 +509,7 @@ export abstract class BaseVectorStore implements IVectorStore {
   protected mergeSearchResults(
     vectorResults: SearchResult[],
     textResults: FullTextSearchResult[],
-    alpha: number = 0.5
+    alpha: number = 0.5,
   ): FullTextSearchResult[] {
     const resultMap = new Map<string, FullTextSearchResult>();
 
@@ -494,7 +552,6 @@ export abstract class BaseVectorStore implements IVectorStore {
    * Generate a unique key for a search result (for deduplication)
    */
   protected getResultKey(result: SearchResult | FullTextSearchResult): string {
-    // Use ID from metadata if available, otherwise use content hash
     if ("id" in result) {
       return result.id!;
     }
@@ -510,7 +567,7 @@ export class VectorStoreErrorHandler {
     operation: string,
     error: unknown,
     handleStack?: boolean,
-    config?: VectorStoreConfig
+    config?: VectorStoreConfig,
   ): Error {
     const message = error instanceof Error ? error.message : "Unknown error";
     const stack = error instanceof Error ? error.stack : undefined;
@@ -538,7 +595,7 @@ export class VectorStoreErrorHandler {
       operation,
       message,
       cause,
-      config
+      config,
     );
     const newError = new Error(enhancedMessage);
 
@@ -557,7 +614,7 @@ export class VectorStoreErrorHandler {
     operation: string,
     message: string,
     cause?: any,
-    config?: VectorStoreConfig
+    config?: VectorStoreConfig,
   ): string {
     const provider = config?.provider || "vector store";
 
@@ -596,7 +653,7 @@ export class VectorStoreErrorHandler {
 
   private static getConnectionErrorMessage(
     provider: string,
-    cause?: any
+    cause?: any,
   ): string {
     const errorCode = cause?.code;
     const baseMessages: Record<string, string> = {

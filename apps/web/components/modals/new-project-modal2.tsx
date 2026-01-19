@@ -139,7 +139,7 @@ export function CreateProjectModal2({
           queryKey: orpcQueryClient.authed.project.list.key(),
         });
       },
-    })
+    }),
   );
 
   // Helper to check if provider has credentials
@@ -152,7 +152,7 @@ export function CreateProjectModal2({
         (c) =>
           c.provider.toLowerCase() === provider.toLowerCase() &&
           c.isValid &&
-          c.credentialType === "ai_model"
+          c.credentialType === "ai_model",
       ) ?? false
     );
   };
@@ -170,7 +170,7 @@ export function CreateProjectModal2({
         acc[provider].push(model);
         return acc;
       },
-      {} as Record<string, typeof availableLLMs>
+      {} as Record<string, typeof availableLLMs>,
     );
   }, [availableLLMs]);
 
@@ -184,14 +184,14 @@ export function CreateProjectModal2({
         acc[provider].push(model);
         return acc;
       },
-      {} as Record<string, typeof availableEmbeddings>
+      {} as Record<string, typeof availableEmbeddings>,
     );
   }, [availableEmbeddings]);
 
   // Get default models
   const getDefaultLLM = () => {
     const llmWithCred = availableLLMs?.find((m) =>
-      providerHasCredential(getModelProvider(m.id, m))
+      providerHasCredential(getModelProvider(m.id, m)),
     );
     if (llmWithCred) return llmWithCred.id;
     if (!availableLLMs?.length && !allModels?.success) return null;
@@ -200,7 +200,7 @@ export function CreateProjectModal2({
 
   const getDefaultEmbedding = () => {
     const embeddingWithCred = availableEmbeddings?.find((m) =>
-      providerHasCredential(getModelProvider(m.id, m))
+      providerHasCredential(getModelProvider(m.id, m)),
     );
     if (embeddingWithCred) return embeddingWithCred.id;
     if (!allModels?.success) return null;
@@ -280,14 +280,14 @@ export function CreateProjectModal2({
     // Find the selected models to get their provider info
     const selectedLLMModel = availableLLMs?.find((m) => m.id === selectedLLM);
     const selectedEmbeddingModel = availableEmbeddings?.find(
-      (m) => m.id === selectedEmbedding
+      (m) => m.id === selectedEmbedding,
     );
 
     // Get providers, handling Vercel models
     const llmProvider = getModelProvider(selectedLLM, selectedLLMModel);
     const embeddingProvider = getModelProvider(
       selectedEmbedding,
-      selectedEmbeddingModel
+      selectedEmbeddingModel,
     );
 
     create({
@@ -328,14 +328,14 @@ export function CreateProjectModal2({
     // Find the default models to get their provider info
     const defaultLLMModel = availableLLMs?.find((m) => m.id === defaultLLM);
     const defaultEmbeddingModel = availableEmbeddings?.find(
-      (m) => m.id === defaultEmbedding
+      (m) => m.id === defaultEmbedding,
     );
 
     // Get providers, handling Vercel models
     const llmProvider = getModelProvider(defaultLLM, defaultLLMModel);
     const embeddingProvider = getModelProvider(
       defaultEmbedding,
-      defaultEmbeddingModel
+      defaultEmbeddingModel,
     );
 
     create({
@@ -505,7 +505,7 @@ export function CreateProjectModal2({
                                     setSelectedLLM(
                                       currentValue === selectedLLM
                                         ? ""
-                                        : currentValue
+                                        : currentValue,
                                     );
                                     setLLMOpen(false);
                                   }}
@@ -515,7 +515,7 @@ export function CreateProjectModal2({
                                       "mr-2 h-4 w-4",
                                       selectedLLM === model.id
                                         ? "opacity-100"
-                                        : "opacity-0"
+                                        : "opacity-0",
                                     )}
                                   />
                                   <div className="flex-1">
@@ -527,7 +527,7 @@ export function CreateProjectModal2({
                               ))}
                             </CommandGroup>
                           );
-                        }
+                        },
                       )}
                     </CommandList>
                   </Command>
@@ -578,7 +578,7 @@ export function CreateProjectModal2({
                   >
                     {selectedEmbedding
                       ? availableEmbeddings?.find(
-                          (m) => m.id === selectedEmbedding
+                          (m) => m.id === selectedEmbedding,
                         )?.name
                       : "Select embedding model..."}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -602,7 +602,7 @@ export function CreateProjectModal2({
                               heading={
                                 <div className="flex items-center justify-start gap-2">
                                   <ProviderIcon provider={provider} />
-                                  <span className="capitalize text-white text-md">
+                                  <span className="capitalize dark:text-white text-md">
                                     {provider}
                                   </span>
                                 </div>
@@ -616,7 +616,7 @@ export function CreateProjectModal2({
                                     setSelectedEmbedding(
                                       currentValue === selectedEmbedding
                                         ? ""
-                                        : currentValue
+                                        : currentValue,
                                     );
                                     setEmbeddingOpen(false);
                                   }}
@@ -626,7 +626,7 @@ export function CreateProjectModal2({
                                       "mr-2 h-4 w-4",
                                       selectedEmbedding === model.id
                                         ? "opacity-100"
-                                        : "opacity-0"
+                                        : "opacity-0",
                                     )}
                                   />
                                   <div className="flex-1">
@@ -638,7 +638,7 @@ export function CreateProjectModal2({
                               ))}
                             </CommandGroup>
                           );
-                        }
+                        },
                       )}
                     </CommandList>
                   </Command>
@@ -689,7 +689,7 @@ export function CreateProjectModal2({
                   >
                     {selectedVectorStore
                       ? availableVectorstores?.find(
-                          (v) => v.id === selectedVectorStore
+                          (v) => v.id === selectedVectorStore,
                         )?.name
                       : "Select vector store..."}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -709,7 +709,7 @@ export function CreateProjectModal2({
                               setSelectedVectorStore(
                                 currentValue === selectedVectorStore
                                   ? ""
-                                  : currentValue
+                                  : currentValue,
                               );
                               setVectorStoreOpen(false);
                             }}
@@ -719,7 +719,7 @@ export function CreateProjectModal2({
                                 "mr-2 h-4 w-4",
                                 selectedVectorStore === vs.id
                                   ? "opacity-100 text-primary rounded-full"
-                                  : "opacity-0"
+                                  : "opacity-0",
                               )}
                             />
                             <div className="flex-1">

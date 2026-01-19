@@ -83,7 +83,7 @@ async function getVectorStore({
 function chunkText(
   text: string,
   chunkSize: number,
-  chunkOverlap: number
+  chunkOverlap: number,
 ): string[] {
   const chunks: string[] = [];
   let start = 0;
@@ -447,29 +447,71 @@ export const ragHandlers = {
       const searchType = input.searchType || projectData.searchType || "hybrid";
 
       let results;
+      let actualSearchType = searchType;
 
-      if (searchType === "hybrid") {
-        results = await vectorStore.hybridSearch(input.query, {
-          topK,
-          minScore,
-          alpha: input.alpha ?? 0.5,
-        });
-      } else if (searchType === "mmr" || searchType === "similarity") {
-        results = await vectorStore.fullTextSearch(input.query, {
-          topK,
-          minScore,
-        });
-      } else {
-        results = await vectorStore.search(input.query, {
-          topK,
-          minScore,
-        });
+      try {
+        if (searchType === "hybrid") {
+          results = await vectorStore.hybridSearch(input.query, {
+            topK,
+            minScore,
+            alpha: input.alpha ?? 0.5,
+          });
+
+          // Check if it actually fell back to semantic search
+          if (results.length > 0 && results[0].searchType === "semantic") {
+            actualSearchType = "semantic";
+            console.log("ℹ️ Hybrid search fell back to vector search");
+          }
+        } else if (searchType === "mrr" || searchType === "similarity") {
+          results = await vectorStore.fullTextSearch(input.query, {
+            topK,
+            minScore,
+          });
+
+          if (results.length > 0 && results[0].searchType === "semantic") {
+            actualSearchType = "semantic";
+            console.log("ℹ️ Full-text search fell back to vector search");
+          }
+        } else {
+          results = await vectorStore.search(input.query, {
+            topK,
+            minScore,
+          });
+          actualSearchType = "semantic";
+        }
+
+        return {
+          success: true,
+          documents: results,
+          searchType: actualSearchType, // Return actual search type used
+          message:
+            actualSearchType !== searchType
+              ? `Requested ${searchType} search, but fell back to ${actualSearchType} search due to missing credentials or configuration`
+              : undefined,
+        };
+      } catch (searchError) {
+        // If search fails entirely, try one last fallback to basic vector search
+        console.error(
+          "Search failed, attempting fallback to vector search:",
+          searchError,
+        );
+
+        try {
+          results = await vectorStore.search(input.query, {
+            topK,
+            minScore,
+          });
+
+          return {
+            success: true,
+            documents: results,
+            searchType: "vector",
+            message: `${searchType} search failed, fell back to vector search`,
+          };
+        } catch (fallbackError) {
+          throw searchError; // Throw original error if even fallback fails
+        }
       }
-
-      return {
-        success: true,
-        documents: results,
-      };
     } catch (error) {
       console.error("RAG search error:", error);
       return {
@@ -578,7 +620,7 @@ export const ragHandlers = {
 
       const chunkIds = Array.from(
         { length: doc.totalChunks },
-        (_, i) => `${doc.id}-chunk-${i}`
+        (_, i) => `${doc.id}-chunk-${i}`,
       );
 
       await vectorStore.delete(chunkIds, doc.id);

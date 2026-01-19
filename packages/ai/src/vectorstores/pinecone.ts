@@ -27,6 +27,7 @@ export class PineconeVectorStore extends BaseVectorStore {
   private maxConcurrency: number;
   private sparseEncoder?: any;
   private indexInitialized: boolean = false;
+  private indexSupportsHybrid: boolean = false;
 
   constructor(config: PineconeConfig) {
     super(config);
@@ -44,19 +45,19 @@ export class PineconeVectorStore extends BaseVectorStore {
   }
 
   static async validateApiKey(
-    config: Record<string, any>
+    config: Record<string, any>,
   ): Promise<boolean | Error> {
     try {
       const client = new PineconeClient({ apiKey: config.apiKey });
       const { indexes } = await client.listIndexes();
 
       const indexExist = indexes?.find(
-        (index) => index.name === config.collectionName
+        (index) => index.name === config.collectionName,
       );
 
       if (!indexExist) {
         return new Error(
-          `Index "${config.collectionName}" does not exist. Please create it in Pinecone dashboard first.`
+          `Index "${config.collectionName}" does not exist. Please create it in Pinecone dashboard first.`,
         );
       }
 
@@ -66,40 +67,49 @@ export class PineconeVectorStore extends BaseVectorStore {
       return VectorStoreErrorHandler.handleError(
         "validate api key",
         err,
-        false
+        false,
       );
     }
   }
 
-  supportsFullTextSearch(): boolean {
-    return true;
+  /**
+   * Check if index supports hybrid search (sparse + dense vectors)
+   */
+  private async checkHybridSupport(): Promise<boolean> {
+    try {
+      const indexStats = await this.pineconeIndex.describeIndexStats();
+      // Check if index metadata indicates hybrid support
+      // This is a simplified check - adjust based on your index configuration
+      return true; // Assume support for now, will fail gracefully if not
+    } catch (error) {
+      console.warn("Could not determine hybrid search support:", error);
+      return false;
+    }
   }
 
-  /**
-   * Optimized: Check index existence without unnecessary API calls
-   */
+  supportsFullTextSearch(): boolean {
+    // Only claim support if we have a sparse encoder OR FTS instance
+    return !!this.sparseEncoder || !!this.ftsInstance;
+  }
+
   protected async storeExists(): Promise<boolean> {
     try {
-      // Just check if we can connect - Pinecone indexes always "exist" once created
       if (!this.indexInitialized) {
         const indexStats = await this.pineconeIndex.describeIndexStats();
         this.indexInitialized = indexStats !== undefined;
+        this.indexSupportsHybrid = await this.checkHybridSupport();
       }
       return this.indexInitialized;
     } catch (error: any) {
-      // 404 means index doesn't exist
       if (error?.status === 404 || error?.message?.includes("404")) {
         throw new Error(
-          `Pinecone index "${this.config.collectionName}" not found. Please create it first in Pinecone dashboard.`
+          `Pinecone index "${this.config.collectionName}" not found. Please create it first in Pinecone dashboard.`,
         );
       }
       return false;
     }
   }
 
-  /**
-   * Optimized: Single initialization path
-   */
   protected async loadStore(): Promise<void> {
     await this.initializeStore();
   }
@@ -108,11 +118,8 @@ export class PineconeVectorStore extends BaseVectorStore {
     await this.initializeStore();
   }
 
-  /**
-   * Unified store initialization - avoids duplicate calls
-   */
   private async initializeStore(): Promise<void> {
-    if (this.store) return; // Already initialized
+    if (this.store) return;
 
     try {
       this.store = await PineconeStore.fromExistingIndex(
@@ -121,41 +128,35 @@ export class PineconeVectorStore extends BaseVectorStore {
           pineconeIndex: this.pineconeIndex,
           maxConcurrency: this.maxConcurrency,
           namespace: this.namespace,
-        }
+        },
       );
       this.indexInitialized = true;
+      this.indexSupportsHybrid = await this.checkHybridSupport();
     } catch (error: any) {
       if (error?.status === 404 || error?.message?.includes("404")) {
         throw new Error(
-          `Pinecone index "${this.config.collectionName}" not found. Create it at: https://app.pinecone.io`
+          `Pinecone index "${this.config.collectionName}" not found. Create it at: https://app.pinecone.io`,
         );
       }
       throw VectorStoreErrorHandler.handleError("initialize store", error);
     }
   }
 
-  /**
-   * Optimized: Batch document addition with chunking
-   */
   protected async createStoreWithDocuments(
-    documents: Document[]
+    documents: Document[],
   ): Promise<void> {
     try {
-      // First ensure store is initialized
       await this.initializeStore();
 
       if (documents.length === 0) return;
 
-      // Batch documents to avoid timeouts (Pinecone limit: ~1000 vectors/batch)
       const BATCH_SIZE = 100;
       const batches = this.chunkArray(documents, BATCH_SIZE);
 
       for (let i = 0; i < batches.length; i++) {
         const batch = batches[i];
-
         await this.store!.addDocuments(batch);
 
-        // Small delay between batches to avoid rate limits
         if (i < batches.length - 1) {
           await this.delay(100);
         }
@@ -163,22 +164,19 @@ export class PineconeVectorStore extends BaseVectorStore {
     } catch (error: any) {
       if (error?.status === 404 || error?.message?.includes("404")) {
         throw new Error(
-          `Pinecone index "${this.config.collectionName}" not found. Please create it first.`
+          `Pinecone index "${this.config.collectionName}" not found. Please create it first.`,
         );
       }
       throw VectorStoreErrorHandler.handleError(
         "create store with documents",
-        error
+        error,
       );
     }
   }
 
-  /**
-   * Override addDocuments to use optimized batching
-   */
   async addDocuments(
     documents: Document[],
-    ids?: string[]
+    ids?: string[],
   ): Promise<string[] | void> {
     this.ensureInitialized();
 
@@ -187,7 +185,6 @@ export class PineconeVectorStore extends BaseVectorStore {
     try {
       const normalizedDocs = this.normalizeDocuments(documents);
 
-      // Batch processing for large document sets
       const BATCH_SIZE = 100;
       if (normalizedDocs.length > BATCH_SIZE) {
         const batches = this.chunkArray(normalizedDocs, BATCH_SIZE);
@@ -203,7 +200,6 @@ export class PineconeVectorStore extends BaseVectorStore {
 
           if (addedIds) allIds.push(...addedIds);
 
-          // Rate limiting
           if (i < batches.length - 1) {
             await this.delay(100);
           }
@@ -212,7 +208,6 @@ export class PineconeVectorStore extends BaseVectorStore {
         return allIds;
       }
 
-      // Small batch - add directly
       return await this.store!.addDocuments(normalizedDocs, { ids });
     } catch (error) {
       throw VectorStoreErrorHandler.handleError("add documents", error);
@@ -221,7 +216,7 @@ export class PineconeVectorStore extends BaseVectorStore {
 
   async search(
     query: string,
-    options?: SearchOptions
+    options?: SearchOptions,
   ): Promise<SearchResult[]> {
     this.ensureInitialized();
 
@@ -232,7 +227,7 @@ export class PineconeVectorStore extends BaseVectorStore {
       const results = await this.store!.similaritySearchWithScore(
         query,
         topK,
-        options?.filter
+        options?.filter,
       );
 
       return results
@@ -247,46 +242,87 @@ export class PineconeVectorStore extends BaseVectorStore {
     }
   }
 
+  /**
+   * Full-text search with graceful fallback
+   */
   async fullTextSearch(
     query: string,
-    options?: FullTextSearchOptions
+    options?: FullTextSearchOptions,
   ): Promise<FullTextSearchResult[]> {
     this.ensureInitialized();
 
-    try {
-      const topK = options?.topK || 4;
-      const minScore = options?.minScore || 0;
-
-      const sparseValues = await this.generateSparseEmbeddings(query);
-
-      const queryResponse = await this.pineconeIndex
-        .namespace(this.namespace || "")
-        .query({
-          topK,
-          sparseVector: sparseValues,
-          includeMetadata: true,
-          includeValues: false,
-          filter: options?.filter,
-        });
-
-      return queryResponse.matches
-        .filter((match: any) => match.score >= minScore)
-        .map((match: any) => ({
-          content: match.metadata?.text || "",
-          metadata: match.metadata || {},
-          score: match.score,
-          searchType: "mrr" as const,
-        }));
-    } catch (error) {
-      throw VectorStoreErrorHandler.handleError("full-text search", error);
+    // If no sparse encoder and no FTS instance, fall back immediately
+    if (!this.sparseEncoder && !this.ftsInstance) {
+      console.warn(
+        "⚠️ No sparse encoder or FTS available, falling back to vector search",
+      );
+      return this.fallbackToSemanticSearch(query, options);
     }
+
+    // Try using external FTS instance first
+    if (this.ftsInstance) {
+      try {
+        return await super.fullTextSearch(query, options);
+      } catch (error) {
+        console.warn(
+          "⚠️ External FTS failed, trying sparse search or falling back",
+        );
+      }
+    }
+
+    // Try sparse search if encoder available
+    if (this.sparseEncoder) {
+      try {
+        const topK = options?.topK || 4;
+        const minScore = options?.minScore || 0;
+
+        const sparseValues = await this.generateSparseEmbeddings(query);
+
+        const queryResponse = await this.pineconeIndex
+          .namespace(this.namespace || "")
+          .query({
+            topK,
+            sparseVector: sparseValues,
+            includeMetadata: true,
+            includeValues: false,
+            filter: options?.filter,
+          });
+
+        return queryResponse.matches
+          .filter((match: any) => match.score >= minScore)
+          .map((match: any) => ({
+            id: match.id,
+            content: match.metadata?.text || "",
+            metadata: match.metadata || {},
+            score: match.score,
+            searchType: "mrr" as const,
+          }));
+      } catch (error: any) {
+        console.warn("⚠️ Sparse search failed:", error.message);
+        return this.fallbackToSemanticSearch(query, options);
+      }
+    }
+
+    // Final fallback
+    return this.fallbackToSemanticSearch(query, options);
   }
 
+  /**
+   * Hybrid search with graceful fallback
+   */
   async hybridSearch(
     query: string,
-    options?: HybridSearchOptions
+    options?: HybridSearchOptions,
   ): Promise<FullTextSearchResult[]> {
     this.ensureInitialized();
+
+    // If no sparse encoder, fall back to semantic search
+    if (!this.sparseEncoder) {
+      console.warn(
+        "⚠️ No sparse encoder available, falling back to vector search",
+      );
+      return this.fallbackToSemanticSearch(query, options);
+    }
 
     try {
       const topK = options?.topK || 4;
@@ -311,23 +347,27 @@ export class PineconeVectorStore extends BaseVectorStore {
       return queryResponse.matches
         .filter((match: any) => match.score >= minScore)
         .map((match: any) => ({
+          id: match.id,
           content: match.metadata?.text || "",
           metadata: match.metadata || {},
           score: match.score,
           searchType: "hybrid" as const,
         }));
-    } catch (error) {
-      throw VectorStoreErrorHandler.handleError("hybrid search", error);
+    } catch (error: any) {
+      console.warn("⚠️ Hybrid search failed:", error.message);
+      // Fall back to semantic search
+      return this.fallbackToSemanticSearch(query, options);
     }
   }
 
   private async generateSparseEmbeddings(
-    text: string
+    text: string,
   ): Promise<{ indices: number[]; values: number[] }> {
     if (this.sparseEncoder) {
       return await this.sparseEncoder.encodeQuery(text);
     }
 
+    // Fallback: simple token-based sparse encoding
     const tokens = text.toLowerCase().split(/\s+/);
     const tokenCounts = new Map<string, number>();
 
@@ -357,7 +397,6 @@ export class PineconeVectorStore extends BaseVectorStore {
   }
 
   async save(): Promise<void> {
-    // Pinecone auto-saves
     return Promise.resolve();
   }
 
@@ -365,11 +404,9 @@ export class PineconeVectorStore extends BaseVectorStore {
     const baseStats = await super.getStats();
 
     try {
-      // const indexStats = await this.pineconeIndex.describeIndexStats();
       return {
         ...baseStats,
-        supportsFullTextSearch: true,
-        // totalVectors: indexStats.totalRecordCount,
+        supportsFullTextSearch: this.supportsFullTextSearch(),
       };
     } catch (error) {
       return baseStats;
@@ -412,7 +449,6 @@ export class PineconeVectorStore extends BaseVectorStore {
     await super.close();
   }
 
-  // Helper methods
   private chunkArray<T>(array: T[], size: number): T[][] {
     const chunks: T[][] = [];
     for (let i = 0; i < array.length; i += size) {

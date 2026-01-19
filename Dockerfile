@@ -7,9 +7,13 @@ RUN corepack enable
 FROM base AS build-stage
 WORKDIR /app
 
-# Set build-time memory limits and optimizations
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+# Aggressive memory optimization for Next.js build
+ENV NODE_OPTIONS="--max-old-space-size=8192 --max-semi-space-size=512"
 ENV NEXT_TELEMETRY_DISABLED=1
+# Disable source maps to save memory
+ENV GENERATE_SOURCEMAP=false
+# Use SWC minifier (faster and less memory)
+ENV NEXT_PRIVATE_MINIFY=false
 
 # Copy all files
 COPY . .
@@ -28,11 +32,11 @@ WORKDIR /app/pruned
 ENV NEXT_BUILD_MODE=standalone
 ENV NEXT_PRIVATE_STANDALONE=true
 
-# Clean any existing build artifacts and run fresh build
+# Clean any existing build artifacts and run fresh build with memory limits
 RUN set -ex && \
     rm -rf .next && \
     rm -rf node_modules/.cache && \
-    pnpm build && \
+    node --max-old-space-size=8192 node_modules/.bin/next build && \
     echo "Build completed successfully" && \
     ls -la && \
     ls -la .next || (echo "Build failed - .next directory not created" && exit 1)

@@ -565,8 +565,6 @@ const ragTool = ({ projectId }: { projectId: string }) => {
           projectId,
         });
 
-        console.log("RAG search results:", res);
-
         if (!res?.success) {
           console.warn("⚠ RAG search failed:", res);
           return {

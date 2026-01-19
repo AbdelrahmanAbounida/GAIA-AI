@@ -36,7 +36,7 @@ export const ChatPageView = ({
   const [input, setInput] = useState("");
   const [webSearch, setWebSearch] = useState(false);
   const [selectedArtifact, setSelectedArtifact] = useState<Artifact | null>(
-    null
+    null,
   );
   const queryClient = useQueryClient();
   const [artifactBoundingBox, setArtifactBoundingBox] =
@@ -118,13 +118,13 @@ export const ChatPageView = ({
         body: {
           webSearch: webSearch,
         },
-      }
+      },
     );
     setInput("");
     window.history.replaceState(
       {},
       "",
-      `/projects/${projectId}/chat/${chatId}`
+      `/projects/${projectId}/chat/${chatId}`,
     );
   };
 
