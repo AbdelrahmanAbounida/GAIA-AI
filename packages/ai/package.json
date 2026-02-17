@@ -3,89 +3,79 @@
   "version": "0.0.0",
   "description": "ai implementation for gaia-rag",
   "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": {
-        "types": "./src/index.ts",
-        "default": "./src/index.ts"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       },
-      "require": "./dist/index.js",
-      "default": "./dist/index.mjs"
+      "require": "./dist/index.cjs"
     },
     "./models": {
       "import": {
-        "types": "./src/models.ts",
-        "default": "./src/models.ts"
+        "types": "./dist/models.d.ts",
+        "default": "./dist/models.js"
       },
-      "require": "./dist/models.js",
-      "default": "./dist/models.mjs"
+      "require": "./dist/models.cjs"
     },
     "./mcp": {
       "import": {
-        "types": "./src/mcp/index.ts",
-        "default": "./src/mcp/index.ts"
+        "types": "./dist/mcp/index.d.ts",
+        "default": "./dist/mcp/index.js"
       },
-      "require": "./dist/mcp/index.js",
-      "default": "./dist/mcp/index.mjs"
+      "require": "./dist/mcp/index.cjs"
     },
     "./vectorstores": {
       "import": {
-        "types": "./src/vectorstores/index.ts",
-        "default": "./src/vectorstores/index.ts"
+        "types": "./dist/vectorstores/index.d.ts",
+        "default": "./dist/vectorstores/index.js"
       },
-      "require": "./dist/vectorstores/index.js",
-      "default": "./dist/vectorstores/index.mjs"
+      "require": "./dist/vectorstores/index.cjs"
     },
     "./types": {
       "import": {
-        "types": "./src/types.ts",
-        "default": "./src/types.ts"
+        "types": "./dist/types.d.ts",
+        "default": "./dist/types.js"
       },
-      "require": "./dist/types.js",
-      "default": "./dist/types.mjs"
+      "require": "./dist/types.cjs"
     },
     "./tools": {
       "import": {
-        "types": "./src/tools/index.ts",
-        "default": "./src/tools/index.ts"
+        "types": "./dist/tools/index.d.ts",
+        "default": "./dist/tools/index.js"
       },
-      "require": "./dist/tools/index.js",
-      "default": "./dist/tools/index.mjs"
+      "require": "./dist/tools/index.cjs"
     },
     "./utils": {
       "import": {
-        "types": "./src/utils.ts",
-        "default": "./src/utils.ts"
+        "types": "./dist/utils.d.ts",
+        "default": "./dist/utils.js"
       },
-      "require": "./dist/utils.js",
-      "default": "./dist/utils.mjs"
+      "require": "./dist/utils.cjs"
     },
     "./local": {
       "import": {
-        "types": "./src/local-models/index.ts",
-        "default": "./src/local-models/index.ts"
+        "types": "./dist/local-models/index.d.ts",
+        "default": "./dist/local-models/index.js"
       },
-      "require": "./dist/local-models/index.js",
-      "default": "./dist/local-models/index.mjs"
+      "require": "./dist/local-models/index.cjs"
     },
     "./fulltext": {
       "import": {
-        "types": "./src/vectorstores/fulltext/index.ts",
-        "default": "./src/vectorstores/fulltext/index.ts"
+        "types": "./dist/vectorstores/fulltext/index.d.ts",
+        "default": "./dist/vectorstores/fulltext/index.js"
       },
-      "require": "./dist/vectorstores/fulltext/index.js",
-      "default": "./dist/vectorstores/fulltext/index.mjs"
+      "require": "./dist/vectorstores/fulltext/index.cjs"
     },
     "./const": {
       "import": {
-        "types": "./src/const.ts",
-        "default": "./src/const.ts"
+        "types": "./dist/const.d.ts",
+        "default": "./dist/const.js"
       },
-      "require": "./dist/const.js",
-      "default": "./dist/const.mjs"
+      "require": "./dist/const.cjs"
     }
   },
   "files": [
@@ -93,6 +83,7 @@
     "src"
   ],
   "scripts": {
+    "prebuild": "node scripts/generate-provider-registry.mjs",
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "vitest run",

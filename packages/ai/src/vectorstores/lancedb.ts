@@ -13,16 +13,37 @@ import type {
 import * as lancedb from "@lancedb/lancedb";
 
 /**
- * LanceDB vector store implementation with full-text search support
+ * LanceDB vector store implementation with full-text search support.
+ * Supports both local (filesystem) and cloud (LanceDB Cloud) modes.
  */
 export class LanceDBVectorStore extends BaseVectorStore {
   private embeddingSize: number | null = null;
   private nativeTable: any = null; // Raw LanceDB table for FTS operations
   private ftsIndexCreated: boolean = false;
+  private isCloudMode: boolean = false;
 
   constructor(config: VectorStoreConfig) {
     super(config);
     this.tableName = this.tableName || "default";
+    // Cloud mode is active when a db:// URI or apiKey is provided
+    this.isCloudMode = !!(
+      config.uri?.startsWith("db://") ||
+      config.apiKey
+    );
+  }
+
+  /**
+   * Connect to LanceDB (local or cloud)
+   */
+  private async connectDB(): Promise<any> {
+    if (this.isCloudMode) {
+      return lancedb.connect({
+        uri: this.config.uri,
+        apiKey: this.config.apiKey,
+        region: this.config.region,
+      });
+    }
+    return lancedb.connect(this.persistPath);
   }
 
   /**
@@ -58,8 +79,10 @@ export class LanceDBVectorStore extends BaseVectorStore {
 
   protected async storeExists(): Promise<boolean> {
     try {
-      await fs.access(this.persistPath);
-      const db = await lancedb.connect({ uri: this.persistPath });
+      if (!this.isCloudMode) {
+        await fs.access(this.persistPath);
+      }
+      const db = await this.connectDB();
       const tableNames = await db.tableNames();
       return tableNames?.includes(this.tableName!);
     } catch {
@@ -69,7 +92,7 @@ export class LanceDBVectorStore extends BaseVectorStore {
 
   protected async loadStore(): Promise<void> {
     try {
-      const db = await lancedb.connect(this.persistPath);
+      const db = await this.connectDB();
       this.nativeTable = await db.openTable(this.tableName!);
       this.store = new LanceDB(this.config.embeddings, {
         table: this.nativeTable,
@@ -83,10 +106,12 @@ export class LanceDBVectorStore extends BaseVectorStore {
   }
 
   protected async createStore(): Promise<void> {
-    await fs.mkdir(this.persistPath, { recursive: true });
+    if (!this.isCloudMode) {
+      await fs.mkdir(this.persistPath, { recursive: true });
+    }
 
     try {
-      const db = await lancedb.connect(this.persistPath);
+      const db = await this.connectDB();
 
       // Cache embedding size
       if (!this.embeddingSize) {
@@ -122,22 +147,41 @@ export class LanceDBVectorStore extends BaseVectorStore {
   protected async createStoreWithDocuments(
     documents: Document[]
   ): Promise<void> {
-    await fs.mkdir(this.persistPath, { recursive: true });
+    if (!this.isCloudMode) {
+      await fs.mkdir(this.persistPath, { recursive: true });
+    }
 
     const normalizedDocs = this.normalizeDocuments(documents);
 
-    this.store = await LanceDB.fromDocuments(
-      normalizedDocs,
-      this.config.embeddings,
-      {
-        uri: this.persistPath,
-        tableName: this.tableName,
-      }
-    );
-
-    // Get native table reference
-    const db = await lancedb.connect(this.persistPath);
-    this.nativeTable = await db.openTable(this.tableName!);
+    if (this.isCloudMode) {
+      // For cloud mode, create the table via native API then use LanceDB wrapper
+      const db = await this.connectDB();
+      const embeddings = await this.config.embeddings.embedDocuments(
+        normalizedDocs.map((d) => d.pageContent)
+      );
+      const data = normalizedDocs.map((doc, i) => ({
+        vector: embeddings[i],
+        text: doc.pageContent,
+        id: doc.metadata.id || i.toString(),
+        ...doc.metadata,
+      }));
+      this.nativeTable = await db.createTable(this.tableName!, data);
+      this.store = new LanceDB(this.config.embeddings, {
+        table: this.nativeTable,
+      });
+    } else {
+      this.store = await LanceDB.fromDocuments(
+        normalizedDocs,
+        this.config.embeddings,
+        {
+          uri: this.persistPath,
+          tableName: this.tableName,
+        }
+      );
+      // Get native table reference
+      const db = await this.connectDB();
+      this.nativeTable = await db.openTable(this.tableName!);
+    }
   }
 
   protected normalizeDocuments(documents: Document[]): Document[] {
@@ -214,20 +258,38 @@ export class LanceDBVectorStore extends BaseVectorStore {
 
       // For LanceDB, use fromTexts if creating new store
       if (!stats.exists) {
-        await fs.mkdir(this.persistPath, { recursive: true });
-        this.store = await LanceDB.fromTexts(
-          texts,
-          metadatas || texts.map(() => ({})),
-          this.config.embeddings,
-          {
-            uri: this.persistPath,
-            tableName: this.tableName,
-          }
-        );
+        if (!this.isCloudMode) {
+          await fs.mkdir(this.persistPath, { recursive: true });
+        }
 
-        // Get native table reference
-        const db = await lancedb.connect(this.persistPath);
-        this.nativeTable = await db.openTable(this.tableName!);
+        if (this.isCloudMode) {
+          // For cloud mode, create table via native API
+          const db = await this.connectDB();
+          const embeddings = await this.config.embeddings.embedDocuments(texts);
+          const data = texts.map((text, i) => ({
+            vector: embeddings[i],
+            text,
+            id: i.toString(),
+            ...(metadatas?.[i] || {}),
+          }));
+          this.nativeTable = await db.createTable(this.tableName!, data);
+          this.store = new LanceDB(this.config.embeddings, {
+            table: this.nativeTable,
+          });
+        } else {
+          this.store = await LanceDB.fromTexts(
+            texts,
+            metadatas || texts.map(() => ({})),
+            this.config.embeddings,
+            {
+              uri: this.persistPath,
+              tableName: this.tableName,
+            }
+          );
+          // Get native table reference
+          const db = await this.connectDB();
+          this.nativeTable = await db.openTable(this.tableName!);
+        }
 
         return texts.map((_, i) => i.toString());
       }

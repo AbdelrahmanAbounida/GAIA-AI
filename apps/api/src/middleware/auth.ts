@@ -7,7 +7,6 @@ export const requiredAuthMiddleware = os
     if (!context.session || !context.session?.user) {
       // throw new ORPCError("UNAUTHORIZED");
     }
-    // TODO:: here we could get user with api key
     return next({
       context: {
         ...context,

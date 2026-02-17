@@ -465,7 +465,7 @@ const TabsWithLine = ({
                   "px-4 py-2 text-sm cursor-pointer font-medium transition-colors duration-200 relative z-10 hover:bg-gaia-200 rounded-lg dark:hover:bg-gaia-800",
                   activeTab === tab
                     ? "text-zinc-700 dark:text-gaia-300 border-b rounded-b-none border-gaia-600 dark:border-gaia-300"
-                    : "text-gray-500 hover:text-gray-700 dark:text-gaia-500 dark:hover:text-gaia-400"
+                    : "text-gray-500 hover:text-gray-700 dark:text-gaia-500 dark:hover:text-gaia-400",
                 )}
               >
                 <div className="flex items-center gap-2">
@@ -570,7 +570,7 @@ const AnswerSection = ({
     message.parts?.filter(
       (p) =>
         p.type === "tool-createCodeArtifact" ||
-        p.type === "tool-createImageArtifact"
+        p.type === "tool-createImageArtifact",
     ) || [];
 
   const isCallingTool =
@@ -584,7 +584,7 @@ const AnswerSection = ({
           p.state !== "done") ||
         (p.type === "dynamic-tool" &&
           p.state !== "output-available" &&
-          p.state !== "done")
+          p.state !== "done"),
     );
 
   const isLiked = vote?.isUpvoted === true;
@@ -691,7 +691,7 @@ interface SourcesSectionProps {
 const SourcesSection = ({ sources }: SourcesSectionProps) => {
   if (sources.length === 0) {
     return (
-      <div className="p-8 text-center rounded-2xl border border-dashed border-gaia-300 dark:border-zinc-700">
+      <div className="p-8 text-center rounded-2xl  border-gaia-300 dark:border-zinc-700">
         <Search className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-50" />
         <p className="text-muted-foreground">
           No sources used for this response
@@ -710,7 +710,7 @@ const SourcesSection = ({ sources }: SourcesSectionProps) => {
       acc[source.type].push(source);
       return acc;
     },
-    {} as Record<string, Source[]>
+    {} as Record<string, Source[]>,
   );
 
   const getTypeIcon = (type: string) => {

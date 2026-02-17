@@ -13,7 +13,7 @@ import {
 import { z } from "zod";
 import { getOrpcServer } from "@/lib/orpc/server";
 import { getMCPManager } from "@gaia/ai/mcp";
-import { aiCompatible } from "@gaia/ai/models";
+import { createAIModel } from "@gaia/ai/models";
 import {
   buildDynamicTools,
   createCodeArtifact,
@@ -238,11 +238,13 @@ export async function POST(req: Request) {
     const {
       messages,
       model,
+      provider,
       chatId,
       webSearch = false,
     }: {
       messages: UIMessage[];
       model?: string;
+      provider?: string;
       webSearch?: boolean;
       chatId?: string;
     } = body;
@@ -311,7 +313,7 @@ export async function POST(req: Request) {
             const tools = await mcpManager.listTools(server);
             Object.entries(tools).forEach(([name, tool]) => {
               const prefixedName = `${server.name.replace(" ", "_")}_${name.replace(" ", "_")}`;
-              mcpTools[prefixedName] = tool;
+              mcpTools[prefixedName] = tool as Tool;
 
               // Collect tool descriptions for system prompt
               const toolDesc = (tool as any).description || name;
@@ -356,7 +358,10 @@ export async function POST(req: Request) {
     const allTools: Record<string, Tool> = {
       ragTool: ragTool({ projectId }),
       ...dynamicTools.reduce(
-        (acc, { name, tool }) => {
+        (
+          acc: Record<string, Tool>,
+          { name, tool }: { name: string; tool: Tool },
+        ) => {
           acc[`${name.replace(" ", "_")}`] = tool;
           return acc;
         },
@@ -468,12 +473,50 @@ Example: If user asks "create a React component for a todo list", you would:
       ? await processMessagesForCompatibility(messages)
       : convertToModelMessages(messages);
 
+    // Fetch user credentials to resolve the model dynamically
+    const modelId = model || "gpt-4o";
+    const credentialsRes = await orpc.authed.credentials.list({
+      offset: 0,
+      limit: 100,
+    });
+    const allCredentials = credentialsRes?.credentials || [];
+    const aiCredentials = allCredentials.filter(
+      (c: any) => c.credentialType === "ai_model",
+    );
+
+    const GATEWAY_PROVIDERS = ["vercel", "openrouter"];
+    const matchingCred = aiCredentials.find((cred: any) => {
+      if (provider && cred.provider === provider) return true;
+      if (cred.models && Array.isArray(cred.models)) {
+        return (cred.models as string[]).includes(modelId);
+      }
+      if (GATEWAY_PROVIDERS.includes(cred.provider?.toLowerCase())) return true;
+      return modelId.toLowerCase().includes(cred.provider.toLowerCase());
+    });
+
+    if (!matchingCred) {
+      return new Response(
+        JSON.stringify({
+          error:
+            "No valid AI provider credentials found. Please add an AI provider in settings.",
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
+    const aiModel = createAIModel({
+      apiKey: matchingCred.apiKey,
+      baseURL: matchingCred.baseUrl,
+      provider: matchingCred.provider,
+      modelId,
+    });
+
     // Create the UI message stream
     const stream = createUIMessageStream({
       execute: async ({ writer }) => {
         // Create the streamText result
         const result = streamText({
-          model: aiCompatible("gpt-4o"),
+          model: aiModel as any,
           messages: processedMessages,
           tools: {
             ...allTools,

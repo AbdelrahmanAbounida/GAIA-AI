@@ -14,7 +14,7 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "downlevelIteration": true,
+    // "downlevelIteration": true,
     "strict": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,

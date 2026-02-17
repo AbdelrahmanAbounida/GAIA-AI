@@ -1,15 +1,32 @@
 import { defineConfig } from "tsup";
-const isDocker =
-  process.env.DOCKER_BUILD === "true" || process.env.DOCKER_BUILD === "1";
 
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: [
+    "src/index.ts",
+    "src/types.ts",
+    "src/ratelimits.ts",
+    "src/utils.ts",
+    "src/scalar.ts",
+  ],
   format: ["cjs", "esm"],
-  dts: !isDocker,
+  dts: true,
   splitting: false,
-  sourcemap: !isDocker,
+  sourcemap: true,
   clean: true,
   treeshake: true,
   minify: false,
   outDir: "dist",
+  external: [
+    "@gaia/ai",
+    "@gaia/db",
+    "@orpc/client",
+    "@orpc/openapi",
+    "@orpc/server",
+    "@orpc/zod",
+    "axios",
+    "nanoid",
+    "uuid",
+    "vm2",
+    "zod",
+  ],
 });

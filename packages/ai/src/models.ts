@@ -1,26 +1,85 @@
 import { createGateway } from "@ai-sdk/gateway";
 import dotenv from "dotenv";
 import z from "zod";
-import type { AIProvider as Provider, ProviderCapability } from "./types";
+import type {
+  AIProvider as Provider,
+  GatewayLanguageModelEntry,
+  ProviderCapability,
+} from "./types";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import type { LanguageModelV2 } from "@ai-sdk/provider";
 
 dotenv.config();
 
-// TODO:: move to api like feedback too
+// Used as a model provider in tools (e.g. aiGateway("gpt-3.5-turbo"))
 export const aiGateway = createGateway({
-  apiKey:
-    process.env.AI_GATEWAY_API_KEY ||
-    "vck_2Z7c547Js4eb8e4sj8b1AYRsJQyTamv1BgRNyPVBhBMBRdk2Aj0ipmyJ",
+  apiKey: process.env.AI_GATEWAY_API_KEY,
 });
 
-export const aiCompatible = createOpenAICompatible({
-  name: "openai",
-  apiKey: "vck_2Z7c547Js4eb8e4sj8b1AYRsJQyTamv1BgRNyPVBhBMBRdk2Aj0ipmyJ",
-  baseURL: "https://ai-gateway.vercel.sh/v1",
-});
+const AI_GATEWAY_MODELS_URL = "https://ai-gateway.vercel.sh/v1/models";
+
+export async function fetchAvailableModels(): Promise<{
+  models: GatewayLanguageModelEntry[];
+}> {
+  const res = await fetch(AI_GATEWAY_MODELS_URL);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch models: ${res.status}`);
+  }
+  const data = (await res.json()) as {
+    data: Array<{
+      id: string;
+      name: string;
+      description?: string;
+      owned_by?: string;
+      type?: string;
+      context_window?: number;
+      max_tokens?: number;
+      pricing?: { input?: string; output?: string };
+      tags?: string[];
+      [key: string]: unknown;
+    }>;
+  };
+
+  const models: GatewayLanguageModelEntry[] = data.data.map((m) => ({
+    id: m.id,
+    name: m.name,
+    description: m.description ?? null,
+    pricing: m.pricing
+      ? { input: m.pricing.input ?? "0", output: m.pricing.output ?? "0" }
+      : null,
+    specification: {
+      specificationVersion: "v2",
+      provider: m.owned_by ?? m.id.split("/")[0] ?? "unknown",
+      modelId: m.id,
+    } as GatewayLanguageModelEntry["specification"],
+    modelType: (m.type as "language" | "embedding" | "image") ?? null,
+  }));
+
+  return { models };
+}
+
+export function createAIModel({
+  apiKey,
+  baseURL,
+  provider,
+  modelId,
+}: {
+  apiKey: string;
+  baseURL?: string | null;
+  provider: string;
+  modelId: string;
+}): LanguageModelV2 {
+  const providerInstance = createOpenAICompatible({
+    name: provider,
+    apiKey,
+    baseURL: baseURL || `https://api.${provider}.com/v1`,
+  });
+
+  return providerInstance(modelId);
+}
 
 export const getAllProvidersWithModels = async (): Promise<Provider[]> => {
-  const models = await aiGateway.getAvailableModels();
+  const models = await fetchAvailableModels();
   const providerMap = new Map<string, Provider>();
 
   models.models.forEach((model) => {
@@ -99,7 +158,10 @@ export async function validateApiKey({
           response.ok ||
           (response.status !== 401 && response.status !== 403)
         ) {
-          const data = await response.json().catch(() => ({}));
+          const data = (await response.json().catch(() => ({}))) as Record<
+            string,
+            any
+          >;
 
           // Check if it's a model error (means auth worked)
           if (data.error && data.error.type === "invalid_request_error") {
@@ -147,7 +209,7 @@ export const VectorStoreSchema = z.object({
       isRequired: z.boolean(),
       cloudOnly: z.boolean().optional(),
       isSecret: z.boolean().optional(),
-    })
+    }),
   ),
   needsCredentials: z.boolean().default(true),
 
@@ -166,7 +228,7 @@ export const VectorStoreSchema = z.object({
             isRequired: z.boolean(),
             default: z.any().optional(),
             placeholder: z.string().optional(),
-          })
+          }),
         )
         .optional(),
 

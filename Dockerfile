@@ -8,28 +8,35 @@ RUN corepack enable
 RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY . .
+COPY . . 
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Build environment - Increased memory for webpack
+# Build environment - keep memory within Docker limits
 ENV DOCKER_BUILD=1
-ENV NODE_OPTIONS="--max-old-space-size=12288"
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Add swap space (6GB) to handle memory spikes
-RUN dd if=/dev/zero of=/swapfile bs=1M count=6144 && \
-    chmod 600 /swapfile && \
-    mkswap /swapfile && \
-    swapon /swapfile || true
+# Vector store profile: "basic" (lancedb+pinecone), "all", or comma-separated list
+ARG GAIA_VECTORSTORE_PROVIDERS=basic
+ENV GAIA_VECTORSTORE_PROVIDERS=${GAIA_VECTORSTORE_PROVIDERS}
 
-# Build with debug output to see the actual error
-RUN pnpm --filter=@gaia/ui build 2>&1 | tee /tmp/build.log || \
-    (cat /tmp/build.log && exit 1)
+# Prebuild workspace packages so Next.js doesn't transpile them from source
+RUN pnpm --filter=@gaia/db build
+RUN pnpm --filter=@gaia/ai build
+RUN pnpm --filter=@gaia/api build
 
-# Clean up swap
-RUN swapoff /swapfile 2>/dev/null || true && rm -f /swapfile
+# Build the app
+RUN pnpm --filter=@gaia/ui build
+
+# Verify build artifacts exist
+RUN echo "=== Checking build output ===" && \
+    ls -la /app/apps/web/.next/ && \
+    echo "=== Standalone contents ===" && \
+    ls -la /app/apps/web/.next/standalone/ 2>/dev/null || echo "No standalone folder" && \
+    echo "=== Static folder ===" && \
+    ls -la /app/apps/web/.next/static/ 2>/dev/null || echo "No static folder"
 
 # Stage 2: Runner
 FROM node:20-slim AS runner
@@ -48,9 +55,20 @@ RUN mkdir -p /app/data \
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/package.json ./apps/web/package.json
 
 USER nextjs
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 CMD ["node", "apps/web/server.js"]
+
+
+# # Basic (lancedb + pinecone) — default for Docker
+# docker-compose up --build
+
+# # Specific providers
+# GAIA_VECTORSTORE_PROVIDERS=lancedb,pinecone,qdrant docker-compose up --build
+
+# # All providers
+# GAIA_VECTORSTORE_PROVIDERS=all docker-compose up --build

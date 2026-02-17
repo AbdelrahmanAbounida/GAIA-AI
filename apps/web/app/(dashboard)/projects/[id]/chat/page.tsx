@@ -2,9 +2,9 @@
 import { cn, generateUUID } from "@/lib/utils";
 import { useState } from "react";
 import { ChatPageView } from "@/components/chat/chat-page";
-import { useParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
-const HomeChatPage = () => {
+function NewChat() {
   const [id] = useState(() => generateUUID());
 
   return (
@@ -12,6 +12,13 @@ const HomeChatPage = () => {
       <ChatPageView isHome={true} id={id} autoResume={true} />
     </div>
   );
+}
+
+const HomeChatPage = () => {
+  const searchParams = useSearchParams();
+  const newKey = searchParams.get("new") ?? "default";
+
+  return <NewChat key={newKey} />;
 };
 
 export default HomeChatPage;

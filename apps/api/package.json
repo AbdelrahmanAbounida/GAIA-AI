@@ -3,34 +3,44 @@
   "version": "0.0.0",
   "description": "",
   "type": "module",
-  "main": "./src/index.ts",
-  "module": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "import": "./src/index.ts",
-      "require": "./src/index.ts"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": "./dist/index.cjs"
     },
     "./types": {
-      "types": "./src/types.ts",
-      "import": "./src/types.ts",
-      "require": "./src/types.ts"
+      "import": {
+        "types": "./dist/types.d.ts",
+        "default": "./dist/types.js"
+      },
+      "require": "./dist/types.cjs"
     },
     "./ratelimit": {
-      "types": "./src/ratelimits.ts",
-      "import": "./src/ratelimits.ts",
-      "require": "./src/ratelimits.ts"
+      "import": {
+        "types": "./dist/ratelimits.d.ts",
+        "default": "./dist/ratelimits.js"
+      },
+      "require": "./dist/ratelimits.cjs"
     },
     "./utils": {
-      "types": "./src/utils.ts",
-      "import": "./src/utils.ts",
-      "require": "./src/utils.ts"
+      "import": {
+        "types": "./dist/utils.d.ts",
+        "default": "./dist/utils.js"
+      },
+      "require": "./dist/utils.cjs"
     },
     "./scalar": {
-      "types": "./src/scalar.ts",
-      "import": "./src/scalar.ts",
-      "require": "./src/scalar.ts"
+      "import": {
+        "types": "./dist/scalar.d.ts",
+        "default": "./dist/scalar.js"
+      },
+      "require": "./dist/scalar.cjs"
     }
   },
   "files": [

@@ -7,65 +7,34 @@ import type {
   FullTextSearchProviderId,
 } from "./types";
 import type { BaseVectorStore } from "./base";
+import {
+  loadProviderModule,
+  INCLUDED_PROVIDERS,
+} from "./_providers.generated";
 
 const isVercel = process.env.VERCEL === "1" || process.env.VERCEL_ENV;
 
+const VERCEL_UNSUPPORTED: VectorStoreProviderId[] = [
+  "faiss",
+  "chroma",
+];
+
 async function loadVectorStoreClass(provider: VectorStoreProviderId) {
-  switch (provider) {
-    case "faiss":
-      if (isVercel) {
-        throw new Error(
-          "Faiss is not available on Vercel. Use Pinecone, Qdrant, or Supabase instead.",
-        );
-      }
-      const { FaissVectorStore } = await import("./faiss");
-      return FaissVectorStore;
-
-    case "lancedb":
-      if (isVercel) {
-        throw new Error(
-          "LanceDB is not available on Vercel. Use Pinecone, Qdrant, or Supabase instead.",
-        );
-      }
-      const { LanceDBVectorStore } = await import("./lancedb");
-      return LanceDBVectorStore;
-
-    case "chroma":
-      if (isVercel) {
-        throw new Error(
-          "ChromaDB is not available on Vercel. Use Pinecone, Qdrant, or Supabase instead.",
-        );
-      }
-      const { ChromaVectorStore } = await import("./chroma");
-      return ChromaVectorStore;
-
-    case "pinecone":
-      const { PineconeVectorStore } = await import("./pinecone");
-      return PineconeVectorStore;
-
-    case "qdrant":
-      const { QdrantVectorStore } = await import("./qdrant");
-      return QdrantVectorStore;
-
-    case "weaviate":
-      const { WeaviateVectorStore } = await import("./weaviate");
-      return WeaviateVectorStore;
-
-    case "milvus":
-      const { MilvusVectorStore } = await import("./milvus");
-      return MilvusVectorStore;
-
-    case "pgvector":
-      const { PGVectorVectorStore } = await import("./pgvector");
-      return PGVectorVectorStore;
-
-    case "supabase":
-      const { SupabaseVectorStore } = await import("./supabase");
-      return SupabaseVectorStore;
-
-    default:
-      throw new Error(`Unsupported vector store provider: ${provider}`);
+  if (isVercel && VERCEL_UNSUPPORTED.includes(provider)) {
+    throw new Error(
+      `${provider} is not available on Vercel. Use Pinecone, Qdrant, or Supabase instead.`,
+    );
   }
+
+  const VectorStoreClass = await loadProviderModule(provider);
+  if (!VectorStoreClass) {
+    throw new Error(
+      `Vector store provider "${provider}" is not included in this build. ` +
+        `Included providers: ${INCLUDED_PROVIDERS.join(", ")}`,
+    );
+  }
+
+  return VectorStoreClass;
 }
 
 export interface CreateVectorStoreOptions {
@@ -158,14 +127,13 @@ function getEffectiveProvider(
 
   if (isVercel) {
     const unsupportedProviders: VectorStoreProviderId[] = [
-      "lancedb",
       "faiss",
       "chroma",
     ];
     if (unsupportedProviders.includes(requestedProvider)) {
       throw new Error(
         `${requestedProvider} is not supported on Vercel. ` +
-          `Please use a cloud-based vector store like Pinecone, Qdrant, or Supabase. ` +
+          `Please use a cloud-based vector store like Pinecone, Qdrant, LanceDB Cloud, or Supabase. ` +
           `Set your VECTOR_STORE_PROVIDER environment variable accordingly.`,
       );
     }
@@ -298,32 +266,13 @@ export async function getAvailableProviders(): Promise<
 > {
   const isVercel = process.env.VERCEL === "1" || process.env.VERCEL_ENV;
 
-  // Base providers that work everywhere
-  const allProviders: VectorStoreProviderId[] = [
-    "pinecone",
-    "qdrant",
-    "weaviate",
-    "milvus",
-    "pgvector",
-    "supabase",
-  ];
-
-  // Only include native-binding providers if not on Vercel
-  if (!isVercel) {
-    allProviders.push("chroma");
-
-    try {
-      await import("./faiss");
-      allProviders.push("faiss");
-    } catch {}
-
-    try {
-      await import("./lancedb");
-      allProviders.push("lancedb");
-    } catch {}
+  if (isVercel) {
+    return INCLUDED_PROVIDERS.filter(
+      (p) => !VERCEL_UNSUPPORTED.includes(p),
+    );
   }
 
-  return allProviders;
+  return [...INCLUDED_PROVIDERS];
 }
 
 /**
@@ -350,7 +299,6 @@ export function providerSupportsLocal(
 ): boolean {
   const localProviders: VectorStoreProviderId[] = [
     "faiss",
-    "lancedb",
     "qdrant",
     "weaviate",
     "chroma",

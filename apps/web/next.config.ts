@@ -32,19 +32,30 @@ const nextConfig: NextConfig = {
 
   outputFileTracingExcludes: {
     "*": [
-      "**/@lancedb+lancedb-linux-x64-musl*/**",
-      "**/@lancedb/lancedb-linux-x64-musl/**",
-
-      "**/@lancedb+lancedb-darwin*/**",
-      "**/@lancedb/lancedb-darwin*/**",
-      "**/@lancedb+lancedb-win32*/**",
-      "**/@lancedb/lancedb-win32*/**",
+      ...(isVercel
+        ? [
+            // On Vercel, keep linux-x64-gnu for LanceDB Cloud, exclude everything else
+            "**/@lancedb+lancedb-linux-x64-musl*/**",
+            "**/@lancedb/lancedb-linux-x64-musl/**",
+            "**/@lancedb+lancedb-linux-arm64*/**",
+            "**/@lancedb/lancedb-linux-arm64*/**",
+            "**/@lancedb+lancedb-darwin*/**",
+            "**/@lancedb/lancedb-darwin*/**",
+            "**/@lancedb+lancedb-win32*/**",
+            "**/@lancedb/lancedb-win32*/**",
+            "node_modules/chromadb/**",
+            "node_modules/@chroma-core/**",
+          ]
+        : [
+            "**/@lancedb+lancedb-linux-x64-musl*/**",
+            "**/@lancedb/lancedb-linux-x64-musl/**",
+            "**/@lancedb+lancedb-darwin*/**",
+            "**/@lancedb/lancedb-darwin*/**",
+            "**/@lancedb+lancedb-win32*/**",
+            "**/@lancedb/lancedb-win32*/**",
+          ]),
 
       "node_modules/faiss-node/**",
-
-      ...(isVercel
-        ? ["node_modules/chromadb/**", "node_modules/@chroma-core/**"]
-        : []),
     ],
   },
   outputFileTracingRoot: path.join(__dirname, "../../"),
@@ -91,14 +102,12 @@ const nextConfig: NextConfig = {
       config.externals.push(
         "chromadb",
         "@chroma-core/default-embed",
-        "@lancedb/lancedb",
         "faiss-node",
       );
       config.resolve.alias = {
         ...config.resolve.alias,
         chromadb: false,
         "@chroma-core/default-embed": false,
-        "@lancedb/lancedb": false,
         "@lancedb/lancedb-linux-x64-musl": false,
         "@lancedb/lancedb-darwin-x64": false,
         "@lancedb/lancedb-darwin-arm64": false,

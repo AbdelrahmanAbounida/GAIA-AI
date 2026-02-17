@@ -121,7 +121,7 @@ print(response.choices[0].message.content)`;
         </div>
 
         {/* API Configuration Card */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle className="text-lg font-medium flex items-center gap-2">
               <Code className="h-5 w-5" />
@@ -129,7 +129,6 @@ print(response.choices[0].message.content)`;
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Base URL */}
             <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">
                 Base URL
@@ -156,7 +155,6 @@ print(response.choices[0].message.content)`;
               </p>
             </div>
 
-            {/* Example Code */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-sm font-medium text-gray-700">
@@ -185,7 +183,6 @@ print(response.choices[0].message.content)`;
               </pre>
             </div>
 
-            {/* Endpoints */}
             <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">
                 Available Endpoints
@@ -225,7 +222,7 @@ print(response.choices[0].message.content)`;
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* API Keys Table */}
         <Card className="shadow-none border">

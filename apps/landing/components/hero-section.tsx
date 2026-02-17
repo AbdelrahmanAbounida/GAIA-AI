@@ -4,14 +4,8 @@ import { motion } from "framer-motion";
 import { GithubIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { showInfoToast } from "./toast";
 
 export function HeroSection() {
-  const [routeLoading, setrouteLoading] = useState(false);
-  const router = useRouter();
-
   return (
     <section className={cn("relative  overflow-hidden  pt-32 pb-20")}>
       {/* Background Grid */}
@@ -79,11 +73,9 @@ export function HeroSection() {
           >
             <Button
               onClick={() => {
-                setrouteLoading(true);
                 // router.push("https://github.com/AbdelrahmanAbounida/GAIA-AI");
                 window.open("https://www.gaia-ai.app/", "_blank");
               }}
-              disabled={routeLoading}
               variant={"brand"}
               size="sm"
               className=" text-xs  gap-2"

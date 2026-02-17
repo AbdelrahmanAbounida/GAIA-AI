@@ -24,13 +24,13 @@ export default function CredentialsView() {
         offset: 0,
         limit: 20,
       },
-    })
+    }),
   );
   const credentials = data?.credentials || [];
 
   // Fetch provider names for the table
   const { data: providersData, isPending: providersLoading } = useQuery(
-    orpcQueryClient.authed.ai.getAllProviders.queryOptions({})
+    orpcQueryClient.authed.ai.getAllProviders.queryOptions({}),
   );
 
   // Calculate pagination
@@ -88,8 +88,8 @@ export default function CredentialsView() {
 
       <Card
         className={cn(
-          "shadow-none",
-          credentials.length > 0 && "bg-transparent border-none"
+          "shadow-none border-none",
+          credentials.length > 0 && "bg-transparent",
         )}
       >
         <CardContent className="p-0 m-0">

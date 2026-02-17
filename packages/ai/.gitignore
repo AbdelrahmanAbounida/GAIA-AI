@@ -22,3 +22,6 @@ coverage
 # OS
 .DS_Store
 Thumbs.db
+
+# Generated provider registry
+src/vectorstores/_providers.generated.ts

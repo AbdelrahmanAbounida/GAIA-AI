@@ -9,8 +9,8 @@ import {
 } from "@gaia/ai";
 import { db, chat, credential, eq, and } from "@gaia/db";
 import {
-  aiGateway,
   ALL_VECTOR_STORES,
+  fetchAvailableModels,
   getAllProvidersWithModels as getModelsProviders,
 } from "@gaia/ai/models";
 import type { UIMessage } from "@gaia/ai";
@@ -231,7 +231,7 @@ export const aiHandlers: {
       };
     }
 
-    const aiModels = (await aiGateway.getAvailableModels()).models;
+    const aiModels = (await fetchAvailableModels()).models;
 
     const llms = aiModels.filter((model) => model.modelType === "language");
     const embeddings = aiModels.filter(

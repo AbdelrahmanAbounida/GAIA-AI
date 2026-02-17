@@ -111,9 +111,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 asChild
                 isActive={isActive("/chat") && !currentChatId}
                 className=""
-                // onClick={() => {
-                //   window.location.href = `/${BASE_URL}/chat`;
-                // }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  router.push(`/${BASE_URL}/chat?new=${Date.now()}`);
+                }}
               >
                 <Link href={`/${BASE_URL}/chat`}>
                   <MessageCircleIcon className="mr-1 ml-0 size-4!" />

@@ -14,17 +14,8 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ProviderIcon } from "./provider-icons";
-import {
-  Eye,
-  EyeOff,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  Trash2,
-  Info,
-  ExternalLink,
-} from "lucide-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Eye, EyeOff, Loader2, Trash2, ExternalLink } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { orpcQueryClient } from "@/lib/orpc/client";
 import { showErrorToast, showSuccessToast } from "@/components/ui/toast";
 import { maskApiKey } from "@/lib/utils";
